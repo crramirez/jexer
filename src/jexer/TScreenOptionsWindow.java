@@ -216,7 +216,7 @@ public class TScreenOptionsWindow extends TWindow {
     /**
      * The original window opacity.
      */
-    private int oldWindowOpacity;
+    private int oldWindowOpacity = 100;
 
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
@@ -318,9 +318,11 @@ public class TScreenOptionsWindow extends TWindow {
 
         // Window opacity
         int alpha = getAlpha();
+        oldWindowOpacity = 95;
         try {
-            alpha = Integer.parseInt(System.getProperty(
-                "jexer.TWindow.opacity", "95")) * 255 / 100;
+            oldWindowOpacity = Integer.parseInt(System.getProperty(
+                "jexer.TWindow.opacity", "95"));
+            alpha = oldWindowOpacity * 255 / 100;
         } catch (NumberFormatException e) {
             // SQUASH
         }
