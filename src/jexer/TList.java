@@ -457,7 +457,7 @@ public class TList extends TScrollableWidget {
      * @param index -1 to unselect, otherwise the index into the list
      */
     public final void setSelectedIndex(final int index) {
-        if ((strings.size() == 0) || (index < 0)) {
+        if ((strings == null) || (strings.size() == 0) || (index < 0)) {
             toTop();
             selectedString = -1;
             return;
