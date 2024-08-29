@@ -167,6 +167,7 @@ public class Cell extends CellAttributes {
      *
      * @param cell the instance to copy
      */
+    @SuppressWarnings("this-escape")
     public Cell(final Cell cell) {
         setTo(cell);
     }

@@ -206,6 +206,7 @@ public class TImage extends TWidget implements EditMenuUser {
      * @param top top row of the image.  0 is the top-most row.
      * @param clickAction function to call when mouse is pressed
      */
+    @SuppressWarnings("this-escape")
     public TImage(final TWidget parent, final int x, final int y,
         final int width, final int height, final BufferedImage image,
         final int left, final int top, final TAction clickAction) {
@@ -254,6 +255,7 @@ public class TImage extends TWidget implements EditMenuUser {
      * @param top top row of the image.  0 is the top-most row.
      * @param clickAction function to call when mouse is pressed
      */
+    @SuppressWarnings("this-escape")
     public TImage(final TWidget parent, final int x, final int y,
         final int width, final int height, final Animation animation,
         final int left, final int top, final TAction clickAction) {

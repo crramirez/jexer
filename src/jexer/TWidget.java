@@ -207,6 +207,7 @@ public abstract class TWidget implements Comparable<TWidget> {
      * @param parent parent widget
      * @param enabled if true assume enabled
      */
+    @SuppressWarnings("this-escape")
     protected TWidget(final TWidget parent, final boolean enabled) {
         this.enabled = enabled;
         this.parent = parent;
@@ -228,6 +229,7 @@ public abstract class TWidget implements Comparable<TWidget> {
      * @param width width of widget
      * @param height height of widget
      */
+    @SuppressWarnings("this-escape")
     protected TWidget(final TWidget parent, final boolean enabled,
         final int x, final int y, final int width, final int height) {
 

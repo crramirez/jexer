@@ -395,6 +395,7 @@ public class TTableWidget extends TWidget {
          * @param column column index of this cell
          * @param row row index of this cell
          */
+        @SuppressWarnings("this-escape")
         public Cell(final TTableWidget parent, final int x, final int y,
             final int width, final int height, final int column,
             final int row) {
@@ -617,6 +618,7 @@ public class TTableWidget extends TWidget {
      * @param gridColumns number of columns in grid
      * @param gridRows number of rows in grid
      */
+    @SuppressWarnings("this-escape")
     public TTableWidget(final TWidget parent, final int x, final int y,
         final int width, final int height, final int gridColumns,
         final int gridRows) {
