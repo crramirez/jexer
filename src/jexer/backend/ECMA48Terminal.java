@@ -567,6 +567,7 @@ public class ECMA48Terminal extends LogicalScreen
      * @throws UnsupportedEncodingException if an exception is thrown when
      * creating the InputStreamReader
      */
+    @SuppressWarnings("this-escape")
     public ECMA48Terminal(final Backend backend, final Object listener,
         final InputStream input, final OutputStream output,
         final int windowWidth,
@@ -606,6 +607,7 @@ public class ECMA48Terminal extends LogicalScreen
      * @throws UnsupportedEncodingException if an exception is thrown when
      * creating the InputStreamReader
      */
+    @SuppressWarnings("this-escape")
     public ECMA48Terminal(final Backend backend, final Object listener,
         final InputStream input,
         final OutputStream output) throws UnsupportedEncodingException {
@@ -717,6 +719,7 @@ public class ECMA48Terminal extends LogicalScreen
      * which uses System.in.
      * @throws IllegalArgumentException if input, reader, or writer are null.
      */
+    @SuppressWarnings("this-escape")
     public ECMA48Terminal(final Backend backend, final Object listener,
         final InputStream input, final Reader reader, final PrintWriter writer,
         final boolean setRawMode) {

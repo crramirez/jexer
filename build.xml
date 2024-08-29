@@ -49,8 +49,7 @@
            includeantruntime="false"
            debug="on"
            debuglevel="lines,vars,source"
-           target="1.7"
-           source="1.7"
+           release="8"
            >
       <compilerarg value="-Xlint"/>
       <compilerarg value="-Xdiags:verbose"/>

@@ -154,6 +154,7 @@ public class TList extends TScrollableWidget {
      * @param singleClickAction action to perform when the user clicks on an
      * item
      */
+    @SuppressWarnings("this-escape")
     public TList(final TWidget parent, final List<String> strings, final int x,
         final int y, final int width, final int height,
         final TAction enterAction, final TAction moveAction,

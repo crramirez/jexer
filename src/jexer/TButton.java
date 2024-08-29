@@ -169,6 +169,7 @@ public class TButton extends TWidget {
      * @param x column relative to parent
      * @param y row relative to parent
      */
+    @SuppressWarnings("this-escape")
     private TButton(final TWidget parent, final String text,
         final int x, final int y) {
 

@@ -227,6 +227,7 @@ public class TScreenOptionsWindow extends TWindow {
      *
      * @param application the TApplication that manages this window
      */
+    @SuppressWarnings("this-escape")
     public TScreenOptionsWindow(final TApplication application) {
 
         // Register with the TApplication
