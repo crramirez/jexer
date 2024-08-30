@@ -156,6 +156,27 @@ public class DemoApplication extends TApplication {
         onMenu(new TMenuEvent(getBackend(), 10001));
     }
 
+    /**
+     * Public constructor.
+     *
+     * @param backendType one of the TApplication.BackendType values
+     * @param windowWidth the number of text columns to start with
+     * @param windowHeight the number of text rows to start with
+     * @param fontSize the size in points
+     * @throws Exception if TApplication can't instantiate the Backend.
+     */
+    @SuppressWarnings("this-escape")
+    public DemoApplication(final BackendType backendType, final int windowWidth,
+        final int windowHeight, final int fontSize) throws Exception {
+
+        super(backendType, windowWidth, windowHeight, fontSize);
+        addAllWidgets();
+        getBackend().setTitle(i18n.getString("applicationTitle"));
+
+        // Use cute theme by default.
+        onMenu(new TMenuEvent(getBackend(), 10001));
+    }
+
     // ------------------------------------------------------------------------
     // TApplication -----------------------------------------------------------
     // ------------------------------------------------------------------------
