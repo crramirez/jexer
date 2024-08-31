@@ -347,7 +347,7 @@ public class Cell extends CellAttributes {
     }
 
     /**
-     * Flatten the image on this cell by rendering it either onto a
+     * Flatten the image on this cell by rendering it onto a
      * background color.
      *
      * @param background the background color to draw on
