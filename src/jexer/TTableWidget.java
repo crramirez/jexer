@@ -1224,7 +1224,9 @@ public class TTableWidget extends TWidget {
 
         // Set left and top such that the table stays on screen if possible.
         top = rows.size() - getHeight();
-        left = columns.size() - (getWidth() / (viewColumns / (COLUMN_DEFAULT_WIDTH + 1)));
+        int visibleColumnWidth = Math.max(1,
+            (viewColumns / (COLUMN_DEFAULT_WIDTH + 1)));
+        left = columns.size() - (getWidth() / visibleColumnWidth);
         // Now ensure the selection is visible.
         alignGrid();
     }
