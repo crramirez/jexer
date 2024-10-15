@@ -784,6 +784,13 @@ public class TButton extends TWidget {
         } else {
             style = Style.SQUARE;
         }
+
+        leftEdgeChar = null;
+        rightEdgeChar = null;
+        leftEdgeShadowChar = null;
+        rightEdgeShadowCharTop = null;
+        rightEdgeShadowCharBottom = null;
+        shadowColor = null;
     }
 
 

@@ -1536,9 +1536,11 @@ public abstract class TWidget implements Comparable<TWidget> {
 
         assert (visible == true);
 
-        // Continue down the chain.  Draw the active child last so that it
-        // is on top.
-        for (TWidget widget: children) {
+        // Continue down the chain.  Draw the active child last so that it is
+        // on top.  Create a second list, because sometimes we can be in the
+        // middle of drawing when the widget or window is closed.
+        List<TWidget> children2 = new ArrayList<TWidget>(children);
+        for (TWidget widget: children2) {
             if (widget.isVisible() && (widget != activeChild)) {
                 widget.drawChildren();
                 if (!isDrawable()) {

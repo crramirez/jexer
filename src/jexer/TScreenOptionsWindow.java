@@ -896,6 +896,9 @@ public class TScreenOptionsWindow extends TWindow {
                         ecmaTerminal.setWideCharImages(oldWideCharImages);
                         ecmaTerminal.setRgbColor(oldRgbColor);
                     }
+                    getApplication().setWindowOpacity(oldWindowOpacity);
+                    System.setProperty("jexer.TWindow.opacity",
+                        Integer.toString(oldWindowOpacity));
                     TScreenOptionsWindow.this.close();
                 }
             });

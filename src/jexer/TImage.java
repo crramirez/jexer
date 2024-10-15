@@ -471,6 +471,12 @@ public class TImage extends TWidget implements EditMenuUser {
      */
     private void sizeToImage(final boolean always) {
 
+        if ((getApplication() == null)
+            || (getApplication().getBackend() == null)
+        ) {
+            return;
+        }
+
         scaleBackColor = getApplication().getBackend().attrToBackgroundColor(getWindow().getBackground());
 
         int textWidth = getScreen().getTextWidth();
