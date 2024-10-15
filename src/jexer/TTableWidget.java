@@ -1475,8 +1475,23 @@ public class TTableWidget extends TWidget {
 
         try {
             writer = new BufferedWriter(new FileWriter(filename));
-            for (Row row: rows) {
-                List<String> list = new ArrayList<String>(row.cells.size());
+
+            List<String> list = new ArrayList<String>();
+            if (showColumnLabels) {
+                list.add("");
+                for (int i = 0; i < columns.size(); i++) {
+                    list.add(getColumnLabel(i));
+                }
+                writer.write(StringUtils.toCsv(list));
+                writer.write("\n");
+            }
+
+            for (int i = 0; i < rows.size(); i++) {
+                Row row = rows.get(i);
+                list = new ArrayList<String>(row.cells.size());
+                if (showRowLabels) {
+                    list.add(getRowLabel(i));
+                }
                 for (Cell cell: row.cells) {
                     list.add(cell.getText());
                 }
