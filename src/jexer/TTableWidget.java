@@ -968,6 +968,16 @@ public class TTableWidget extends TWidget {
                 "than 1");
         }
 
+        // Remove old TFields from the window.
+        for (Row row: rows) {
+            for (Cell cell: row.cells) {
+                cell.cancelEdit();
+                cell.setText("");
+                cell.field.remove();
+            }
+        }
+
+        // Now redo with new cells.
         columns = new ArrayList<Column>();
         rows = new ArrayList<Row>();
         top = 0;
