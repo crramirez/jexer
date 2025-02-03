@@ -111,7 +111,11 @@ public class TTerminalWindow extends TScrollableWindow {
      * @param x column relative to parent
      * @param y row relative to parent
      * @param flags mask of CENTERED, MODAL, or RESIZABLE
-     * @param command the command line to execute
+     * @param command the command line to execute, as an array of strings
+     * which signifies the external program file to be invoked (command[0])
+     * and its arguments, if any (command[1], command[2], ...). Refer also to
+     * java.lang.ProcessBuilder for further operating-system specific
+     * details.
      */
     public TTerminalWindow(final TApplication application, final int x,
         final int y, final int flags, final String [] command) {
@@ -128,7 +132,11 @@ public class TTerminalWindow extends TScrollableWindow {
      * @param x column relative to parent
      * @param y row relative to parent
      * @param flags mask of CENTERED, MODAL, or RESIZABLE
-     * @param command the command line to execute
+     * @param command the command line to execute, as an array of strings
+     * which signifies the external program file to be invoked (command[0])
+     * and its arguments, if any (command[1], command[2], ...). Refer also to
+     * java.lang.ProcessBuilder for further operating-system specific
+     * details.
      * @param closeOnExit if true, close the window when the command exits
      */
     @SuppressWarnings("this-escape")

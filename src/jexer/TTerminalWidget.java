@@ -194,7 +194,11 @@ public class TTerminalWidget extends TScrollableWidget
      * @param parent parent widget
      * @param x column relative to parent
      * @param y row relative to parent
-     * @param command the command line to execute
+     * @param command the command line to execute, as an array of strings
+     * which signifies the external program file to be invoked (command[0])
+     * and its arguments, if any (command[1], command[2], ...). Refer also to
+     * java.lang.ProcessBuilder for further operating-system specific
+     * details.
      */
     public TTerminalWidget(final TWidget parent, final int x, final int y,
         final String [] command) {
@@ -208,7 +212,11 @@ public class TTerminalWidget extends TScrollableWidget
      * @param parent parent widget
      * @param x column relative to parent
      * @param y row relative to parent
-     * @param command the command line to execute
+     * @param command the command line to execute, as an array of strings
+     * which signifies the external program file to be invoked (command[0])
+     * and its arguments, if any (command[1], command[2], ...). Refer also to
+     * java.lang.ProcessBuilder for further operating-system specific
+     * details.
      * @param closeAction action to perform when the shell exits
      */
     public TTerminalWidget(final TWidget parent, final int x, final int y,
@@ -225,7 +233,11 @@ public class TTerminalWidget extends TScrollableWidget
      * @param y row relative to parent
      * @param width width of widget
      * @param height height of widget
-     * @param command the command line to execute
+     * @param command the command line to execute, as an array of strings
+     * which signifies the external program file to be invoked (command[0])
+     * and its arguments, if any (command[1], command[2], ...). Refer also to
+     * java.lang.ProcessBuilder for further operating-system specific
+     * details.
      * @param closeAction action to perform when the shell exits
      */
     @SuppressWarnings("this-escape")
