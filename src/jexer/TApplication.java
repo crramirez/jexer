@@ -4565,7 +4565,11 @@ public class TApplication implements Runnable {
      * @param x column relative to parent
      * @param y row relative to parent
      * @param flags mask of CENTERED, MODAL, or RESIZABLE
-     * @param command the command line to execute
+     * @param command the command line to execute, as an array of strings
+     * which signifies the external program file to be invoked (command[0])
+     * and its arguments, if any (command[1], command[2], ...). Refer also to
+     * java.lang.ProcessBuilder for further operating-system specific
+     * details.
      * @return the terminal new window
      */
     public final TTerminalWindow openTerminal(final int x, final int y,
@@ -4584,7 +4588,11 @@ public class TApplication implements Runnable {
      * @param x column relative to parent
      * @param y row relative to parent
      * @param flags mask of CENTERED, MODAL, or RESIZABLE
-     * @param command the command line to execute
+     * @param command the command line to execute, as an array of strings
+     * which signifies the external program file to be invoked (command[0])
+     * and its arguments, if any (command[1], command[2], ...). Refer also to
+     * java.lang.ProcessBuilder for further operating-system specific
+     * details.
      * @param closeOnExit if true, close the window when the command exits
      * @return the terminal new window
      */
