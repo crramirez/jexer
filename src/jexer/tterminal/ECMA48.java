@@ -4934,7 +4934,7 @@ public class ECMA48 implements Runnable {
      * XTVERSION - Report xterm name and version.
      */
     private void xtversion() {
-        int i = -1;
+        int i = 0;
         if (collectBuffer.length() > 0) {
             String args = collectBuffer.substring(1);
             if (collectBuffer.charAt(0) == '>') {
@@ -6883,8 +6883,15 @@ public class ECMA48 implements Runnable {
                 case 'p':
                     break;
                 case 'q':
-                    // DECLL - Load leds
-                    // Not supported
+                    if ((type == DeviceType.XTERM)
+                        && (collectBuffer.length() > 0)
+                        && (collectBuffer.charAt(collectBuffer.length() - 1) == '>')
+                    ) {
+                        xtversion();
+                    } else {
+                        // DECLL - Load leds
+                        // Not supported
+                    }
                     break;
                 case 'r':
                     // DECSTBM - Set top and bottom margins
