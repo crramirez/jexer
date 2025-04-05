@@ -7689,7 +7689,23 @@ public class ECMA48 implements Runnable {
             } else if (collectBuffer.length() == 1) {
                 // We've got the two characters, one in the buffer and the
                 // other in ch.
-                cursorPosition(collectBuffer.charAt(0) - '\040', ch - '\040');
+                int vt52RowNumber = collectBuffer.charAt(0) - '\040';
+                if (vt52RowNumber >= height) {
+                    /*
+                     * VT52 will not change the row if the provided number is
+                     * outside the visible region.
+                     */
+                    vt52RowNumber = currentState.cursorY;
+                }
+                int vt52ColNumber = ch - '\040';
+                if (vt52ColNumber > rightMargin) {
+                    /*
+                     * A real VT52 will move to the rightmost column. A VT100
+                     * emulating VT52 will not.
+                     */
+                    vt52ColNumber = currentState.cursorX;
+                }
+                cursorPosition(vt52RowNumber, vt52ColNumber);
                 toGround();
             }
             return;
