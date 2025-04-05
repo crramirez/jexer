@@ -2136,9 +2136,9 @@ public class HQSixelEncoder implements SixelEncoder {
                     sb.append("\033\\");
                     // If there are transparent pixels, we need to note that
                     // at the beginning.
-                    String header = "\033Pq";
+                    String header = "\033P9;0;0q";
                     if (result.transparent && allowTransparent) {
-                        header = "\033P0;1;0q";
+                        header = "\033P9;1;0q";
                     }
                     // Now put it together.
                     System.out.print(header);
