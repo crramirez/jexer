@@ -1162,6 +1162,10 @@ public class ECMA48Terminal extends LogicalScreen
         } catch (NumberFormatException e) {
             // SQUASH
         }
+        if (sixelEncoder instanceof LegacySixelEncoder) {
+            // Legacy encoder is not thread-safe.
+            imageThreadCount = 1;
+        }
 
         // Set custom colors
         setCustomSystemColors();
