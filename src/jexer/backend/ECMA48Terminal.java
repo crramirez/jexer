@@ -1942,11 +1942,12 @@ public class ECMA48Terminal extends LogicalScreen
         }
 
         if (imageThreadCount > 1) {
+            List<String> threadedImages = new ArrayList<String>(imageResults.size());
             // Collect all the encoded images.
             while (imageResults.size() > 0) {
                 Future<String> image = imageResults.get(0);
                 try {
-                    sb.append(image.get());
+                    threadedImages.add(image.get());
                 } catch (InterruptedException e) {
                     // SQUASH
                     // e.printStackTrace();
@@ -1957,6 +1958,11 @@ public class ECMA48Terminal extends LogicalScreen
                 imageResults.remove(0);
             }
             imageExecutor.shutdown();
+
+            Collections.sort(threadedImages);
+            for (String imageString: threadedImages) {
+                sb.append(imageString);
+            }
         }
 
         // Draw the text part now.
@@ -3552,7 +3558,7 @@ public class ECMA48Terminal extends LogicalScreen
         assert (sixel == true);
 
         // Place the cursor.
-        sb.append(gotoXY(x, y));
+        sb.append(sortableGotoXY(x, y));
 
         // DCS
         sb.append("\033Pq");
@@ -3961,7 +3967,7 @@ public class ECMA48Terminal extends LogicalScreen
             String cachedResult = iterm2Cache.get(cells);
             if (cachedResult != null) {
                 // System.err.println("CACHE HIT");
-                sb.append(gotoXY(x, y));
+                sb.append(sortableGotoXY(x, y));
                 sb.append(cachedResult);
                 return sb.toString();
             }
@@ -4076,7 +4082,7 @@ public class ECMA48Terminal extends LogicalScreen
             iterm2Cache.put(cells, sb.toString());
         }
 
-        return (gotoXY(x, y) + sb.toString());
+        return (sortableGotoXY(x, y) + sb.toString());
     }
 
     /**
@@ -4116,7 +4122,7 @@ public class ECMA48Terminal extends LogicalScreen
 
         if (jexerImageOption == JexerImageOption.DISABLED) {
             sb.append(normal());
-            sb.append(gotoXY(x, y));
+            sb.append(sortableGotoXY(x, y));
             for (int i = 0; i < cells.size(); i++) {
                 sb.append(' ');
             }
@@ -4139,7 +4145,7 @@ public class ECMA48Terminal extends LogicalScreen
             String cachedResult = jexerCache.get(cells);
             if (cachedResult != null) {
                 // System.err.println("CACHE HIT");
-                sb.append(gotoXY(x, y));
+                sb.append(sortableGotoXY(x, y));
                 sb.append(cachedResult);
                 return sb.toString();
             }
@@ -4929,6 +4935,17 @@ public class ECMA48Terminal extends LogicalScreen
      */
     private String gotoXY(final int x, final int y) {
         return String.format("\033[%d;%dH", y + 1, x + 1);
+    }
+
+    /**
+     * Move the cursor to (x, y).
+     *
+     * @param x column coordinate.  0 is the left-most column.
+     * @param y row coordinate.  0 is the top-most row.
+     * @return the string to emit to an ANSI / ECMA-style terminal
+     */
+    private String sortableGotoXY(final int x, final int y) {
+        return String.format("\033[%02d;%02dH", y + 1, x + 1);
     }
 
     /**
