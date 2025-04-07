@@ -3687,7 +3687,7 @@ public class ECMA48 implements Runnable {
                 if ((type == DeviceType.XTERM)
                     && (decPrivateModeFlag == true)
                 ) {
-                    // Mouse: normal tracking mode
+                    // Mouse: button-event tracking mode
                     if (value == true) {
                         mouseProtocol = MouseProtocol.BUTTONEVENT;
                     } else {
@@ -3700,7 +3700,7 @@ public class ECMA48 implements Runnable {
                 if ((type == DeviceType.XTERM)
                     && (decPrivateModeFlag == true)
                 ) {
-                    // Mouse: Any-event tracking mode
+                    // Mouse: any-event tracking mode
                     if (value == true) {
                         mouseProtocol = MouseProtocol.ANYEVENT;
                     } else {
@@ -5584,22 +5584,130 @@ public class ECMA48 implements Runnable {
 
             int Ps = 2;         // Reset
             switch (i) {
+            case 1:
+                // DECCKM
+                if (arrowKeyMode == ArrowKeyMode.VT100) {
+                    Ps = 1;     // Set
+                }
+                break;
+            case 2:
+                // DECANM - This cannot be queried when set, so it must be
+                // reset.
+                break;
+            case 3:
+                // DECCOLM
+                if (columns132 == true) {
+                    Ps = 1;     // Set
+                }
+                break;
+            case 4:
+                // DECSCLM
+                // Not supported, assume reset.
+                break;
+            case 5:
+                // DECSCNM
+                if (reverseVideo == true) {
+                    Ps = 1;     // Set
+                }
+                break;
+            case 6:
+                // DECOM
+                if (currentState.originMode == true) {
+                    Ps = 1;     // Set
+                }
+                break;
+            case 7:
+                // DECAWM
+                if (currentState.lineWrap == true) {
+                    Ps = 1;     // Set
+                }
+                break;
+            case 8:
+                // DECARM
+                // Not supported, assume reset.
+                break;
+            case 18:
+                // DECPFF
+                // Not supported, assume reset.
+                break;
+            case 19:
+                // DECPEX
+                // Not supported, assume reset.
+                break;
+            case 25:
+                // DECTCEM
+                if (cursorVisible == true) {
+                    Ps = 1;     // Set
+                }
+                break;
+            case 42:
+                // DECNRCM
+                // Not supported, assume reset.
+                break;
+            case 80:
+                // DECSDM
+                if (sixelScrolling == false) {
+                    Ps = 1;     // Set
+                }
+                break;
+            case 1000:
+                // Mouse: normal tracking mode
+                if (mouseProtocol == MouseProtocol.NORMAL) {
+                    Ps = 1;     // Set
+                }
+                break;
+            case 1002:
+                // Mouse: button-event tracking mode
+                if (mouseProtocol == MouseProtocol.BUTTONEVENT) {
+                    Ps = 1;     // Set
+                }
+                break;
+            case 1003:
+                // Mouse: any-event tracking mode
+                if (mouseProtocol == MouseProtocol.ANYEVENT) {
+                    Ps = 1;     // Set
+                }
+                break;
+            case 1005:
+                // Mouse: UTF-8 coordinates
+                if (mouseEncoding == MouseEncoding.UTF8) {
+                    Ps = 1;     // Set
+                }
+                break;
+            case 1006:
+                // Mouse: SGR coordinates
+                if (mouseEncoding == MouseEncoding.SGR) {
+                    Ps = 1;     // Set
+                }
+                break;
             case 1016:
-                // Report SGR-Pixels support
+                // Mouse: SGR-Pixels mode
                 if (mouseEncoding == MouseEncoding.SGR_PIXELS) {
                     Ps = 1;     // Set
                 }
-                writeRemote(String.format("\033[?%d;%d$y", i, Ps));
+                break;
+            case 1070:
+                // Sixe: Use private color registers for each sixel graphic
+                // (default).
+                if (sixelPalette == null) {
+                    Ps = 1;     // Set
+                }
                 break;
             case 2026:
                 // Report Synchronized Updates support
                 if (withinSynchronizedUpdate) {
                     Ps = 1;     // Set
                 }
-                writeRemote(String.format("\033[?%d;%d$y", i, Ps));
                 break;
             default:
+                // Unsupported option
+                Ps = 0;
                 break;
+            }
+            if (s8c1t == true) {
+                writeRemote(String.format("\u009b?%d;%d$y", i, Ps));
+            } else {
+                writeRemote(String.format("\033[?%d;%d$y", i, Ps));
             }
         }
     }
