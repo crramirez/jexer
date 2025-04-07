@@ -4927,7 +4927,11 @@ public class ECMA48 implements Runnable {
              * number of 123."
              *
              */
-            writeRemote("\033P!|00010203\033\\");
+            if (s8c1t == true) {
+                writeRemote("\u0090P!|00010203\u009c");
+            } else {
+                writeRemote("\033P!|00010203\033\\");
+            }
         }
     }
     /**
@@ -5358,6 +5362,13 @@ public class ECMA48 implements Runnable {
         // Collect first
         collectBuffer.append(xtermChar);
 
+        String OSC = "\033]";
+        String ST = "\033\\";
+        if (s8c1t) {
+            OSC = "\u009d";
+            ST = "\u009c";
+        }
+
         // Xterm cases...
         if (oscEnd) {
             String args = null;
@@ -5386,8 +5397,8 @@ public class ECMA48 implements Runnable {
                                 int red   = (rgb >>> 16) & 0xFF;
                                 int green = (rgb >>>  8) & 0xFF;
                                 int blue  =  rgb         & 0xFF;
-                                String response = String.format("\033]4;%d;rgb:%02x%02x/%02x%02x/%02x%02x\033\\",
-                                    color, red, red, green, green, blue, blue);
+                                String response = String.format("%s4;%d;rgb:%02x%02x/%02x%02x/%02x%02x%s",
+                                    OSC, color, red, red, green, green, blue, blue, ST);
                                 writeRemote(response);
                             }
                         } catch (NumberFormatException e) {
@@ -5410,10 +5421,10 @@ public class ECMA48 implements Runnable {
                         // Respond with foreground color.
                         java.awt.Color color = backend.attrToForegroundColor(currentState.attr);
                         writeRemote(String.format(
-                            "\033]10;rgb:%04x/%04x/%04x\033\\",
+                            "%s10;rgb:%04x/%04x/%04x%s", OSC,
                                 color.getRed() << 8,
                                 color.getGreen() << 8,
-                                color.getBlue() << 8));
+                                color.getBlue() << 8, ST));
                     }
                 }
 
@@ -5422,10 +5433,10 @@ public class ECMA48 implements Runnable {
                         // Respond with background color.
                         java.awt.Color color = backend.attrToBackgroundColor(currentState.attr);
                         writeRemote(String.format(
-                            "\033]11;rgb:%04x/%04x/%04x\033\\",
+                            "%s11;rgb:%04x/%04x/%04x%s", OSC,
                                 color.getRed() << 8,
                                 color.getGreen() << 8,
-                                color.getBlue() << 8));
+                                color.getBlue() << 8, ST));
                     }
                 }
 
@@ -5509,24 +5520,29 @@ public class ECMA48 implements Runnable {
 
         int i = getCsiParam(0, 0);
 
+        String CSI = "\033[";
+        if (s8c1t) {
+            CSI = "\u009b";
+        }
+
         if (!xtermPrivateModeFlag) {
             switch (i) {
             case 14:
                 // Report xterm text area size in pixels as CSI 4 ; height ;
                 // width t
-                writeRemote(String.format("\033[4;%d;%dt", textHeight * height,
-                        textWidth * width));
+                writeRemote(String.format("%s4;%d;%dt", CSI,
+                            textHeight * height, textWidth * width));
                 break;
             case 16:
                 // Report character size in pixels as CSI 6 ; height ; width
                 // t
-                writeRemote(String.format("\033[6;%d;%dt", textHeight,
-                        textWidth));
+                writeRemote(String.format("%s6;%d;%dt", CSI,
+                            textHeight, textWidth));
                 break;
             case 18:
                 // Report the text are size in characters as CSI 8 ; height ;
                 // width t
-                writeRemote(String.format("\033[8;%d;%dt", height, width));
+                writeRemote(String.format("%s8;%d;%dt", CSI, height, width));
                 break;
             default:
                 break;
@@ -5553,7 +5569,11 @@ public class ECMA48 implements Runnable {
                 // Report number of color registers.  Though we can support
                 // effectively unlimited colors, report the same max as stock
                 // xterm (MAX_COLOR_REGISTERS).
-                writeRemote(String.format("\033[?%d;%d;%dS", item, 0, 1024));
+                if (s8c1t == true) {
+                    writeRemote(String.format("\u009b?%d;%d;%dS", item, 0, 1024));
+                } else {
+                    writeRemote(String.format("\033[?%d;%d;%dS", item, 0, 1024));
+                }
                 return;
             }
             break;
@@ -5561,7 +5581,11 @@ public class ECMA48 implements Runnable {
             break;
         }
         // We will not support this option.
-        writeRemote(String.format("\033[?%d;%dS", item, action));
+        if (s8c1t == true) {
+            writeRemote(String.format("\u009b?%d;%dS", item, action));
+        } else {
+            writeRemote(String.format("\033[?%d;%dS", item, action));
+        }
     }
 
     /**
