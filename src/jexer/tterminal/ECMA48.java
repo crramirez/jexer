@@ -5602,11 +5602,11 @@ public class ECMA48 implements Runnable {
         }
 
         int i = getCsiParam(0, 0);
+        // System.err.printf("DECRQM: %d %s\n", i, decPrivateModeFlag);
 
+        int Ps = 2;         // Reset
         if (decPrivateModeFlag) {
-            // System.err.printf("DECRQM: %d\n", i);
 
-            int Ps = 2;         // Reset
             switch (i) {
             case 1:
                 // DECCKM
@@ -5626,7 +5626,8 @@ public class ECMA48 implements Runnable {
                 break;
             case 4:
                 // DECSCLM
-                // Not supported, assume reset.
+                // Not supported, assume permanently reset.
+                Ps = 4;
                 break;
             case 5:
                 // DECSCNM
@@ -5648,15 +5649,18 @@ public class ECMA48 implements Runnable {
                 break;
             case 8:
                 // DECARM
-                // Not supported, assume reset.
+                // Not supported, assume permanently reset.
+                Ps = 4;
                 break;
             case 18:
                 // DECPFF
-                // Not supported, assume reset.
+                // Not supported, assume permanently reset.
+                Ps = 4;
                 break;
             case 19:
                 // DECPEX
-                // Not supported, assume reset.
+                // Not supported, assume permanently reset.
+                Ps = 4;
                 break;
             case 25:
                 // DECTCEM
@@ -5666,7 +5670,8 @@ public class ECMA48 implements Runnable {
                 break;
             case 42:
                 // DECNRCM
-                // Not supported, assume reset.
+                // Not supported, assume permanently reset.
+                Ps = 4;
                 break;
             case 80:
                 // DECSDM
@@ -5734,6 +5739,38 @@ public class ECMA48 implements Runnable {
                 writeRemote(String.format("\033[?%d;%d$y", i, Ps));
             }
         }
+
+        switch (i) {
+        case 4:
+            // IRM
+            if (insertMode == true) {
+                Ps = 1;     // Set
+            }
+            break;
+        case 12:
+            // SRM
+            if (fullDuplex == true) {
+                Ps = 1;     // Set
+            }
+            break;
+        case 20:
+            // LNM
+            if (newLineMode == true) {
+                Ps = 1;     // Set
+            }
+            break;
+        default:
+            // Unsupported option
+            Ps = 0;
+            break;
+        }
+        if (s8c1t == true) {
+            writeRemote(String.format("\u009b%d;%d$y", i, Ps));
+        } else {
+            writeRemote(String.format("\033[%d;%d$y", i, Ps));
+        }
+
+
     }
 
     /**
