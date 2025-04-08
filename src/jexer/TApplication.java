@@ -3830,6 +3830,13 @@ public class TApplication implements Runnable {
             return;
         }
 
+        // If the mouse is on the status bar, do not switch focus
+        if ((hideStatusBar == false)
+            && (mouse.getAbsoluteY() == getDesktopBottom())
+        ) {
+            return;
+        }
+
         if (((focusFollowsMouse == true)
                 && (mouse.getType() == TMouseEvent.Type.MOUSE_MOTION))
             || (mouse.getType() == TMouseEvent.Type.MOUSE_DOWN)
