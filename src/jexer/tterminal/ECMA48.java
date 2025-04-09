@@ -8579,7 +8579,7 @@ public class ECMA48 implements Runnable {
                 }
 
                 // I'm genuinely not sure if making many small cells with
-                // array copy is better than lots of sumImages.  Memory
+                // array copy is better than lots of subImages.  Memory
                 // pressure is killing it at high animation rates.  For now,
                 // we will ALWAYS make a copy.
                 Cell cell = new Cell();
