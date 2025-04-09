@@ -251,9 +251,7 @@ See Also
 * [XtermDOOM](https://gitlab.com/AutumnMeowMeow/xtermdoom) is an
   effort to make [MochaDoom](https://github.com/jendave/mochadoom) run
   smoothly under Xterm.  The game is not yet playable, but it can show
-  off Jexer's multiplexing and multihead image capabilities.  For
-  ramblings about the game, terminal resources, etc. see
-  [/r/xtermdoom](https://reddit.com/r/xtermdoom).
+  off Jexer's multiplexing and multihead image capabilities.
 
 * [LCXterm](https://lcxterm.sourceforge.io) is a curses-based terminal
   emulator that allows one to use Jexer with full support on the raw
