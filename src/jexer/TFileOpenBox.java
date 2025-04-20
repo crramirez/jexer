@@ -158,7 +158,7 @@ public class TFileOpenBox extends TWindow {
         final Type type, final List<String> filters) throws IOException {
 
         // Register with the TApplication
-        super(application, "", 0, 0, 76, 22, MODAL);
+        super(application, "", 0, 0, 78, 22, MODAL);
 
         // Add text field
         entryField = addField(1, 1, getWidth() - 4, false,
@@ -262,7 +262,7 @@ public class TFileOpenBox extends TWindow {
         this.type = type;
 
         // Setup button actions
-        openButton = addButton(openLabel, this.getWidth() - 12, 3,
+        openButton = addButton(openLabel, this.getWidth() - 14, 3,
             new TAction() {
                 public void DO() {
                     try {
@@ -281,7 +281,7 @@ public class TFileOpenBox extends TWindow {
             openButton.setEnabled(false);
         }
 
-        addButton(i18n.getString("cancelButton"), getWidth() - 12, 5,
+        addButton(i18n.getString("cancelButton"), getWidth() - 14, 5,
             new TAction() {
                 public void DO() {
                     filename = null;

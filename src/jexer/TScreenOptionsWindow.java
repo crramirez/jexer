@@ -231,7 +231,7 @@ public class TScreenOptionsWindow extends TWindow {
     public TScreenOptionsWindow(final TApplication application) {
 
         // Register with the TApplication
-        super(application, i18n.getString("windowTitle"), 0, 0, 60, 23, MODAL);
+        super(application, i18n.getString("windowTitle"), 0, 0, 66, 24, MODAL);
 
         // Add shortcut text
         newStatusBar(i18n.getString("statusBar"));
@@ -327,7 +327,7 @@ public class TScreenOptionsWindow extends TWindow {
         } catch (NumberFormatException e) {
             // SQUASH
         }
-        windowOpacity = addField(31, 0, 4, true,
+        windowOpacity = addField(41, 0, 4, true,
             Integer.toString(alpha * 100 / 255),
             new TAction() {
                 public void DO() {
@@ -349,7 +349,7 @@ public class TScreenOptionsWindow extends TWindow {
             },
             null);
 
-        addSpinner(35, 0,
+        addSpinner(45, 0,
             new TAction() {
                 public void DO() {
                     int currentOpacity = getAlpha() * 100 / 255;
@@ -851,7 +851,7 @@ public class TScreenOptionsWindow extends TWindow {
         }
 
         addButton(i18n.getString("okButton"),
-            getWidth() - 13, getHeight() - 7,
+            getWidth() - 14, getHeight() - 7,
             new TAction() {
                 public void DO() {
                     // Copy values out.
@@ -874,7 +874,7 @@ public class TScreenOptionsWindow extends TWindow {
             });
 
         TButton cancelButton = addButton(i18n.getString("cancelButton"),
-            getWidth() - 13, getHeight() - 5,
+            getWidth() - 14, getHeight() - 5,
             new TAction() {
                 public void DO() {
                     // Restore old values, then close the window.
@@ -969,7 +969,7 @@ public class TScreenOptionsWindow extends TWindow {
             "jexer.TScreenOptions.options.borderStyle", "single"));
 
         CellAttributes color = getTheme().getColor("ttext");
-        drawBox(2, 2, left + 24, 14, color, color, borderStyle, false);
+        drawBox(2, 2, left + 30, 14, color, color, borderStyle, false);
         if (borderStyle.equals(BorderStyle.NONE)) {
             putStringXY(3, 2, i18n.getString("swingOptions"), color);
         } else {
@@ -977,7 +977,7 @@ public class TScreenOptionsWindow extends TWindow {
         }
 
 
-        drawBox(2, 15, left + 12, 22, color, color, borderStyle, false);
+        drawBox(2, 15, left + 18, 22, color, color, borderStyle, false);
         if (borderStyle.equals(BorderStyle.NONE)) {
             putStringXY(3, 15, i18n.getString("xtermOptions"), color);
         } else {
@@ -987,14 +987,14 @@ public class TScreenOptionsWindow extends TWindow {
         borderStyle = BorderStyle.getStyle(System.getProperty(
             "jexer.TScreenOptions.grid.borderStyle", "singleVdoubleH"));
 
-        drawBox(left + 2, 5, left + 22, 10, color, color, borderStyle, false);
+        drawBox(left + 4, 5, left + 28, 10, color, color, borderStyle, false);
         if (borderStyle.equals(BorderStyle.NONE)) {
-            putStringXY(left + 2, 5, i18n.getString("sample"), color);
-        } else {
             putStringXY(left + 4, 5, i18n.getString("sample"), color);
+        } else {
+            putStringXY(left + 6, 5, i18n.getString("sample"), color);
         }
         for (int i = 6; i < 9; i++) {
-            hLineXY(left + 3, i, 18, GraphicsChars.HATCH, color);
+            hLineXY(left + 5, i, 22, GraphicsChars.HATCH, color);
         }
 
     }

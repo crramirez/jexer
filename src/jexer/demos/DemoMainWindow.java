@@ -309,19 +309,19 @@ public class DemoMainWindow extends TWindow {
             }
         );
 
-        /*
-        addButton("Exception", 35, row + 3,
-            new TAction() {
-                public void DO() {
-                    try {
-                        throw new RuntimeException("FUBAR'd!");
-                    } catch (Exception e) {
-                        new jexer.TExceptionDialog(getApplication(), e);
+        if (false) {
+            addButton("Exception", 35, row + 3,
+                new TAction() {
+                    public void DO() {
+                        try {
+                            throw new RuntimeException("FUBAR'd!");
+                        } catch (Exception e) {
+                            new jexer.TExceptionDialog(getApplication(), e);
+                        }
                     }
                 }
-            }
-        );
-         */
+            );
+        }
 
         activate(first);
 

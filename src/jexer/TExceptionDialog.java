@@ -95,10 +95,12 @@ public class TExceptionDialog extends TWindow {
             "twindow.background.modal");
         addLabel(i18n.getString("captionLine4"), 1, 4,
             "twindow.background.modal");
+        addLabel(i18n.getString("captionLine5"), 1, 5,
+            "twindow.background.modal");
 
         addLabel(MessageFormat.format(i18n.getString("exceptionString"),
                 exception.getClass().getName(), exception.getMessage()),
-            2, 6, "ttext", false);
+            2, 7, "ttext", false);
 
         ArrayList<String> stackTraceStrings = new ArrayList<String>();
         stackTraceStrings.add(exception.getMessage());
@@ -106,10 +108,10 @@ public class TExceptionDialog extends TWindow {
         for (int i = 0; i < stack.length; i++) {
             stackTraceStrings.add(stack[i].toString());
         }
-        stackTrace = addList(stackTraceStrings, 2, 7, getWidth() - 6, 10);
+        stackTrace = addList(stackTraceStrings, 2, 8, getWidth() - 6, 9);
 
         // Buttons
-        addButton(i18n.getString("saveButton"), 21, getHeight() - 4,
+        addButton(i18n.getString("saveButton"), 17, getHeight() - 4,
             new TAction() {
                 public void DO() {
                     saveToFile();
@@ -117,7 +119,7 @@ public class TExceptionDialog extends TWindow {
             });
 
         TButton closeButton = addButton(i18n.getString("closeButton"),
-            37, getHeight() - 4,
+            41, getHeight() - 4,
             new TAction() {
                 public void DO() {
                     // Don't do anything, just close the window.
@@ -142,7 +144,7 @@ public class TExceptionDialog extends TWindow {
         super.draw();
 
         CellAttributes boxColor = getTheme().getColor("ttext");
-        hLineXY(3, 7, getWidth() - 6, ' ', boxColor);
+        hLineXY(3, 8, getWidth() - 6, ' ', boxColor);
     }
 
     // ------------------------------------------------------------------------
