@@ -107,7 +107,7 @@ public class DemoTextFieldWindow extends TWindow {
         int row = 1;
 
         addLabel(i18n.getString("textField1"), 1, row);
-        addField(35, row++, 15, false, "Field text");
+        addField(35, row++, 15, false, i18n.getString("fieldText"));
         addLabel(i18n.getString("textField2"), 1, row);
         addField(35, row++, 15, true);
         addLabel(i18n.getString("textField3"), 1, row);
