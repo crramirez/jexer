@@ -3847,6 +3847,11 @@ public class TApplication implements Runnable {
                     return;
                 }
 
+                if (windows.get(0).inMovements()) {
+                    // Moving/resizing windows don't switch
+                    return;
+                }
+
                 for (TWindow window: windows) {
                     assert (!window.isModal());
 
