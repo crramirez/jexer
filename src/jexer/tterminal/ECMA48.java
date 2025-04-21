@@ -225,10 +225,29 @@ public class ECMA48 implements Runnable {
      * XTERM mouse reporting protocols.
      */
     public enum MouseProtocol {
+        /**
+         * No mouse events.
+         */
         OFF,
+
+        /**
+         * Button-down events only.
+         */
         X10,
+
+        /**
+         * Button-down and button-release events.
+         */
         NORMAL,
+
+        /**
+         * Button-down, button-up, and motion while a button is pressed.
+         */
         BUTTONEVENT,
+
+        /**
+         * All mouse events.
+         */
         ANYEVENT
     }
 

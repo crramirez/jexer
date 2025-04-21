@@ -43,6 +43,19 @@ import jexer.event.TResizeEvent;
  */
 public class WidgetUtils {
 
+    // ------------------------------------------------------------------------
+    // Constructors -----------------------------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * Private constructor prevents accidental creation of this class.
+     */
+    private WidgetUtils() {}
+
+    // ------------------------------------------------------------------------
+    // WidgetUtils ------------------------------------------------------------
+    // ------------------------------------------------------------------------
+
     /**
      * Re-layout a list of widgets as non-overlapping tiles into a
      * rectangular space.  This produces almost the same results as Turbo

@@ -31,9 +31,7 @@ package jexer.bits;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
-// import java.awt.image.DataBuffer;
 import java.awt.image.IndexColorModel;
-// import java.awt.image.Raster;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -88,6 +86,15 @@ public class ImageUtils {
          */
         SCALE,
     }
+
+    // ------------------------------------------------------------------------
+    // Constructors -----------------------------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * Private constructor prevents accidental creation of this class.
+     */
+    private ImageUtils() {}
 
     // ------------------------------------------------------------------------
     // ImageUtils -------------------------------------------------------------
