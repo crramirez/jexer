@@ -158,7 +158,7 @@ public class TTableWindow extends TScrollableWindow {
         final File csvFile) throws IOException {
 
         super(parent, csvFile.getName(), 0, 0,
-            parent.getScreen().getWidth() / 2,
+            parent.getScreen().getWidth() * 4 / 5,
             parent.getScreen().getHeight() / 2 - 2,
             RESIZABLE | CENTERED);
 

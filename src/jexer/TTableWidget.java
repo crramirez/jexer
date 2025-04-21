@@ -1505,6 +1505,9 @@ public class TTableWidget extends TWidget {
         top = 0;
         selectedRow = 0;
         selectedColumn = 0;
+        for (int i = 0; i < columns.size(); i++) {
+            setColumnWidthAuto(i, getWidth() / 2);
+        }
         alignGrid();
         activate(columns.get(selectedColumn).get(selectedRow));
     }
@@ -1935,6 +1938,30 @@ public class TTableWidget extends TWidget {
             leftX += columns.get(i).width + 1;
         }
         alignGrid();
+    }
+
+    /**
+     * Automatically set the width of a column to either the minimum required
+     * to display the data, or the maximum supplied width, whichever is
+     * smaller.
+     *
+     * @param column the column number
+     * @param maxWidth the maximum width to size to
+     */
+    public void setColumnWidthAuto(final int column, final int maxWidth) {
+
+        // Columns may not be smaller than 4 cells wide.
+        int newWidth = 4;
+        
+        for (Cell cell: columns.get(column).cells) {
+            newWidth = Math.max(StringUtils.width(cell.getText()), newWidth);
+        }
+        if (showColumnLabels) {
+            newWidth = Math.max(StringUtils.width(getColumnLabel(column)),
+                newWidth);
+        }
+        newWidth = Math.min(newWidth, maxWidth);
+        setColumnWidth(column, newWidth);
     }
 
     /**
