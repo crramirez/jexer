@@ -1234,6 +1234,24 @@ public class TTableWidget extends TWidget {
     }
 
     /**
+     * Automatically set the width of the column used to show the row labels
+     * to either the minimum required to display the data, or the maximum
+     * supplied width, whichever is smaller.
+     *
+     * @param maxWidth the maximum width to size to
+     */
+    public void setRowLabelWidthAuto(final int maxWidth) {
+        // Row label column may not be smaller than 4 cells wide.
+        int newWidth = 4;
+
+        for (int i = 0; i < rows.size(); i++) {
+            newWidth = Math.max(StringUtils.width(getRowLabel(i)), newWidth);
+        }
+        newWidth = Math.min(newWidth, maxWidth);
+        setRowLabelWidth(newWidth);
+    }
+
+    /**
      * Get the number of columns.
      *
      * @return the number of columns
@@ -1949,10 +1967,9 @@ public class TTableWidget extends TWidget {
      * @param maxWidth the maximum width to size to
      */
     public void setColumnWidthAuto(final int column, final int maxWidth) {
-
         // Columns may not be smaller than 4 cells wide.
         int newWidth = 4;
-        
+
         for (Cell cell: columns.get(column).cells) {
             newWidth = Math.max(StringUtils.width(cell.getText()), newWidth);
         }
