@@ -95,9 +95,9 @@ public class DemoCheckBoxWindow extends TWindow {
 
         // Add some widgets
         addLabel(i18n.getString("checkBoxLabel1"), 1, row);
-        addCheckBox(35, row++, i18n.getString("checkBoxText1"), false);
+        addCheckBox(40, row++, i18n.getString("checkBoxText1"), false);
         addLabel(i18n.getString("checkBoxLabel2"), 1, row);
-        addCheckBox(35, row++, i18n.getString("checkBoxText2"), true);
+        addCheckBox(40, row++, i18n.getString("checkBoxText2"), true);
         row += 2;
 
         TRadioGroup group = addRadioGroup(1, row,
