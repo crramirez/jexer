@@ -77,29 +77,37 @@ public class DemoTextWindow extends TWindow {
         super(parent, title, 0, 0, 44, 22, RESIZABLE);
         textField = addText(text, 1, 3, 40, 16);
 
-        addButton(i18n.getString("left"), 1, 1, new TAction() {
+        TWidget button = null;
+        button = addButton(i18n.getString("left"), 1, 1, new TAction() {
                 public void DO() {
                     textField.leftJustify();
                 }
         });
 
-        addButton(i18n.getString("center"), 10, 1, new TAction() {
+        button = addButton(i18n.getString("center"),
+            button.getX() + button.getWidth() + 2, 1, new TAction() {
                 public void DO() {
                     textField.centerJustify();
                 }
         });
 
-        addButton(i18n.getString("right"), 21, 1, new TAction() {
+        button = addButton(i18n.getString("right"),
+            button.getX() + button.getWidth() + 2, 1, new TAction() {
                 public void DO() {
                     textField.rightJustify();
                 }
         });
 
-        addButton(i18n.getString("full"), 31, 1, new TAction() {
+        button = addButton(i18n.getString("full"),
+            button.getX() + button.getWidth() + 2, 1, new TAction() {
                 public void DO() {
                     textField.fullJustify();
                 }
         });
+
+        setWidth(button.getX() + button.getWidth() + 4);
+        onResize(new TResizeEvent(getApplication().getBackend(),
+                TResizeEvent.Type.WIDGET, getWidth(), getHeight()));
 
         statusBar = newStatusBar(i18n.getString("statusBar"));
         statusBar.addShortcutKeypress(kbF1, cmHelp,
