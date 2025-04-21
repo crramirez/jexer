@@ -30,6 +30,7 @@ package jexer;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 
 import jexer.bits.CellAttributes;
 import jexer.bits.GraphicsChars;
@@ -58,6 +59,16 @@ public class TCalendar extends TWidget {
     private GregorianCalendar calendar = new GregorianCalendar();
 
     /**
+     * The days of week heading line.
+     */
+    private String daysOfWeek = "  S   M   T   W   T   F   S ";
+
+    /**
+     * If true, the week starts on Monday.
+     */
+    private boolean startOnMonday = false;
+
+    /**
      * The action to perform when the user changes the value of the calendar.
      */
     private TAction updateAction = null;
@@ -82,6 +93,25 @@ public class TCalendar extends TWidget {
         super(parent, x, y, 28, 8);
 
         this.updateAction = updateAction;
+
+        GregorianCalendar dayOfWeekCalendar = new GregorianCalendar();
+        if (dayOfWeekCalendar.getFirstDayOfWeek() == Calendar.MONDAY) {
+            startOnMonday = true;
+        }
+
+        dayOfWeekCalendar.setWeekDate(2025, 1,
+            (startOnMonday ? Calendar.MONDAY : Calendar.SUNDAY));
+        daysOfWeek = "  ";
+        for (int i = 0; i < 7; i++) {
+            daysOfWeek += dayOfWeekCalendar.getDisplayName(Calendar.DAY_OF_WEEK,
+                Calendar.LONG, Locale.getDefault()).substring(0, 1);
+            if (i < 6) {
+                daysOfWeek += "   ";
+            } else {
+                daysOfWeek += " ";
+            }
+            dayOfWeekCalendar.add(Calendar.DAY_OF_WEEK, 1);
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -140,9 +170,15 @@ public class TCalendar extends TWidget {
             firstOfMonth.setTimeInMillis(displayCalendar.getTimeInMillis());
             firstOfMonth.set(Calendar.DAY_OF_MONTH, 1);
             int dayOf1st = firstOfMonth.get(Calendar.DAY_OF_WEEK) - 1;
+            if (startOnMonday) {
+                dayOf1st--;
+            }
             // System.err.println("dayOf1st: " + dayOf1st);
 
             int day = index - dayOf1st;
+            if (dayOf1st < 0) {
+                day -= 7;
+            }
             // System.err.println("day: " + day);
 
             if ((day < 1) || (day > lastDayNumber)) {
@@ -256,17 +292,23 @@ public class TCalendar extends TWidget {
         /*
          * Now draw out the days.
          */
-        putStringXY(0, 1, "  S   M   T   W   T   F   S ", dayColor);
+        putStringXY(0, 1, daysOfWeek, dayColor);
         int lastDayNumber = displayCalendar.getActualMaximum(
                 Calendar.DAY_OF_MONTH);
         GregorianCalendar firstOfMonth = new GregorianCalendar();
         firstOfMonth.setTimeInMillis(displayCalendar.getTimeInMillis());
         firstOfMonth.set(Calendar.DAY_OF_MONTH, 1);
         int dayOf1st = firstOfMonth.get(Calendar.DAY_OF_WEEK) - 1;
+        if (startOnMonday) {
+            dayOf1st--;
+        }
         int dayColumn = dayOf1st * 4;
         int row = 2;
 
         int dayOfMonth = 1;
+        if (dayOf1st < 0) {
+            dayColumn = 4 * 6;
+        }
         while (dayOfMonth <= lastDayNumber) {
             if (dayColumn == 4 * 7) {
                 dayColumn = 0;
