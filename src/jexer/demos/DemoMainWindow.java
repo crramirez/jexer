@@ -129,16 +129,17 @@ public class DemoMainWindow extends TWindow {
     private DemoMainWindow(final TApplication parent, final int flags) {
         // Construct a demo window.  X and Y don't matter because it will be
         // centered on screen.
-        super(parent, i18n.getString("windowTitle"), 0, 0, 64, 25, flags);
+        super(parent, i18n.getString("windowTitle"), 0, 0, 66, 25, flags);
 
         setLayoutManager(new StretchLayoutManager(getWidth() - 2,
                 getHeight() - 2));
 
         int row = 1;
+        int col = 37;
 
         // Add some widgets
         addLabel(i18n.getString("messageBoxLabel"), 1, row);
-        TButton first = addButton(i18n.getString("messageBoxButton"), 35, row,
+        TButton first = addButton(i18n.getString("messageBoxButton"), col, row,
             new TAction() {
                 public void DO() {
                     new DemoMsgBoxWindow(getApplication());
@@ -149,7 +150,7 @@ public class DemoMainWindow extends TWindow {
         row += 2;
 
         addLabel(i18n.getString("openModalLabel"), 1, row);
-        addButton(i18n.getString("openModalButton"), 35, row,
+        addButton(i18n.getString("openModalButton"), col, row,
             new TAction() {
                 public void DO() {
                     new DemoMainWindow(getApplication(), MODAL);
@@ -159,7 +160,7 @@ public class DemoMainWindow extends TWindow {
         row += 2;
 
         addLabel(i18n.getString("textFieldLabel"), 1, row);
-        addButton(i18n.getString("textFieldButton"), 35, row,
+        addButton(i18n.getString("textFieldButton"), col, row,
             new TAction() {
                 public void DO() {
                     new DemoTextFieldWindow(getApplication());
@@ -169,7 +170,7 @@ public class DemoMainWindow extends TWindow {
         row += 2;
 
         addLabel(i18n.getString("radioButtonLabel"), 1, row);
-        addButton(i18n.getString("radioButtonButton"), 35, row,
+        addButton(i18n.getString("radioButtonButton"), col, row,
             new TAction() {
                 public void DO() {
                     new DemoCheckBoxWindow(getApplication());
@@ -179,14 +180,14 @@ public class DemoMainWindow extends TWindow {
         row += 2;
 
         addLabel(i18n.getString("editorLabel"), 1, row);
-        addButton(i18n.getString("editorButton1"), 35, row,
+        addButton(i18n.getString("editorButton1"), col, row,
             new TAction() {
                 public void DO() {
                     new DemoEditorWindow(getApplication());
                 }
             }
         );
-        addButton(i18n.getString("editorButton2"), 48, row,
+        addButton(i18n.getString("editorButton2"), col + 13, row,
             new TAction() {
                 public void DO() {
                     new TEditorWindow(getApplication());
@@ -196,7 +197,7 @@ public class DemoMainWindow extends TWindow {
         row += 2;
 
         addLabel(i18n.getString("textAreaLabel"), 1, row);
-        addButton(i18n.getString("textAreaButton"), 35, row,
+        addButton(i18n.getString("textAreaButton"), col, row,
             new TAction() {
                 public void DO() {
                     new DemoTextWindow(getApplication());
@@ -206,7 +207,7 @@ public class DemoMainWindow extends TWindow {
         row += 2;
 
         addLabel(i18n.getString("ttableLabel"), 1, row);
-        addButton(i18n.getString("ttableButton1"), 35, row,
+        addButton(i18n.getString("ttableButton1"), col, row,
             new TAction() {
                 public void DO() {
                     new DemoTableWindow(getApplication(),
@@ -214,7 +215,7 @@ public class DemoMainWindow extends TWindow {
                 }
             }
         );
-        addButton(i18n.getString("ttableButton2"), 48, row,
+        addButton(i18n.getString("ttableButton2"), col + 13, row,
             new TAction() {
                 public void DO() {
                     new TTableWindow(getApplication(),
@@ -225,7 +226,7 @@ public class DemoMainWindow extends TWindow {
         row += 2;
 
         addLabel(i18n.getString("treeViewLabel"), 1, row);
-        addButton(i18n.getString("treeViewButton"), 35, row,
+        addButton(i18n.getString("treeViewButton"), col, row,
             new TAction() {
                 public void DO() {
                     try {
@@ -239,7 +240,7 @@ public class DemoMainWindow extends TWindow {
         row += 2;
 
         addLabel(i18n.getString("terminalLabel"), 1, row);
-        addButton(i18n.getString("terminalButton"), 35, row,
+        addButton(i18n.getString("terminalButton"), col, row,
             new TAction() {
                 public void DO() {
                     getApplication().openTerminal(0, 0);
@@ -249,7 +250,7 @@ public class DemoMainWindow extends TWindow {
         row += 2;
 
         addLabel(i18n.getString("colorEditorLabel"), 1, row);
-        addButton(i18n.getString("colorEditorButton"), 35, row,
+        addButton(i18n.getString("colorEditorButton"), col, row,
             new TAction() {
                 public void DO() {
                     new TEditColorThemeWindow(getApplication());
@@ -259,7 +260,7 @@ public class DemoMainWindow extends TWindow {
         row += 2;
 
         addLabel(i18n.getString("pixelsLabel"), 1, row);
-        addButton(i18n.getString("pixelsButton"), 35, row,
+        addButton(i18n.getString("pixelsButton"), col, row,
             new TAction() {
                 public void DO() {
                     new DemoPixelsWindow(getApplication());
@@ -268,9 +269,9 @@ public class DemoMainWindow extends TWindow {
         );
 
         row = 15;
-        progressBar1 = addProgressBar(48, row, 12, 0);
+        progressBar1 = addProgressBar(col + 13, row, 12, 0);
         row++;
-        timerLabel = addLabel(i18n.getString("timerLabel"), 48, row);
+        timerLabel = addLabel(i18n.getString("timerLabel"), col + 13, row);
         timer1 = getApplication().addTimer(250, true,
             new TAction() {
 
@@ -289,7 +290,7 @@ public class DemoMainWindow extends TWindow {
         );
 
         row += 2;
-        progressBar2 = addProgressBar(48, row, 12, 0);
+        progressBar2 = addProgressBar(col + 13, row, 12, 0);
         progressBar2.setLeftBorderChar('\u255e');
         progressBar2.setRightBorderChar('\u2561');
         progressBar2.setCompletedChar('\u2592');
@@ -310,7 +311,7 @@ public class DemoMainWindow extends TWindow {
         );
 
         if (false) {
-            addButton("Exception", 35, row + 3,
+            addButton("Exception", col, row + 3,
                 new TAction() {
                     public void DO() {
                         try {

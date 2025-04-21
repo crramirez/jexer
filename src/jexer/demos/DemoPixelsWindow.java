@@ -105,17 +105,18 @@ public class DemoPixelsWindow extends TWindow {
     public DemoPixelsWindow(final TApplication parent) {
         // Construct a demo window.  X and Y don't matter because it will be
         // centered on screen.
-        super(parent, i18n.getString("windowTitle"), 0, 0, 64, 17,
+        super(parent, i18n.getString("windowTitle"), 0, 0, 72, 17,
             CENTERED | RESIZABLE);
 
         setLayoutManager(new StretchLayoutManager(getWidth() - 2,
                 getHeight() - 2));
 
         int row = 1;
+        int col = 43;
 
         // Add some widgets
         addLabel(i18n.getString("customMouseLabel"), 1, row);
-        TWidget first = addButton(i18n.getString("customMouseButton"), 35, row,
+        TWidget first = addButton(i18n.getString("customMouseButton"), col, row,
             new TAction() {
                 public void DO() {
                     TackboardItem mouse = getApplication().getCustomMousePointer();
@@ -144,7 +145,7 @@ public class DemoPixelsWindow extends TWindow {
         row += 2;
 
         addLabel(i18n.getString("floatingTextLabel"), 1, row);
-        addButton(i18n.getString("floatingTextButton"), 35, row,
+        addButton(i18n.getString("floatingTextButton"), col, row,
             new TAction() {
                 public void DO() {
                     if (floatingText == null) {
@@ -163,8 +164,8 @@ public class DemoPixelsWindow extends TWindow {
                             font = new Font(Font.SANS_SERIF, Font.PLAIN,
                                 fontSize);
                         }
-                        floatingText = new Text(30, 21, 2, "Heat from fire",
-                            font, fontSize,
+                        floatingText = new Text(30, 21, 2,
+                            i18n.getString("heatFromFire"), font, fontSize,
                             new java.awt.Color(0xF7, 0xA8, 0xB8));
                         addOverlay(floatingText);
                     } else {
@@ -177,7 +178,7 @@ public class DemoPixelsWindow extends TWindow {
         row += 2;
 
         addLabel(i18n.getString("textField1"), 1, row);
-        TWidget field = addField(35, row, 15, false, "Field text");
+        TWidget field = addField(col, row, 15, false, "Field text");
         try {
             ClassLoader loader;
             loader = Thread.currentThread().getContextClassLoader();
@@ -194,7 +195,7 @@ public class DemoPixelsWindow extends TWindow {
 
         // TODO: more things
 
-        // Put some floating hearts on the screen.
+        // Put some floating things on the screen.
         try {
             ClassLoader loader;
             loader = Thread.currentThread().getContextClassLoader();
@@ -204,7 +205,7 @@ public class DemoPixelsWindow extends TWindow {
             animation = ImageUtils.getAnimation(loader.getResource(
                 "demo/butterfly.gif"));
             addUnderlay(new Bitmap(17, 33, 0, animation, getApplication()));
-            addOverlay(new Bitmap(11, 97, 0, image));
+            addOverlay(new Bitmap(15, 60, 0, image));
 
             timer3 = getApplication().addTimer(100, true,
                 new TAction() {
@@ -240,9 +241,9 @@ public class DemoPixelsWindow extends TWindow {
                                 }
                             }
                             if ((item.getX() < 0)
-                                || (item.getX() > 100)
+                                || (item.getX() > 300)
                                 || (item.getY() < 0)
-                                || (item.getY() > 100)
+                                || (item.getY() > 200)
                             ) {
                                 direction = !direction;
                             }
