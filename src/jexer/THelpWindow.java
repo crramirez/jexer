@@ -50,6 +50,10 @@ public class THelpWindow extends TWindow {
     // ------------------------------------------------------------------------
 
     // Default help topic keys.
+
+    /**
+     * "Help On Help".
+     */
     public static String HELP_HELP                      = "Help On Help";
 
     // ------------------------------------------------------------------------
