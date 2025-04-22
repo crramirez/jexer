@@ -39,6 +39,7 @@ import java.lang.reflect.Modifier;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -973,8 +974,10 @@ public class TTerminalWidget extends TScrollableWidget
         try {
             ProcessBuilder pb = new ProcessBuilder(command);
             Map<String, String> env = pb.environment();
+            Locale locale = Locale.getDefault();
             env.put("TERM", ECMA48.deviceTypeTerm(deviceType));
-            env.put("LANG", ECMA48.deviceTypeLang(deviceType, "en_US"));
+            env.put("LANG", ECMA48.deviceTypeLang(deviceType,
+                    locale.getLanguage() + "_" + locale.getCountry()));
             env.put("COLUMNS", "80");
             env.put("LINES", "24");
             pb.redirectErrorStream(true);
