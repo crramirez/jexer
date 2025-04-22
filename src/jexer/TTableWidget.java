@@ -482,28 +482,38 @@ public class TTableWidget extends TWidget {
         public void onKeypress(final TKeypressEvent keypress) {
             // System.err.println("Cell onKeypress: " + keypress);
 
-            if (readOnly) {
-                // Read only: do nothing.
-                return;
-            }
-
             if (isEditing) {
                 if (keypress.equals(kbEsc)) {
                     // ESC cancels the edit.
                     cancelEdit();
                     return;
                 }
-                if (keypress.equals(kbEnter)) {
-                    // Enter ends editing.
 
-                    // Pass down to field first so that it can execute
-                    // enterAction if specified.
-                    super.onKeypress(keypress);
-
-                    fieldText = field.getText();
-                    isEditing = false;
-                    field.setEnabled(false);
+                if (readOnly) {
+                    // Read only: only send position keys.
+                    if (keypress.equals(kbLeft)
+                        || keypress.equals(kbRight)
+                        || keypress.equals(kbHome)
+                        || keypress.equals(kbEnd)
+                    ) {
+                        // Pass down to field.
+                        field.onKeypress(keypress);
+                    }
                     return;
+
+                } else {
+                    if (keypress.equals(kbEnter)) {
+                        // Enter ends editing.
+
+                        // Pass down to field first so that it can execute
+                        // enterAction if specified.
+                        super.onKeypress(keypress);
+
+                        fieldText = field.getText();
+                        isEditing = false;
+                        field.setEnabled(false);
+                        return;
+                    }
                 }
                 // Pass down to field.
                 super.onKeypress(keypress);
