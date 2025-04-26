@@ -40,11 +40,6 @@ import jexer.help.Topic;
  */
 public class THelpWindow extends TWindow {
 
-    /**
-     * Translated strings.
-     */
-    private static final ResourceBundle i18n = ResourceBundle.getBundle(THelpWindow.class.getName());
-
     // ------------------------------------------------------------------------
     // Constants --------------------------------------------------------------
     // ------------------------------------------------------------------------
@@ -59,6 +54,11 @@ public class THelpWindow extends TWindow {
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Translated strings.
+     */
+    private ResourceBundle i18n = null;
 
     /**
      * The help text window.
@@ -112,8 +112,10 @@ public class THelpWindow extends TWindow {
      */
     @SuppressWarnings("this-escape")
     public THelpWindow(final TApplication application, final Topic topic) {
-        super(application, i18n.getString("windowTitle"),
-            1, 1, 78, 22, CENTERED | RESIZABLE);
+        super(application, "", 1, 1, 78, 22, CENTERED | RESIZABLE);
+
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        setTitle(i18n.getString("windowTitle"));
 
         setMinimumWindowHeight(16);
         setMinimumWindowWidth(30);

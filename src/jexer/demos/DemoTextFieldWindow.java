@@ -51,14 +51,14 @@ import static jexer.TKeypress.*;
  */
 public class DemoTextFieldWindow extends TWindow {
 
-    /**
-     * Translated strings.
-     */
-    private static final ResourceBundle i18n = ResourceBundle.getBundle(DemoTextFieldWindow.class.getName());
-
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Translated strings.
+     */
+    private ResourceBundle i18n = null;
 
     /**
      * Calendar.  Has to be at class scope so that it can be accessed by the
@@ -99,7 +99,9 @@ public class DemoTextFieldWindow extends TWindow {
     DemoTextFieldWindow(final TApplication parent, final int flags) {
         // Construct a demo window.  X and Y don't matter because it
         // will be centered on screen.
-        super(parent, i18n.getString("windowTitle"), 0, 0, 60, 20, flags);
+        super(parent, "", 0, 0, 60, 20, flags);
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        setTitle(i18n.getString("windowTitle"));
 
         setLayoutManager(new StretchLayoutManager(getWidth() - 2,
                 getHeight() - 2));

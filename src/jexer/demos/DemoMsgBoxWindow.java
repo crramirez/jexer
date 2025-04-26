@@ -45,14 +45,14 @@ import static jexer.TKeypress.*;
  */
 public class DemoMsgBoxWindow extends TWindow {
 
-    /**
-     * Translated strings.
-     */
-    private static final ResourceBundle i18n = ResourceBundle.getBundle(DemoMsgBoxWindow.class.getName());
-
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Translated strings.
+     */
+    private ResourceBundle i18n = null;
 
     /**
      * Constructor.
@@ -72,7 +72,9 @@ public class DemoMsgBoxWindow extends TWindow {
     DemoMsgBoxWindow(final TApplication parent, final int flags) {
         // Construct a demo window.  X and Y don't matter because it
         // will be centered on screen.
-        super(parent, i18n.getString("windowTitle"), 0, 0, 79, 18, flags);
+        super(parent, "", 0, 0, 79, 18, flags);
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        setTitle(i18n.getString("windowTitle"));
 
         setLayoutManager(new StretchLayoutManager(getWidth() - 2,
                 getHeight() - 2));

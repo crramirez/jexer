@@ -56,14 +56,14 @@ import static jexer.TKeypress.*;
  */
 public class TEditorWindow extends TScrollableWindow {
 
-    /**
-     * Translated strings.
-     */
-    private static final ResourceBundle i18n = ResourceBundle.getBundle(TEditorWindow.class.getName());
-
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Translated strings.
+     */
+    private ResourceBundle i18n = null;
 
     /**
      * Hang onto my TEditor so I can resize it with the window.
@@ -101,6 +101,7 @@ public class TEditorWindow extends TScrollableWindow {
 
         super(parent, title, 0, 0, parent.getScreen().getWidth(),
             parent.getDesktopBottom() - parent.getDesktopTop(), RESIZABLE);
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
 
         editField = addEditor("", 0, 0, getWidth() - 2, getHeight() - 2);
         setupAfterEditor();
@@ -119,6 +120,7 @@ public class TEditorWindow extends TScrollableWindow {
 
         super(parent, title, 0, 0, parent.getScreen().getWidth(),
             parent.getDesktopBottom() - parent.getDesktopTop(), RESIZABLE);
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
 
         filename = title;
         editField = addEditor(contents, 0, 0, getWidth() - 2, getHeight() - 2);
@@ -138,6 +140,7 @@ public class TEditorWindow extends TScrollableWindow {
 
         super(parent, file.getName(), 0, 0, parent.getScreen().getWidth(),
             parent.getDesktopBottom() - parent.getDesktopTop(), RESIZABLE);
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
 
         filename = file.getName();
         String contents = readFileData(file);
@@ -150,8 +153,11 @@ public class TEditorWindow extends TScrollableWindow {
      *
      * @param parent the main application
      */
+    @SuppressWarnings("this-escape")
     public TEditorWindow(final TApplication parent) {
-        this(parent, i18n.getString("newTextDocument"));
+        this(parent, "");
+
+        setTitle(i18n.getString("newTextDocument"));
     }
 
     // ------------------------------------------------------------------------

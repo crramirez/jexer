@@ -48,11 +48,6 @@ import static jexer.TKeypress.*;
  */
 public class TMenu extends TWindow {
 
-    /**
-     * Translated strings.
-     */
-    private static final ResourceBundle i18n = ResourceBundle.getBundle(TMenu.class.getName());
-
     // ------------------------------------------------------------------------
     // Constants --------------------------------------------------------------
     // ------------------------------------------------------------------------
@@ -398,6 +393,11 @@ public class TMenu extends TWindow {
     // ------------------------------------------------------------------------
 
     /**
+     * Translated strings.
+     */
+    private ResourceBundle i18n = null;
+
+    /**
      * If true, this is a sub-menu.  Note package private access.
      */
     boolean isSubMenu = false;
@@ -442,6 +442,8 @@ public class TMenu extends TWindow {
 
         super(parent, label, x, y, parent.getScreen().getWidth(),
             parent.getScreen().getHeight());
+
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
 
         // Setup the menu shortcut
         mnemonic = new MnemonicString(label);

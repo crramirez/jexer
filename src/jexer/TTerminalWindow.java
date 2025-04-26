@@ -44,14 +44,14 @@ import static jexer.TKeypress.*;
  */
 public class TTerminalWindow extends TScrollableWindow {
 
-    /**
-     * Translated strings.
-     */
-    private static final ResourceBundle i18n = ResourceBundle.getBundle(TTerminalWindow.class.getName());
-
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Translated strings.
+     */
+    private ResourceBundle i18n = null;
 
     /**
      * The terminal.
@@ -144,8 +144,10 @@ public class TTerminalWindow extends TScrollableWindow {
         final int y, final int flags, final String [] command,
         final boolean closeOnExit) {
 
-        super(application, i18n.getString("windowTitle"), x, y,
-            80 + 2, 24 + 2, flags);
+        super(application, "", x, y, 80 + 2, 24 + 2, flags);
+
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        setTitle(i18n.getString("windowTitle"));
 
         // Require at least one line for the display.
         setMinimumWindowHeight(3);
@@ -212,8 +214,9 @@ public class TTerminalWindow extends TScrollableWindow {
     public TTerminalWindow(final TApplication application, final int x,
         final int y, final int flags, final boolean closeOnExit) {
 
-        super(application, i18n.getString("windowTitle"), x, y,
-            80 + 2, 24 + 2, flags);
+        super(application, "", x, y, 80 + 2, 24 + 2, flags);
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        setTitle(i18n.getString("windowTitle"));
 
         // Require at least one line for the display.
         setMinimumWindowHeight(3);

@@ -43,14 +43,14 @@ import static jexer.TKeypress.*;
  */
 public class DemoEditorWindow extends TWindow {
 
-    /**
-     * Translated strings.
-     */
-    private static final ResourceBundle i18n = ResourceBundle.getBundle(DemoEditorWindow.class.getName());
-
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Translated strings.
+     */
+    private ResourceBundle i18n = null;
 
     /**
      * Hang onto my TEditor so I can resize it with the window.
@@ -73,6 +73,8 @@ public class DemoEditorWindow extends TWindow {
         final String text) {
 
         super(parent, title, 0, 0, 44, 22, RESIZABLE);
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+
         editField = addEditor(text, 0, 0, 42, 20);
 
         statusBar = newStatusBar(i18n.getString("statusBar"));
@@ -90,7 +92,7 @@ public class DemoEditorWindow extends TWindow {
      * @param parent the main application
      */
     public DemoEditorWindow(final TApplication parent) {
-        this(parent, i18n.getString("windowTitle"),
+        this(parent, "",
 "This is an example of an editable text field.  Some example text follows.\n" +
 "\n" +
 "This library implements a text-based windowing system loosely\n" +
@@ -118,6 +120,8 @@ public class DemoEditorWindow extends TWindow {
 "1 2 3 123\n" +
 "\n"
         );
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        setTitle(i18n.getString("windowTitle"));
 
     }
 

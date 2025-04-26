@@ -58,11 +58,6 @@ import static jexer.TKeypress.*;
  */
 public class TFileOpenBox extends TWindow {
 
-    /**
-     * Translated strings.
-     */
-    private static final ResourceBundle i18n = ResourceBundle.getBundle(TFileOpenBox.class.getName());
-
     // ------------------------------------------------------------------------
     // Constants --------------------------------------------------------------
     // ------------------------------------------------------------------------
@@ -90,6 +85,11 @@ public class TFileOpenBox extends TWindow {
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Translated strings.
+     */
+    private ResourceBundle i18n = null;
 
     /**
      * String to return, or null if the user canceled.
@@ -159,6 +159,7 @@ public class TFileOpenBox extends TWindow {
 
         // Register with the TApplication
         super(application, "", 0, 0, 78, 22, MODAL);
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
 
         // Add text field
         entryField = addField(1, 1, getWidth() - 4, false,

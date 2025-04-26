@@ -45,14 +45,14 @@ import static jexer.TKeypress.*;
  */
 public class DemoTreeViewWindow extends TWindow {
 
-    /**
-     * Translated strings.
-     */
-    private static final ResourceBundle i18n = ResourceBundle.getBundle(DemoTreeViewWindow.class.getName());
-
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Translated strings.
+     */
+    private ResourceBundle i18n = null;
 
     /**
      * Hang onto my TTreeView so I can resize it with the window.
@@ -71,8 +71,9 @@ public class DemoTreeViewWindow extends TWindow {
      */
     @SuppressWarnings("this-escape")
     public DemoTreeViewWindow(final TApplication parent) throws IOException {
-        super(parent, i18n.getString("windowTitle"), 0, 0, 44, 16,
-            TWindow.RESIZABLE);
+        super(parent, "", 0, 0, 44, 16, TWindow.RESIZABLE);
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        setTitle(i18n.getString("windowTitle"));
 
         // Load the treeview with "stuff"
         treeView = addTreeViewWidget(1, 1, 40, 12);

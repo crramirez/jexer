@@ -49,14 +49,14 @@ import static jexer.TKeypress.*;
  */
 public class TTableWindow extends TScrollableWindow {
 
-    /**
-     * Translated strings.
-     */
-    private static final ResourceBundle i18n = ResourceBundle.getBundle(TTableWindow.class.getName());
-
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Translated strings.
+     */
+    private ResourceBundle i18n = null;
 
     /**
      * The table widget.
@@ -129,6 +129,7 @@ public class TTableWindow extends TScrollableWindow {
         final int flags) {
 
         super(parent, title, x, y, width, height, flags);
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
 
         tableField = addTable(0, 0, getWidth() - 2, getHeight() - 2);
         setupAfterTable();
@@ -161,6 +162,7 @@ public class TTableWindow extends TScrollableWindow {
             parent.getScreen().getWidth() * 4 / 5,
             parent.getScreen().getHeight() / 2 - 2,
             RESIZABLE | CENTERED);
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
 
         tableField = addTable(0, 0, getWidth() - 2, getHeight() - 2, 1, 1);
         setupAfterTable();
@@ -234,6 +236,7 @@ public class TTableWindow extends TScrollableWindow {
         final int flags) throws IOException {
 
         super(parent, csvFile.getName(), x, y, width, height, flags);
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
 
         tableField = addTable(0, 0, getWidth() - 2, getHeight() - 2, 1, 1);
         setupAfterTable();

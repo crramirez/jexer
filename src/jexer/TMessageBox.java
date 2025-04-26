@@ -54,11 +54,6 @@ import static jexer.TKeypress.*;
  */
 public class TMessageBox extends TWindow {
 
-    /**
-     * Translated strings.
-     */
-    private static final ResourceBundle i18n = ResourceBundle.getBundle(TMessageBox.class.getName());
-
     // ------------------------------------------------------------------------
     // Constants --------------------------------------------------------------
     // ------------------------------------------------------------------------
@@ -116,6 +111,11 @@ public class TMessageBox extends TWindow {
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Translated strings.
+     */
+    private ResourceBundle i18n = null;
 
     /**
      * The type of this message box.
@@ -182,6 +182,9 @@ public class TMessageBox extends TWindow {
 
         // Start as 100x100 at (1, 1).  These will be changed later.
         super(application, title, 1, 1, 100, 100, CENTERED | MODAL);
+
+        i18n = ResourceBundle.getBundle(TMessageBox.class.getName(),
+            getLocale());
 
         // Hang onto type so that we can provide more convenience in
         // onKeypress().

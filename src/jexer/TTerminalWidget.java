@@ -65,14 +65,14 @@ import static jexer.TKeypress.*;
 public class TTerminalWidget extends TScrollableWidget
                              implements DisplayListener, EditMenuUser {
 
-    /**
-     * Translated strings.
-     */
-    private static final ResourceBundle i18n = ResourceBundle.getBundle(TTerminalWidget.class.getName());
-
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Translated strings.
+     */
+    private ResourceBundle i18n = null;
 
     /**
      * The emulator.
@@ -247,6 +247,7 @@ public class TTerminalWidget extends TScrollableWidget
         final TAction closeAction) {
 
         super(parent, x, y, width, height);
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
 
         setMouseStyle("text");
         this.closeAction = closeAction;
@@ -351,6 +352,7 @@ public class TTerminalWidget extends TScrollableWidget
         final int width, final int height, final TAction closeAction) {
 
         super(parent, x, y, width, height);
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
 
         setMouseStyle("text");
         this.closeAction = closeAction;
