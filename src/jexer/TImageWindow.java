@@ -46,11 +46,6 @@ import static jexer.TKeypress.*;
  */
 public class TImageWindow extends TScrollableWindow {
 
-    /**
-     * Translated strings.
-     */
-    private static final ResourceBundle i18n = ResourceBundle.getBundle(TImageWindow.class.getName());
-
     // ------------------------------------------------------------------------
     // Constants --------------------------------------------------------------
     // ------------------------------------------------------------------------
@@ -63,6 +58,11 @@ public class TImageWindow extends TScrollableWindow {
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Translated strings.
+     */
+    private ResourceBundle i18n = null;
 
     /**
      * Hang onto the TImage so I can resize it with the window.
@@ -104,6 +104,7 @@ public class TImageWindow extends TScrollableWindow {
         final int height) throws IOException {
 
         super(parent, file.getName(), x, y, width, height, RESIZABLE);
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
 
         BufferedImage image = null;
         Animation animation = null;

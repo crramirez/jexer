@@ -44,11 +44,6 @@ import jexer.bits.CellAttributes;
  */
 public class TExceptionDialog extends TWindow {
 
-    /**
-     * Translated strings.
-     */
-    private static final ResourceBundle i18n = ResourceBundle.getBundle(TExceptionDialog.class.getName());
-
     // ------------------------------------------------------------------------
     // Constants --------------------------------------------------------------
     // ------------------------------------------------------------------------
@@ -56,6 +51,11 @@ public class TExceptionDialog extends TWindow {
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Translated strings.
+     */
+    private ResourceBundle i18n = null;
 
     /**
      * The exception.  We will actually make it Throwable, for the unlikely
@@ -82,8 +82,9 @@ public class TExceptionDialog extends TWindow {
     public TExceptionDialog(final TApplication application,
         final Throwable exception) {
 
-        super(application, i18n.getString("windowTitle"),
-            1, 1, 78, 22, CENTERED | MODAL);
+        super(application, "", 1, 1, 78, 22, CENTERED | MODAL);
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        setTitle(i18n.getString("windowTitle"));
 
         this.exception = exception;
 

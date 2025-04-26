@@ -63,14 +63,14 @@ import static jexer.TKeypress.*;
  */
 public class DemoPixelsWindow extends TWindow {
 
-    /**
-     * Translated strings.
-     */
-    private static final ResourceBundle i18n = ResourceBundle.getBundle(DemoPixelsWindow.class.getName());
-
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Translated strings.
+     */
+    private ResourceBundle i18n = null;
 
     /**
      * Timer that moves things.
@@ -105,8 +105,9 @@ public class DemoPixelsWindow extends TWindow {
     public DemoPixelsWindow(final TApplication parent) {
         // Construct a demo window.  X and Y don't matter because it will be
         // centered on screen.
-        super(parent, i18n.getString("windowTitle"), 0, 0, 72, 17,
-            CENTERED | RESIZABLE);
+        super(parent, "", 0, 0, 72, 17, CENTERED | RESIZABLE);
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        setTitle(i18n.getString("windowTitle"));
 
         setLayoutManager(new StretchLayoutManager(getWidth() - 2,
                 getHeight() - 2));

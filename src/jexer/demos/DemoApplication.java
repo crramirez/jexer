@@ -35,6 +35,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 import jexer.TApplication;
@@ -58,10 +59,14 @@ import jexer.backend.SwingTerminal;
  */
 public class DemoApplication extends TApplication {
 
+    // ------------------------------------------------------------------------
+    // Variables --------------------------------------------------------------
+    // ------------------------------------------------------------------------
+
     /**
      * Translated strings.
      */
-    private static final ResourceBundle i18n = ResourceBundle.getBundle(DemoApplication.class.getName());
+    private ResourceBundle i18n = ResourceBundle.getBundle(DemoApplication.class.getName());
 
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
@@ -320,6 +325,26 @@ public class DemoApplication extends TApplication {
             return true;
         }
 
+        if (menu.getId() == 10005) {
+            setLocale(new Locale("en"));
+            i18n = ResourceBundle.getBundle(DemoApplication.class.getName(),
+                getLocale());
+            getBackend().setTitle(i18n.getString("applicationTitle"));
+            clearAllWidgets();
+            addAllWidgets();
+            return true;
+        }
+
+        if (menu.getId() == 10006) {
+            setLocale(new Locale("es"));
+            i18n = ResourceBundle.getBundle(DemoApplication.class.getName(),
+                getLocale());
+            getBackend().setTitle(i18n.getString("applicationTitle"));
+            clearAllWidgets();
+            addAllWidgets();
+            return true;
+        }
+
         return super.onMenu(menu);
     }
 
@@ -371,6 +396,9 @@ public class DemoApplication extends TApplication {
         demoMenu.addSeparator();
         demoMenu.addItem(10001, i18n.getString("lookCute"));
         demoMenu.addItem(10002, i18n.getString("lookBland"));
+        TSubMenu languageMenu = demoMenu.addSubMenu(i18n.getString("selectLanguage"));
+        languageMenu.addItem(10005, i18n.getString("english"));
+        languageMenu.addItem(10006, i18n.getString("espanol"));
         demoMenu.addSeparator();
         TMenuItem item = demoMenu.addItem(2000, i18n.getString("checkable"));
         item.setCheckable(true);
@@ -403,6 +431,19 @@ public class DemoApplication extends TApplication {
         addTableMenu();
         addWindowMenu();
         addHelpMenu();
+    }
+
+    /**
+     * Clear all the widgets of the demo.
+     */
+    private void clearAllWidgets() {
+        closeMenu();
+        for (TMenu menu: getAllMenus()) {
+            removeMenu(menu);
+        }
+        for (TWindow window: getAllWindows()) {
+            closeWindow(window);
+        }
     }
 
 }

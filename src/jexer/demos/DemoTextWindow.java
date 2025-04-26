@@ -45,14 +45,14 @@ import static jexer.TKeypress.*;
  */
 public class DemoTextWindow extends TWindow {
 
-    /**
-     * Translated strings.
-     */
-    private static final ResourceBundle i18n = ResourceBundle.getBundle(DemoTextWindow.class.getName());
-
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Translated strings.
+     */
+    private ResourceBundle i18n = null;
 
     /**
      * Hang onto my TText so I can resize it with the window.
@@ -75,6 +75,8 @@ public class DemoTextWindow extends TWindow {
         final String text) {
 
         super(parent, title, 0, 0, 44, 22, RESIZABLE);
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+
         textField = addText(text, 1, 3, 40, 16);
 
         TWidget button = null;
@@ -125,8 +127,9 @@ public class DemoTextWindow extends TWindow {
      *
      * @param parent the main application
      */
+    @SuppressWarnings("this-escape")
     public DemoTextWindow(final TApplication parent) {
-        this(parent, i18n.getString("windowTitle"),
+        this(parent, "",
 "This is an example of a reflowable text field.  Some example text follows.\n" +
 "\n" +
 "Notice that some menu items should be disabled when this window has focus.\n" +
@@ -141,6 +144,8 @@ public class DemoTextWindow extends TWindow {
 "This library is licensed MIT.  See the file LICENSE for the full license " +
 "for the details.\n");
 
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        setTitle(i18n.getString("windowTitle"));
     }
 
     // ------------------------------------------------------------------------

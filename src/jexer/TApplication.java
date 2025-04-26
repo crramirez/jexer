@@ -43,6 +43,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -84,11 +85,6 @@ import static jexer.TKeypress.*;
  * processes events received from the user.
  */
 public class TApplication implements Runnable {
-
-    /**
-     * Translated strings.
-     */
-    private static final ResourceBundle i18n = ResourceBundle.getBundle(TApplication.class.getName());
 
     // ------------------------------------------------------------------------
     // Constants --------------------------------------------------------------
@@ -142,6 +138,11 @@ public class TApplication implements Runnable {
     // ------------------------------------------------------------------------
 
     /**
+     * Translated strings.
+     */
+    private ResourceBundle i18n = ResourceBundle.getBundle(TApplication.class.getName());
+
+    /**
      * The primary event handler thread.
      */
     private volatile WidgetEventHandler primaryEventHandler;
@@ -165,6 +166,11 @@ public class TApplication implements Runnable {
      * Access to the physical screen, keyboard, and mouse.
      */
     private Backend backend;
+
+    /**
+     * The Locale used for producing user-facing strings.
+     */
+    private Locale locale = Locale.getDefault();
 
     /**
      * The clipboard for copy and paste.
@@ -2025,6 +2031,31 @@ public class TApplication implements Runnable {
         } else {
             return backend.getScreen();
         }
+    }
+
+    /**
+     * Get the Locale used for producing user-facing strings.
+     *
+     * @return the locale
+     */
+    public final Locale getLocale() {
+        assert (locale != null);
+        return locale;
+    }
+
+    /**
+     * Set the Locale used for producing user-facing strings.
+     *
+     * @param locale the locale. If null, reset to the default JVM Locale.
+     */
+    public final void setLocale(final Locale locale) {
+        if (locale != null) {
+            this.locale = locale;
+        } else {
+            this.locale = Locale.getDefault();
+        }
+        i18n = ResourceBundle.getBundle(TApplication.class.getName(),
+            getLocale());
     }
 
     /**

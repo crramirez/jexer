@@ -43,14 +43,14 @@ import static jexer.TKeypress.*;
  */
 public class DemoTableWindow extends TWindow {
 
-    /**
-     * Translated strings.
-     */
-    private static final ResourceBundle i18n = ResourceBundle.getBundle(DemoTableWindow.class.getName());
-
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Translated strings.
+     */
+    private ResourceBundle i18n = null;
 
     /**
      * Hang onto my TTable so I can resize it with the window.
@@ -71,6 +71,8 @@ public class DemoTableWindow extends TWindow {
     public DemoTableWindow(final TApplication parent, final String title) {
 
         super(parent, title, 0, 0, 44, 22, RESIZABLE);
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+
         tableField = new TTableWidget(this, 0, 0, 42, 20);
 
         statusBar = newStatusBar(i18n.getString("statusBar"));
@@ -87,8 +89,11 @@ public class DemoTableWindow extends TWindow {
      *
      * @param parent the main application
      */
+    @SuppressWarnings("this-escape")
     public DemoTableWindow(final TApplication parent) {
-        this(parent, i18n.getString("windowTitle"));
+        this(parent, "");
+        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        setTitle(i18n.getString("windowTitle"));
     }
 
     // ------------------------------------------------------------------------
