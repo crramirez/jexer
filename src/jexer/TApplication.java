@@ -3983,6 +3983,28 @@ public class TApplication implements Runnable {
     }
 
     /**
+     * Remove the keyboard accelerators of a menu item.  Sub-menu's will be
+     * searched recursively.
+     *
+     * @param item the item with the keyboard accelerator to remove
+     */
+    private final void removeMenuAccelerator(final TMenuItem item) {
+        if (item instanceof TSubMenu) {
+            for (TMenuItem subMenuItem: ((TSubMenu) item).getMenuItems()) {
+                removeMenuAccelerator(subMenuItem);
+            }
+            return;
+        }
+
+        TKeypress key = item.getKey();
+        if (key != null) {
+            synchronized (accelerators) {
+                accelerators.remove(key.toLowerCase());
+            }
+        }
+    }
+
+    /**
      * Remove a top-level menu from the list.
      *
      * @param menu the menu to remove
@@ -3998,6 +4020,16 @@ public class TApplication implements Runnable {
         }
         closeMenu();
         menus.remove(menu);
+
+        // Remove keyboard accelerators, recursively.
+        for (TWidget w: menu.getChildren()) {
+            if (w instanceof TMenuItem) {
+                if (w instanceof TMenuItem) {
+                    removeMenuAccelerator((TMenuItem) w);
+                }
+            }
+        }
+
         recomputeMenuX();
     }
 

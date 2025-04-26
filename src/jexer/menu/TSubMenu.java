@@ -28,6 +28,9 @@
  */
 package jexer.menu;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jexer.TKeypress;
 import jexer.TWidget;
 import jexer.backend.Backend;
@@ -355,5 +358,20 @@ public class TSubMenu extends TMenuItem {
             menu.getChildren().get(i).setY(i + 1);
         }
         menu.resetTabOrder();
+    }
+
+    /**
+     * Get the menu items.
+     *
+     * @return the menu items
+     */
+    public List<TMenuItem> getMenuItems() {
+        List<TMenuItem> items = new ArrayList<TMenuItem>();
+        for (TWidget w: menu.getChildren()) {
+            if (w instanceof TMenuItem) {
+                items.add((TMenuItem) w);
+            }
+        }
+        return items;
     }
 }
