@@ -1389,7 +1389,7 @@ public abstract class TWidget implements Comparable<TWidget> {
      * @return the pointer style string, one of: "default", "none",
      * "hand", "text", "move", or "crosshair"
      */
-    public final String getMouseStyle() {
+    public String getMouseStyle() {
         return mouseStyle;
     }
 

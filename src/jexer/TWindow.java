@@ -1091,6 +1091,17 @@ public class TWindow extends TWidget {
         // Default does nothing
     }
 
+    /**
+     * Get the mouse pointer (cursor) style.
+     *
+     * @return the pointer style string, one of: "default", "none",
+     * "hand", "text", "move", or "crosshair"
+     */
+    @Override
+    public String getMouseStyle() {
+        return System.getProperty("jexer.Swing.mouseStyle", "default");
+    }
+
     // ------------------------------------------------------------------------
     // TWindow ----------------------------------------------------------------
     // ------------------------------------------------------------------------

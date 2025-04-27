@@ -840,7 +840,12 @@ public class TScreenOptionsWindow extends TWindow {
         mouseStyle = addComboBox(22, 11, 25, mouseStyles, 0, 7,
             new TAction() {
                 public void DO() {
-                    terminal.setMouseStyle(mouseStyle.getText());
+                    // TApplication.setMouseState() will override mouse style
+                    // with the system property, so set that here.  If we
+                    // cancel the screen, it will be put back.
+                    String newMouseStyle = mouseStyle.getText();
+                    System.setProperty("jexer.Swing.mouseStyle", newMouseStyle);
+                    terminal.setMouseStyle(newMouseStyle);
                 }
             });
         mouseStyle.setText((terminal == null ?
@@ -891,6 +896,8 @@ public class TScreenOptionsWindow extends TWindow {
                         terminal.setTripleBuffer(oldTripleBuffer);
                         terminal.setCursorStyle(oldCursorStyle);
                         terminal.setMouseStyle(oldMouseStyle);
+                        System.setProperty("jexer.Swing.mouseStyle",
+                            oldMouseStyle);
                     }
                     if (ecmaTerminal != null) {
                         ecmaTerminal.setHasSixel(oldSixel);
@@ -935,6 +942,7 @@ public class TScreenOptionsWindow extends TWindow {
                 terminal.setTripleBuffer(oldTripleBuffer);
                 terminal.setCursorStyle(oldCursorStyle);
                 terminal.setMouseStyle(oldMouseStyle);
+                System.setProperty("jexer.Swing.mouseStyle", oldMouseStyle);
             }
             if (ecmaTerminal != null) {
                 ecmaTerminal.setHasSixel(oldSixel);
