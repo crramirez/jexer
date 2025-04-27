@@ -104,7 +104,8 @@ public class TImageWindow extends TScrollableWindow {
         final int height) throws IOException {
 
         super(parent, file.getName(), x, y, width, height, RESIZABLE);
-        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        i18n = ResourceBundle.getBundle(TImageWindow.class.getName(),
+            getLocale());
 
         BufferedImage image = null;
         Animation animation = null;

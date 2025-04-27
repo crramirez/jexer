@@ -232,7 +232,8 @@ public class TScreenOptionsWindow extends TWindow {
 
         // Register with the TApplication
         super(application, "", 0, 0, 66, 24, MODAL);
-        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        i18n = ResourceBundle.getBundle(TScreenOptionsWindow.class.getName(),
+            getLocale());
         setTitle(i18n.getString("windowTitle"));
 
         // Add shortcut text

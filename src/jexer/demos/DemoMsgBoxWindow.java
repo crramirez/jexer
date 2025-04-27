@@ -73,7 +73,8 @@ public class DemoMsgBoxWindow extends TWindow {
         // Construct a demo window.  X and Y don't matter because it
         // will be centered on screen.
         super(parent, "", 0, 0, 79, 18, flags);
-        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        i18n = ResourceBundle.getBundle(DemoMsgBoxWindow.class.getName(),
+            getLocale());
         setTitle(i18n.getString("windowTitle"));
 
         setLayoutManager(new StretchLayoutManager(getWidth() - 2,

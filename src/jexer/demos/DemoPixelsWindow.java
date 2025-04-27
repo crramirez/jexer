@@ -106,7 +106,8 @@ public class DemoPixelsWindow extends TWindow {
         // Construct a demo window.  X and Y don't matter because it will be
         // centered on screen.
         super(parent, "", 0, 0, 72, 17, CENTERED | RESIZABLE);
-        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        i18n = ResourceBundle.getBundle(DemoPixelsWindow.class.getName(),
+            getLocale());
         setTitle(i18n.getString("windowTitle"));
 
         setLayoutManager(new StretchLayoutManager(getWidth() - 2,

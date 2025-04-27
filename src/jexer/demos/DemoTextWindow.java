@@ -75,7 +75,8 @@ public class DemoTextWindow extends TWindow {
         final String text) {
 
         super(parent, title, 0, 0, 44, 22, RESIZABLE);
-        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        i18n = ResourceBundle.getBundle(DemoTextWindow.class.getName(),
+            getLocale());
 
         textField = addText(text, 1, 3, 40, 16);
 
@@ -144,7 +145,8 @@ public class DemoTextWindow extends TWindow {
 "This library is licensed MIT.  See the file LICENSE for the full license " +
 "for the details.\n");
 
-        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        i18n = ResourceBundle.getBundle(DemoTextWindow.class.getName(),
+            getLocale());
         setTitle(i18n.getString("windowTitle"));
     }
 
