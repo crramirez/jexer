@@ -146,7 +146,8 @@ public class TTerminalWindow extends TScrollableWindow {
 
         super(application, "", x, y, 80 + 2, 24 + 2, flags);
 
-        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        i18n = ResourceBundle.getBundle(TTerminalWindow.class.getName(),
+            getLocale());
         setTitle(i18n.getString("windowTitle"));
 
         // Require at least one line for the display.
@@ -215,7 +216,8 @@ public class TTerminalWindow extends TScrollableWindow {
         final int y, final int flags, final boolean closeOnExit) {
 
         super(application, "", x, y, 80 + 2, 24 + 2, flags);
-        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        i18n = ResourceBundle.getBundle(TTerminalWindow.class.getName(),
+            getLocale());
         setTitle(i18n.getString("windowTitle"));
 
         // Require at least one line for the display.

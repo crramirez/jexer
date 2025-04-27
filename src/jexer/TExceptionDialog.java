@@ -83,7 +83,8 @@ public class TExceptionDialog extends TWindow {
         final Throwable exception) {
 
         super(application, "", 1, 1, 78, 22, CENTERED | MODAL);
-        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        i18n = ResourceBundle.getBundle(TExceptionDialog.class.getName(),
+            getLocale());
         setTitle(i18n.getString("windowTitle"));
 
         this.exception = exception;

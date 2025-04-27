@@ -159,7 +159,8 @@ public class TFileOpenBox extends TWindow {
 
         // Register with the TApplication
         super(application, "", 0, 0, 78, 22, MODAL);
-        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        i18n = ResourceBundle.getBundle(TFileOpenBox.class.getName(),
+            getLocale());
 
         // Add text field
         entryField = addField(1, 1, getWidth() - 4, false,

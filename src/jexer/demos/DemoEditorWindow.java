@@ -73,7 +73,8 @@ public class DemoEditorWindow extends TWindow {
         final String text) {
 
         super(parent, title, 0, 0, 44, 22, RESIZABLE);
-        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        i18n = ResourceBundle.getBundle(DemoEditorWindow.class.getName(),
+            getLocale());
 
         editField = addEditor(text, 0, 0, 42, 20);
 
@@ -121,7 +122,8 @@ public class DemoEditorWindow extends TWindow {
 "1 2 3 123\n" +
 "\n"
         );
-        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        i18n = ResourceBundle.getBundle(DemoEditorWindow.class.getName(),
+            getLocale());
         setTitle(i18n.getString("windowTitle"));
 
     }

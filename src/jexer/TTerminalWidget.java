@@ -247,7 +247,8 @@ public class TTerminalWidget extends TScrollableWidget
         final TAction closeAction) {
 
         super(parent, x, y, width, height);
-        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        i18n = ResourceBundle.getBundle(TTerminalWidget.class.getName(),
+            getLocale());
 
         setMouseStyle("text");
         this.closeAction = closeAction;
@@ -352,7 +353,8 @@ public class TTerminalWidget extends TScrollableWidget
         final int width, final int height, final TAction closeAction) {
 
         super(parent, x, y, width, height);
-        i18n = ResourceBundle.getBundle(getClass().getName(), getLocale());
+        i18n = ResourceBundle.getBundle(TTerminalWidget.class.getName(),
+            getLocale());
 
         setMouseStyle("text");
         this.closeAction = closeAction;
@@ -976,10 +978,21 @@ public class TTerminalWidget extends TScrollableWidget
         try {
             ProcessBuilder pb = new ProcessBuilder(command);
             Map<String, String> env = pb.environment();
-            Locale locale = Locale.getDefault();
+            String langString = System.getenv().get("LANG");
+            if (langString == null) {
+                Locale locale = Locale.getDefault();
+                langString = locale.getLanguage();
+                if (locale.getCountry().length() > 0) {
+                    langString += "_" + locale.getCountry();
+                }
+            } else {
+                int dotIndex = langString.indexOf(".");
+                if (dotIndex > 0) {
+                    langString = langString.substring(0, dotIndex);
+                }
+            }
             env.put("TERM", ECMA48.deviceTypeTerm(deviceType));
-            env.put("LANG", ECMA48.deviceTypeLang(deviceType,
-                    locale.getLanguage() + "_" + locale.getCountry()));
+            env.put("LANG", ECMA48.deviceTypeLang(deviceType, langString));
             env.put("COLUMNS", "80");
             env.put("LINES", "24");
             pb.redirectErrorStream(true);
