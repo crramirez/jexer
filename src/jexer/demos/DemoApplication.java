@@ -326,7 +326,7 @@ public class DemoApplication extends TApplication {
         }
 
         if (menu.getId() == 10005) {
-            setLocale(new Locale("en"));
+            setLocale(Locale.forLanguageTag("en"));
             i18n = ResourceBundle.getBundle(DemoApplication.class.getName(),
                 getLocale());
             getBackend().setTitle(i18n.getString("applicationTitle"));
@@ -336,7 +336,7 @@ public class DemoApplication extends TApplication {
         }
 
         if (menu.getId() == 10006) {
-            setLocale(new Locale("es"));
+            setLocale(Locale.forLanguageTag("es"));
             i18n = ResourceBundle.getBundle(DemoApplication.class.getName(),
                 getLocale());
             getBackend().setTitle(i18n.getString("applicationTitle"));

@@ -91,6 +91,7 @@ public class DemoEditorWindow extends TWindow {
      *
      * @param parent the main application
      */
+    @SuppressWarnings("this-escape")
     public DemoEditorWindow(final TApplication parent) {
         this(parent, "",
 "This is an example of an editable text field.  Some example text follows.\n" +
