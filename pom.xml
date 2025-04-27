@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.gitlab.klamonte</groupId>
+  <groupId>io.gitlab.autumnmeowmeow</groupId>
   <artifactId>jexer</artifactId>
   <packaging>jar</packaging>
   <name>Jexer</name>
@@ -33,6 +33,7 @@
     <url>https://gitlab.com/AutumnMeowMeow/jexer/issues</url>
   </issueManagement>
 
+  <!--
   <distributionManagement>
     <snapshotRepository>
       <id>ossrh</id>
@@ -42,7 +43,8 @@
       <id>ossrh</id>
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
-  </distributionManagement>
+    </distributionManagement>
+  -->
 
   <build>
     <sourceDirectory>${project.basedir}/src</sourceDirectory>
@@ -67,17 +69,21 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
+        <version>3.14.0</version>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>1.8</source>
+          <target>1.8</target>
+          <compilerArgs>
+            <!-- <arg>-verbose</arg> -->
+            <arg>-Xlint:all,-options,-path</arg>
+          </compilerArgs>
         </configuration>
       </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.0.2</version>
+        <version>3.4.2</version>
         <configuration>
           <archive>
             <manifest>
@@ -96,7 +102,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>2.2.1</version>
+        <version>3.3.1</version>
         <executions>
           <execution>
             <id>attach-sources</id>
@@ -111,7 +117,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.9.1</version>
+        <version>3.11.2</version>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -125,36 +131,24 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
-        <version>2.5.3</version>
+        <version>3.1.1</version>
         <configuration>
           <localCheckout>true</localCheckout>
           <pushChanges>false</pushChanges>
           <mavenExecutorId>forked-path</mavenExecutorId>
-          <!-- <arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments> -->
         </configuration>
-
-        <!--
-            <dependencies>
-              <dependency>
-                <groupId>org.apache.maven.scm</groupId>
-                <artifactId>maven-scm-provider-gitexe</artifactId>
-                <version>1.9.5</version>
-              </dependency>
-            </dependencies>
-        -->
       </plugin>
 
       <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.7</version>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.7.0</version>
         <extensions>true</extensions>
         <configuration>
-          <serverId>ossrh</serverId>
-          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-          <autoReleaseAfterClose>true</autoReleaseAfterClose>
+          <publishingServerId>central</publishingServerId>
         </configuration>
       </plugin>
+
     </plugins>
   </build>
 
@@ -174,7 +168,7 @@
           <!--
           <plugin>
             <artifactId>maven-deploy-plugin</artifactId>
-            <version>2.8.2</version>
+            <version>3.1.4</version>
             <executions>
               <execution>
                 <id>default-deploy</id>
@@ -190,7 +184,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.5</version>
+            <version>3.2.7</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -208,8 +202,7 @@
 
   <developers>
     <developer>
-      <!-- Is this the old name for sonatype or the new name for GitLab? -->
-      <id>AutumnMeowMeow</id>
+      <id>autumnmeowmeow</id>
       <name>Autumn Lamonte</name>
       <email>AutumnWalksTheLake@gmail.com</email>
     </developer>
