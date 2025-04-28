@@ -157,8 +157,8 @@ public class DemoApplication extends TApplication {
         addAllWidgets();
         getBackend().setTitle(i18n.getString("applicationTitle"));
 
-        // Use cute theme by default.
-        onMenu(new TMenuEvent(getBackend(), 10001));
+        // Use custom theme by default.
+        onMenu(new TMenuEvent(getBackend(), 10003));
     }
 
     /**
@@ -178,8 +178,8 @@ public class DemoApplication extends TApplication {
         addAllWidgets();
         getBackend().setTitle(i18n.getString("applicationTitle"));
 
-        // Use cute theme by default.
-        onMenu(new TMenuEvent(getBackend(), 10001));
+        // Use custom theme by default.
+        onMenu(new TMenuEvent(getBackend(), 10003));
     }
 
     // ------------------------------------------------------------------------
@@ -325,6 +325,49 @@ public class DemoApplication extends TApplication {
             return true;
         }
 
+        if (menu.getId() == 10003) {
+            // Look "custom", sorta vaguely like Qmodem 5.
+            System.setProperty("jexer.TWindow.borderStyleForeground", "round");
+            System.setProperty("jexer.TWindow.borderStyleModal", "round");
+            System.setProperty("jexer.TWindow.borderStyleMoving", "round");
+            System.setProperty("jexer.TWindow.borderStyleInactive", "round");
+            System.setProperty("jexer.TEditColorTheme.borderStyle", "round");
+            System.setProperty("jexer.TEditColorTheme.options.borderStyle", "round");
+            System.setProperty("jexer.TRadioGroup.borderStyle", "round");
+            System.setProperty("jexer.TScreenOptions.borderStyle", "round");
+            System.setProperty("jexer.TScreenOptions.grid.borderStyle", "round");
+            System.setProperty("jexer.TScreenOptions.options.borderStyle", "round");
+            System.setProperty("jexer.TWindow.opacity", "90");
+            System.setProperty("jexer.TImage.opacity", "90");
+            System.setProperty("jexer.TTerminal.opacity", "90");
+            System.setProperty("jexer.TButton.style", "diamond");
+
+            getTheme().setQmodem5();
+            for (TWindow window: getAllWindows()) {
+                window.setBorderStyleForeground("round");
+                window.setBorderStyleModal("round");
+                window.setBorderStyleMoving("round");
+                window.setBorderStyleInactive("round");
+                window.setAlpha(90 * 255 / 100);
+
+                for (TWidget widget: window.getChildren()) {
+                    if (widget instanceof TButton) {
+                        ((TButton) widget).setStyle(TButton.Style.DIAMOND);
+                    }
+                }
+            }
+            for (TMenu m: getAllMenus()) {
+                m.setBorderStyleForeground("single");
+                m.setBorderStyleModal("single");
+                m.setBorderStyleMoving("single");
+                m.setBorderStyleInactive("single");
+                m.setAlpha(95 * 255 / 100);
+            }
+            setDesktop(new TDesktop(this));
+            setHideStatusBar(false);
+            return true;
+        }
+
         if (menu.getId() == 10005) {
             setLocale(Locale.forLanguageTag("en"));
             i18n = ResourceBundle.getBundle(DemoApplication.class.getName(),
@@ -396,6 +439,7 @@ public class DemoApplication extends TApplication {
         demoMenu.addSeparator();
         demoMenu.addItem(10001, i18n.getString("lookCute"));
         demoMenu.addItem(10002, i18n.getString("lookBland"));
+        demoMenu.addItem(10003, i18n.getString("lookCustom"));
         TSubMenu languageMenu = demoMenu.addSubMenu(i18n.getString("selectLanguage"));
         languageMenu.addItem(10005, i18n.getString("english"));
         languageMenu.addItem(10006, i18n.getString("espanol"));
