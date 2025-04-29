@@ -5,7 +5,7 @@
   <packaging>jar</packaging>
   <name>Jexer</name>
   <description>Java Text User Interface library that resembles Turbo Vision</description>
-  <version>1.7.0-SNAPSHOT</version>
+  <version>1.7.0</version>
   <url>https://gitlab.com/AutumnMeowMeow/jexer</url>
 
   <licenses>
@@ -106,7 +106,7 @@
         <executions>
           <execution>
             <id>attach-sources</id>
-            <phase>verify</phase>
+            <phase>package</phase>
             <goals>
               <goal>jar-no-fork</goal>
             </goals>
@@ -132,10 +132,19 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
         <version>3.1.1</version>
+        <!--
         <configuration>
           <localCheckout>true</localCheckout>
           <pushChanges>false</pushChanges>
           <mavenExecutorId>forked-path</mavenExecutorId>
+        </configuration>
+        -->
+        <configuration>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
+          <useReleaseProfile>false</useReleaseProfile>
+          <releaseProfiles>release</releaseProfiles>
+          <!-- <goals>deploy</goals> -->
+          <goals>deploy nexus-staging:release</goals>
         </configuration>
       </plugin>
 
@@ -146,6 +155,7 @@
         <extensions>true</extensions>
         <configuration>
           <publishingServerId>central</publishingServerId>
+          <tokenAuth>true</tokenAuth>
         </configuration>
       </plugin>
 
@@ -165,7 +175,6 @@
       <build>
         <plugins>
 
-          <!--
           <plugin>
             <artifactId>maven-deploy-plugin</artifactId>
             <version>3.1.4</version>
@@ -179,7 +188,6 @@
               </execution>
             </executions>
           </plugin>
-          -->
 
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -188,12 +196,16 @@
             <executions>
               <execution>
                 <id>sign-artifacts</id>
-                <phase>verify</phase>
+                <phase>package</phase>
                 <goals>
                   <goal>sign</goal>
                 </goals>
               </execution>
             </executions>
+            <configuration>
+              <keyname>${gpg.keyname}</keyname>
+              <passphraseServerId>${gpg.keyname}</passphraseServerId>
+            </configuration>
           </plugin>
         </plugins>
       </build>
