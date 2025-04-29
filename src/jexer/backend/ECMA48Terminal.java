@@ -3997,7 +3997,7 @@ public class ECMA48Terminal extends LogicalScreen
          * The optional arguments are formatted as key=value with a semicolon
          * between each key-value pair. They are described below:
          *
-         * Key		Description of value
+         * Key          Description of value
          * name         base-64 encoded filename. Defaults to "Unnamed file".
          * size         File size in bytes. Optional; this is only used by the
          *              progress indicator.
