@@ -66,9 +66,9 @@ Jexer is available on Maven Central:
 
 ```xml
 <dependency>
-  <groupId>com.gitlab.klamonte</groupId>
+  <groupId>io.gitlab.autumnmeowmeow</groupId>
   <artifactId>jexer</artifactId>
-  <version>1.6.0</version>
+  <version>1.7.0</version>
 </dependency>
 ```
 
@@ -208,6 +208,7 @@ the terminals last tested against Jexer:
 | yakuake        | X11                | yes         | no           | no     |
 | screen         | CLI                | yes(1)      | yes(1)       | no(2)  |
 | tmux           | CLI                | yes(1)      | yes(1)       | no     |
+| zellij         | CLI                | yes         | yes          | no(10) |
 | putty          | X11, Windows       | yes         | no           | no(2)  |
 | qodem(3)       | CLI, Linux console | yes         | yes(4)       | no     |
 | qodem-x11(3)   | X11                | yes         | no           | no     |
@@ -237,6 +238,9 @@ the terminals last tested against Jexer:
     of principle.  Should that terminal adopt iTerm2 or sixel, then
     images could work.  (Image support for kitty was removed on
     February 10, 2022.)
+
+10 - zellij supports sixel, but Jexer's output can overwhelm it,
+     resulting in it becoming unresponsive to user input.
 
 See Also
 --------

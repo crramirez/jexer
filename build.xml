@@ -30,7 +30,7 @@
 
 <project name="jexer" basedir="." default="jar">
 
-  <property name="version"       value="1.7"/>
+  <property name="version"       value="1.7.1"/>
   <property name="src.dir"       value="src"/>
   <property name="resources.dir" value="resources"/>
   <property name="build.dir"     value="build"/>
@@ -115,7 +115,7 @@
         <![CDATA[<h1>Jexer - Java Text User Interface Library</h1>]]>
       </doctitle>
       <bottom>
-        <![CDATA[<i>Copyright &#169; 2022 Autumn Lamonte. Licensed MIT.</i>]]>
+        <![CDATA[<i>${version} - Copyright &#169; 2025 Autumn Lamonte. Licensed MIT.</i>]]>
       </bottom>
     </javadoc>
   </target>
