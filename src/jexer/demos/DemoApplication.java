@@ -369,7 +369,7 @@ public class DemoApplication extends TApplication {
         }
 
         if (menu.getId() == 10005) {
-            setLocale(Locale.forLanguageTag("en"));
+            setLocale(Locale.forLanguageTag(""));
             i18n = ResourceBundle.getBundle(DemoApplication.class.getName(),
                 getLocale());
             getBackend().setTitle(i18n.getString("applicationTitle"));
