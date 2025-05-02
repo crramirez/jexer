@@ -886,14 +886,14 @@ public class LogicalScreen implements Screen {
         for (int i = 0; i < boxHeight; i++) {
             Cell cell = getCharXY(offsetX + boxLeft + boxWidth,
                 offsetY + boxTop + 1 + i);
-            if (cell.getWidth() == Cell.Width.SINGLE) {
+            if ((cell.getWidth() == Cell.Width.SINGLE) && (!cell.isImage())) {
                 putAttrXY(boxLeft + boxWidth, boxTop + 1 + i, shadowAttr);
             } else {
                 putCharXY(boxLeft + boxWidth, boxTop + 1 + i, ' ', shadowAttr);
             }
             cell = getCharXY(offsetX + boxLeft + boxWidth + 1,
                 offsetY + boxTop + 1 + i);
-            if (cell.getWidth() == Cell.Width.SINGLE) {
+            if ((cell.getWidth() == Cell.Width.SINGLE) && (!cell.isImage())) {
                 putAttrXY(boxLeft + boxWidth + 1, boxTop + 1 + i, shadowAttr);
             } else {
                 putCharXY(boxLeft + boxWidth + 1, boxTop + 1 + i, ' ',
@@ -903,7 +903,7 @@ public class LogicalScreen implements Screen {
         for (int i = 0; i < boxWidth; i++) {
             Cell cell = getCharXY(offsetX + boxLeft + 2 + i,
                 offsetY + boxTop + boxHeight);
-            if (cell.getWidth() == Cell.Width.SINGLE) {
+            if ((cell.getWidth() == Cell.Width.SINGLE) && (!cell.isImage())) {
                 putAttrXY(boxLeft + 2 + i, boxTop + boxHeight, shadowAttr);
             } else {
                 putCharXY(boxLeft + 2 + i, boxTop + boxHeight, ' ', shadowAttr);
