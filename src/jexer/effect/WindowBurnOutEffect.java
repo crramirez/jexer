@@ -39,7 +39,7 @@ import jexer.tackboard.Bitmap;
 /**
  * Make the window look like it was was burned in with plasma fire.
  */
-public class WindowBurnInEffect implements Effect {
+public class WindowBurnOutEffect implements Effect {
 
     // ------------------------------------------------------------------------
     // Constants --------------------------------------------------------------
@@ -50,14 +50,14 @@ public class WindowBurnInEffect implements Effect {
     // ------------------------------------------------------------------------
 
     /**
-     * The window to burn in.
-     */
-    private TWindow window;
-
-    /**
      * The fake window with the plasma effect.
      */
     private TWindow fakeWindow;
+
+    /**
+     * The region of the screen the window last rendered to.
+     */
+    private Screen oldScreen;
 
     /**
      * The bitmap for the plasma effect.
@@ -78,8 +78,10 @@ public class WindowBurnInEffect implements Effect {
      *
      * @param window the window to burn in
      */
-    public WindowBurnInEffect(final TWindow window) {
-        this.window = window;
+    public WindowBurnOutEffect(final TWindow window) {
+        final Screen oldScreen = window.getScreen().snapshotPhysical(
+            window.getX(), window.getY(),
+            window.getWidth(), window.getHeight());
 
         alpha = 220;
 
@@ -104,10 +106,14 @@ public class WindowBurnInEffect implements Effect {
                         // NOP
                     }
 
+                    // Draw the old screen, then the plasma.
                     @Override
                     public void draw() {
-                        // Draw nothing.  TWidget.drawChildren() will draw
-                        // the overlay, which contains the plasma.
+                        for (int y = 0; y < getHeight(); y++) {
+                            for (int x = 0; x < getWidth(); x++) {
+                                putCharXY(x, y, oldScreen.getCharXY(x, y));
+                            }
+                        }
                     }
 
                     @Override

@@ -132,8 +132,9 @@ public class WindowFadeOutEffect implements Effect {
             return;
         }
         if (alpha > 0) {
-            // Aiming for 1/8 second, at 32 FPS = 4 frames.  256 / 4 = 64.
-            alpha = Math.max(alpha - 96, 0);
+            // Bump alpha a bit.  I have not yet figured out how this
+            // converts to an actual time in practice.
+            alpha = Math.max(alpha - 16, 0);
             fakeWindow.setAlpha(alpha);
         }
     }

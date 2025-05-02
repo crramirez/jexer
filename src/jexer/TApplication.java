@@ -54,6 +54,7 @@ import jexer.bits.ColorTheme;
 import jexer.bits.StringUtils;
 import jexer.effect.Effect;
 import jexer.effect.WindowBurnInEffect;
+import jexer.effect.WindowBurnOutEffect;
 import jexer.effect.WindowFadeInEffect;
 import jexer.effect.WindowFadeOutEffect;
 import jexer.event.TCommandEvent;
@@ -421,6 +422,12 @@ public class TApplication implements Runnable {
      * The list of desktop/window effects to run.
      */
     private List<Effect> effects = new LinkedList<Effect>();
+
+    /**
+     * If true, a new desktop/window has been added but runEffects() has not
+     * yet been called.
+     */
+    private boolean needToRunEffects = false;
 
     /**
      * WidgetEventHandler is the main event consumer loop.  There are at most
@@ -1389,6 +1396,16 @@ public class TApplication implements Runnable {
         // the screen is drawn.
         onPreDraw();
 
+        // Allow any new desktop/window effects to run once before the screen
+        // is updated.
+        boolean doRunEffects = false;
+        synchronized (effects) {
+            doRunEffects = needToRunEffects;
+        }
+        if (doRunEffects) {
+            runEffects();
+        }
+
         // Update the screen
         synchronized (getScreen()) {
             drawAll();
@@ -1872,6 +1889,7 @@ public class TApplication implements Runnable {
         if (effectsToRemove.size() > 0) {
             synchronized (effects) {
                 effects.removeAll(effectsToRemove);
+                needToRunEffects = false;
             }
         }
         // System.err.println("runEffects() exit");
@@ -3286,6 +3304,13 @@ public class TApplication implements Runnable {
             if (windowCloseEffect.equals("fade")) {
                 synchronized (effects) {
                     effects.add(new WindowFadeOutEffect(window));
+                    needToRunEffects = true;
+                }
+            }
+            if (windowCloseEffect.equals("burn")) {
+                synchronized (effects) {
+                    effects.add(new WindowBurnOutEffect(window));
+                    needToRunEffects = true;
                 }
             }
         }
@@ -3488,11 +3513,13 @@ public class TApplication implements Runnable {
             if (windowOpenEffect.equals("fade")) {
                 synchronized (effects) {
                     effects.add(new WindowFadeInEffect(window));
+                    needToRunEffects = true;
                 }
             }
             if (windowOpenEffect.equals("burn")) {
                 synchronized (effects) {
                     effects.add(new WindowBurnInEffect(window));
+                    needToRunEffects = true;
                 }
             }
         }

@@ -51,7 +51,7 @@ public class WindowFadeInEffect implements Effect {
     /**
      * The window's original alpha value we are ramping up to.
      */
-    private int targetAlpha = 0;
+    private int targetAlpha = -1;
     
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
@@ -64,8 +64,6 @@ public class WindowFadeInEffect implements Effect {
      */
     public WindowFadeInEffect(final TWindow window) {
         this.window = window;
-        targetAlpha = window.getAlpha();
-        window.setAlpha(64);
     }
 
     // ------------------------------------------------------------------------
@@ -79,11 +77,17 @@ public class WindowFadeInEffect implements Effect {
         if (!window.isShown()) {
             return;
         }
-        int alpha = window.getAlpha();
-        if (alpha < targetAlpha) {
-            // Aiming for 1/8 second, at 32 FPS = 4 frames.  256 / 4 = 64.
-            alpha = Math.min(alpha + 64, targetAlpha);
-            window.setAlpha(alpha);
+        if (targetAlpha < 0) {
+            targetAlpha = window.getAlpha();
+            window.setAlpha(0);
+        } else {
+            int alpha = window.getAlpha();
+            if (alpha < targetAlpha) {
+                // Bump alpha a bit.  I have not yet figured out how this
+                // converts to an actual time in practice.
+                alpha = Math.min(alpha + 16, targetAlpha);
+                window.setAlpha(alpha);
+            }
         }
     }
 
@@ -93,7 +97,7 @@ public class WindowFadeInEffect implements Effect {
      * @return true if this effect is finished
      */
     public boolean isCompleted() {
-        return (window.getAlpha() >= targetAlpha);
+        return ((targetAlpha > 0) && (window.getAlpha() >= targetAlpha));
     }
 
 }
