@@ -1358,8 +1358,10 @@ public class TTerminalWidget extends TScrollableWidget
         right.setChar(' ');
         left.setImage(leftImage, Math.abs(leftImage.hashCode()));
         left.setOpaqueImage();
+        left.setWidth(Cell.Width.LEFT);
         right.setImage(rightImage, Math.abs(rightImage.hashCode()));
         right.setOpaqueImage();
+        right.setWidth(Cell.Width.RIGHT);
         putCharXY(x, y, left);
         putCharXY(x + 1, y, right);
     }

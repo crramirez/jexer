@@ -1701,6 +1701,7 @@ public class LogicalScreen implements Screen {
                     thisCell.setProtect(overCell.isProtect());
                     thisCell.setAnimations(overCell.getAnimations());
                     thisCell.setPulse(false, false, 0);
+                    thisCell.setWidth(overCell.getWidth());
 
                     if (!overCell.isImage()) {
                         // If we had an image, destroy it.  Text ALWAYS
@@ -1741,6 +1742,7 @@ public class LogicalScreen implements Screen {
                             thisCell.setImage(newImage);
                         }
                         thisCell.setOpaqueImage();
+                        thisCell.setWidth(overCell.getWidth());
                         continue;
                     }
 
@@ -1777,6 +1779,7 @@ public class LogicalScreen implements Screen {
                             thisCell.setImage(newImage);
                         }
                         thisCell.setOpaqueImage();
+                        thisCell.setWidth(overCell.getWidth());
                         continue;
                     }
 
@@ -1812,6 +1815,7 @@ public class LogicalScreen implements Screen {
                             thisCell.setImage(newImage);
                         }
                         thisCell.setOpaqueImage();
+                        thisCell.setWidth(overCell.getWidth());
                         continue;
                     }
 
@@ -1848,6 +1852,7 @@ public class LogicalScreen implements Screen {
                             thisCell.setImage(newImage);
                         }
                         thisCell.setOpaqueImage();
+                        thisCell.setWidth(overCell.getWidth());
                         continue;
                     }
 
