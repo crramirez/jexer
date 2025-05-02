@@ -7981,12 +7981,14 @@ public class ECMA48 implements Runnable {
             textHeight);
 
         Cell left = new Cell(cell);
-        left.setImage(leftImage);
+        left.setImage(leftImage, Math.abs(leftImage.hashCode()));
+        left.setOpaqueImage();
         left.setWidth(Cell.Width.LEFT);
         display.get(leftY).replace(leftX, left);
 
         Cell right = new Cell(cell);
-        right.setImage(rightImage);
+        right.setImage(rightImage, Math.abs(rightImage.hashCode()));
+        right.setOpaqueImage();
         right.setWidth(Cell.Width.RIGHT);
         display.get(rightY).replace(rightX, right);
     }

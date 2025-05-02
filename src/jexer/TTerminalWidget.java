@@ -1291,31 +1291,8 @@ public class TTerminalWidget extends TScrollableWidget
         if (getScreen() instanceof SwingTerminal) {
             SwingTerminal terminal = (SwingTerminal) getScreen();
             cursorBlinkVisible = terminal.getCursorBlinkVisible();
-        } else if (getScreen() instanceof ECMA48Terminal) {
-            ECMA48Terminal terminal = (ECMA48Terminal) getScreen();
-
-            /* Always render double-width/height with images.
-            if (!terminal.hasSixel()
-                && !terminal.hasJexerImages()
-                && !terminal.hasIterm2Images()
-            ) {
-                // The backend does not have images support, draw this as
-                // text and bail out.
-                putCharXY(x, y, cell);
-                putCharXY(x + 1, y, ' ', cell);
-                return;
-            }
-             */
-            cursorBlinkVisible = blinkState;
-
-        /* Always render double-width/height with images.
         } else {
-            // We don't know how to dray glyphs to this screen, draw them as
-            // text and bail out.
-            putCharXY(x, y, cell);
-            putCharXY(x + 1, y, ' ', cell);
-            return;
-        */
+            cursorBlinkVisible = blinkState;
         }
 
         if ((textWidth != lastTextWidth) || (textHeight != lastTextHeight)) {
@@ -1334,7 +1311,7 @@ public class TTerminalWidget extends TScrollableWidget
             image = doubleFont.getImage(newCell, textWidth * 2, textHeight * 2,
                 getApplication().getBackend(), cursorBlinkVisible);
         } else {
-            image = doubleFont.getImage(cell,  textWidth * 2, textHeight * 2,
+            image = doubleFont.getImage(cell, textWidth * 2, textHeight * 2,
                 getApplication().getBackend(), cursorBlinkVisible);
         }
 
@@ -1342,7 +1319,6 @@ public class TTerminalWidget extends TScrollableWidget
         // pieces of it to the cells.
         Cell left = new Cell(cell);
         Cell right = new Cell(cell);
-        right.setChar(' ');
         BufferedImage leftImage = null;
         BufferedImage rightImage = null;
         /*
@@ -1375,13 +1351,15 @@ public class TTerminalWidget extends TScrollableWidget
                 textHeight);
             break;
         }
-        left.setImage(leftImage);
-        right.setImage(rightImage);
         // Since we have image data, ditch the character here.  Otherwise, a
         // drawBoxShadow() over the terminal window will show the characters
         // which looks wrong.
         left.setChar(' ');
         right.setChar(' ');
+        left.setImage(leftImage, Math.abs(leftImage.hashCode()));
+        left.setOpaqueImage();
+        right.setImage(rightImage, Math.abs(rightImage.hashCode()));
+        right.setOpaqueImage();
         putCharXY(x, y, left);
         putCharXY(x + 1, y, right);
     }
