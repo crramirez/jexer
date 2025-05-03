@@ -3160,6 +3160,7 @@ public class ECMA48Terminal extends LogicalScreen
 
                     boolean reportsJexerImages = false;
                     boolean reportsIterm2Images = false;
+                    boolean reportsSixelImages = false;
                     for (String x: params) {
                         if (debugToStderr) {
                             System.err.println("Device Attributes: x = " + x);
@@ -3169,6 +3170,7 @@ public class ECMA48Terminal extends LogicalScreen
                             if (debugToStderr) {
                                 System.err.println("Device Attributes: sixel");
                             }
+                            reportsSixelImages = true;
                         }
                         if (x.equals("444")) {
                             // Terminal reports Jexer images support
@@ -3191,6 +3193,14 @@ public class ECMA48Terminal extends LogicalScreen
                                 System.err.println("Device Attributes: ASSUMING iTerm2 image support");
                             }
                             reportsIterm2Images = true;
+                        }
+                    }
+                    if (reportsSixelImages == false) {
+                        // Terminal does not support Sixel images, disable
+                        // them.
+                        sixel = false;
+                        if (debugToStderr) {
+                            System.err.println("Device Attributes: Disable Sixel images");
                         }
                     }
                     if (reportsJexerImages == false) {
