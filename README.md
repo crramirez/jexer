@@ -16,8 +16,9 @@ like this:
 
 Jexer works on both Xterm-like terminals and Swing, and supports
 images in both Xterm and Swing.  On Swing, images are true color; on
-Xterm, images are rendered as sixel, iTerm2, or Jexer images.  Jexer
-can be run inside its own terminal window, with support for all of its
+Xterm, images are rendered as sixel, iTerm2, or Jexer images, or as
+Unicode half-block glyphs if none of those are available.  Jexer can
+be run inside its own terminal window, with support for all of its
 features including images and mouse, and of course more terminals.
 
 Jexer has seen inspiration from several other projects:
@@ -38,6 +39,10 @@ Jexer has seen inspiration from several other projects:
   were inspired by [vtm's](https://github.com/netxs-group/vtm)
   incredibly slick game-like aesthetic.
 
+* Notcurses, chafa, and
+  [sixel-tmux](https://github.com/csdvrx/sixel-tmux) were the
+  inspiration for adding image rendering to Unicode half-block glyphs.
+
 If you like what you see here, definitely take a look at its
 inspirations.  Again, those are:
 
@@ -57,6 +62,8 @@ Screenshots
 ![PCA color matching with 128-color palette and translucent windows](/screenshots/pca_match.png?raw=true "PCA color matching with 128-color palette and translucent windows")
 
 ![Jexer with Spanish-language translations, CJK text in terminal, the libsixel snake image, and an ANSI art screen](/screenshots/jexer_espanol.png?raw=true "Jexer with Spanish-language translations, CJK text in terminal, the libsixel snake image, and an ANSI art screen")
+
+![Unicode half-block rendering of images](/screenshots/unicode_half_blocks.png?raw=true "Unicode half-block rendering of images")
 
 More screenshots and videos are [at the screenshots web
 page.](https://jexer.sourceforge.io/screenshots.html)
