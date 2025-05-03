@@ -212,6 +212,8 @@ public class DemoPixelsWindow extends TWindow {
             timer3 = getApplication().addTimer(100, true,
                 new TAction() {
                     public void DO() {
+                        // System.err.println("Pixels: tick");
+
                         List<TackboardItem> items;
                         items = new ArrayList<TackboardItem>();
                         if (underlay != null) {
@@ -282,6 +284,8 @@ public class DemoPixelsWindow extends TWindow {
     @Override
     public void onClose() {
         super.onClose();
+        // Just in case, make sure timer stops ticking.
+        timer3.setRecurring(false);
         getApplication().removeTimer(timer3);
     }
 

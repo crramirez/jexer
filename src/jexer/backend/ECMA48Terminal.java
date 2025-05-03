@@ -268,6 +268,16 @@ public class ECMA48Terminal extends LogicalScreen
     private ImageCache jexerCache = null;
 
     /**
+     * The Unicode glyph encoder.
+     */
+    private UnicodeGlyphEncoder unicodeGlyphEncoder = null;
+
+    /**
+     * The Unicode glyph post-rendered string cache.
+     */
+    private ImageCache unicodeGlyphCache = null;
+
+    /**
      * The number of threads for image rendering.
      */
     private int imageThreadCount = 2;
@@ -1099,6 +1109,9 @@ public class ECMA48Terminal extends LogicalScreen
         }
         sixelEncoder.reloadOptions();
 
+        unicodeGlyphEncoder = new UnicodeGlyphEncoder();
+        unicodeGlyphEncoder.reloadOptions();
+
         // Request xterm use the sixel settings we want
         this.output.printf("%s", xtermSetSixelSettings());
 
@@ -1899,9 +1912,13 @@ public class ECMA48Terminal extends LogicalScreen
                         if (jexerCache == null) {
                             jexerCache = new ImageCache(height * width * 10);
                         }
-                    } else {
+                    } else if (sixel == true) {
                         if (sixelCache == null) {
                             sixelCache = new ImageCache(height * width * 10);
+                        }
+                    } else {
+                        if (unicodeGlyphCache == null) {
+                            unicodeGlyphCache = new ImageCache(height * width);
                         }
                     }
 
@@ -1911,8 +1928,10 @@ public class ECMA48Terminal extends LogicalScreen
                             sb.append(toIterm2Image(x, y, cellsToDraw));
                         } else if (jexerImageOption != JexerImageOption.DISABLED) {
                             sb.append(toJexerImage(x, y, cellsToDraw));
-                        } else {
+                        } else if (sixel == true) {
                             sb.append(toSixel(x, y, cellsToDraw));
+                        } else {
+                            sb.append(toUnicodeGlyphs(x, y, cellsToDraw));
                         }
                     } else {
                         // Multi-threaded: experimental and likely borken
@@ -1929,8 +1948,11 @@ public class ECMA48Terminal extends LogicalScreen
                                     return toIterm2Image(callX, callY, callCells);
                                 } else if (jexerImageOption != JexerImageOption.DISABLED) {
                                     return toJexerImage(callX, callY, callCells);
-                                } else {
+                                } else if (sixel == true) {
                                     return toSixel(callX, callY, callCells);
+                                } else {
+                                    return toUnicodeGlyphs(callX, callY,
+                                        callCells);
                                 }
                             }
                         }));
@@ -4246,6 +4268,68 @@ public class ECMA48Terminal extends LogicalScreen
 
     // ------------------------------------------------------------------------
     // End Jexer image output support -----------------------------------------
+    // ------------------------------------------------------------------------
+
+    // ------------------------------------------------------------------------
+    // Unicode glyphs output support ------------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * Create a Unicode glyphs "image" string representing a row of several
+     * cells containing bitmap data.
+     *
+     * @param x column coordinate.  0 is the left-most column.
+     * @param y row coordinate.  0 is the top-most row.
+     * @param cells the cells containing the bitmap data
+     * @return the string to emit to an ANSI / ECMA-style terminal
+     */
+    private String toUnicodeGlyphs(final int x, final int y,
+        final ArrayList<Cell> cells) {
+
+        assert (cells != null);
+        assert (cells.size() > 0);
+        assert (cells.get(0).getImage() != null);
+
+        StringBuilder sb = new StringBuilder();
+
+        // Save and get rows to/from the cache that do NOT have inverted
+        // cells.
+        boolean saveInCache = true;
+        for (Cell cell: cells) {
+            if (cell.isInvertedImage()) {
+                saveInCache = false;
+                break;
+            }
+            // Compute the hashcode so that the cell image hash is available
+            // for looking up in the image cache.
+            cell.hashCode();
+        }
+        if (saveInCache) {
+            String cachedResult = unicodeGlyphCache.get(cells);
+            if (cachedResult != null) {
+                // System.err.println("CACHE HIT");
+                sb.append(sortableGotoXY(x, y));
+                sb.append(cachedResult);
+                return sb.toString();
+            }
+            // System.err.println("CACHE MISS");
+        }
+
+        for (int i = 0; i < cells.size(); i++) {
+            sb.append(unicodeGlyphEncoder.toUnicodeGlyph(cells.get(i).
+                    getImage()));
+        }
+
+        if (saveInCache) {
+            // This row is OK to save into the cache.
+            unicodeGlyphCache.put(cells, sb.toString());
+        }
+
+        return (sortableGotoXY(x, y) + sb.toString());
+    }
+
+    // ------------------------------------------------------------------------
+    // Unicode glyphs output support ------------------------------------------
     // ------------------------------------------------------------------------
 
     /**
