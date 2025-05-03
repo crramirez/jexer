@@ -18,7 +18,7 @@ Jexer works on both Xterm-like terminals and Swing, and supports
 images in both Xterm and Swing.  On Swing, images are true color; on
 Xterm, images are rendered as sixel, iTerm2, or Jexer images.  Jexer
 can be run inside its own terminal window, with support for all of its
-features including images and mouse, and more terminals.
+features including images and mouse, and of course more terminals.
 
 Jexer has seen inspiration from several other projects:
 
@@ -34,9 +34,9 @@ Jexer has seen inspiration from several other projects:
   component analysis based sixel encoder.  HQSixelEncoder combined
   with Jexer's cell-based images design approaches 20-bit color depth!
 
-* Pulsing button text, window effects, and soon-to-be desktop effected
+* Pulsing button text, window effects, and soon-to-be desktop effects
   were inspired by [vtm's](https://github.com/netxs-group/vtm)
-  incredibly slick game-like aesthetic effects.
+  incredibly slick game-like aesthetic.
 
 If you like what you see here, definitely take a look at its
 inspirations.  Again, those are:
