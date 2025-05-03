@@ -51,12 +51,12 @@ public class TCalendar extends TWidget {
     /**
      * The calendar being displayed.
      */
-    private GregorianCalendar displayCalendar = new GregorianCalendar();
+    private GregorianCalendar displayCalendar = null;
 
     /**
      * The calendar with the selected day.
      */
-    private GregorianCalendar calendar = new GregorianCalendar();
+    private GregorianCalendar calendar = null;
 
     /**
      * The days of week heading line.
@@ -86,6 +86,7 @@ public class TCalendar extends TWidget {
      * @param updateAction action to call when the user changes the value of
      * the calendar
      */
+    @SuppressWarnings("this-escape")
     public TCalendar(final TWidget parent, final int x, final int y,
         final TAction updateAction) {
 
@@ -93,8 +94,10 @@ public class TCalendar extends TWidget {
         super(parent, x, y, 28, 8);
 
         this.updateAction = updateAction;
+        displayCalendar = new GregorianCalendar(getLocale());
+        calendar = new GregorianCalendar(getLocale());
 
-        GregorianCalendar dayOfWeekCalendar = new GregorianCalendar();
+        GregorianCalendar dayOfWeekCalendar = new GregorianCalendar(getLocale());
         if (dayOfWeekCalendar.getFirstDayOfWeek() == Calendar.MONDAY) {
             startOnMonday = true;
         }
@@ -104,7 +107,7 @@ public class TCalendar extends TWidget {
         daysOfWeek = "  ";
         for (int i = 0; i < 7; i++) {
             daysOfWeek += dayOfWeekCalendar.getDisplayName(Calendar.DAY_OF_WEEK,
-                Calendar.LONG, Locale.getDefault()).substring(0, 1);
+                Calendar.LONG, getLocale()).substring(0, 1);
             if (i < 6) {
                 daysOfWeek += "   ";
             } else {
@@ -252,6 +255,23 @@ public class TCalendar extends TWidget {
     // ------------------------------------------------------------------------
 
     /**
+     * Set the Locale used for producing user-facing strings.
+     *
+     * @param locale the locale
+     */
+    @Override
+    public void setLocale(final Locale locale) {
+        super.setLocale(locale);
+        GregorianCalendar newDisplayCalendar = new GregorianCalendar(locale);
+        newDisplayCalendar.setTime(displayCalendar.getTime());
+        displayCalendar = newDisplayCalendar;
+
+        GregorianCalendar newCalendar = new GregorianCalendar(locale);
+        newCalendar.setTime(calendar.getTime());
+        calendar = newCalendar;
+    }
+
+    /**
      * Draw the combobox down arrow.
      */
     @Override
@@ -273,7 +293,7 @@ public class TCalendar extends TWidget {
         }
 
         // Draw the title
-        String title = String.format("%tB %tY", displayCalendar,
+        String title = String.format(getLocale(), "%tB %tY", displayCalendar,
             displayCalendar);
         // This particular title is always single-width (see format string
         // above), but for completeness let's treat it the same as every
@@ -295,7 +315,7 @@ public class TCalendar extends TWidget {
         putStringXY(0, 1, daysOfWeek, dayColor);
         int lastDayNumber = displayCalendar.getActualMaximum(
                 Calendar.DAY_OF_MONTH);
-        GregorianCalendar firstOfMonth = new GregorianCalendar();
+        GregorianCalendar firstOfMonth = new GregorianCalendar(getLocale());
         firstOfMonth.setTimeInMillis(displayCalendar.getTimeInMillis());
         firstOfMonth.set(Calendar.DAY_OF_MONTH, 1);
         int dayOf1st = firstOfMonth.get(Calendar.DAY_OF_WEEK) - 1;
