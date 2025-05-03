@@ -12,42 +12,61 @@ like this:
 
 ![Terminal, Image, Table](/screenshots/new_demo1.png?raw=true "Terminal, Image, Table")
 
-...or anything in between.  Translucent windows -- including layered
-images -- are supported and generally look as one would expect in a
-modern graphical environment...but it's mostly text.  Translucent
-windows were inspired in part by
-[notcurses](https://github.com/dankamongmen/notcurses).
+...or anything in between.
 
 Jexer works on both Xterm-like terminals and Swing, and supports
 images in both Xterm and Swing.  On Swing, images are true color; on
-Xterm, images are rendered as sixel, iTerm2, or Jexer images.
+Xterm, images are rendered as sixel, iTerm2, or Jexer images.  Jexer
+can be run inside its own terminal window, with support for all of its
+features including images and mouse, and more terminals.
 
-Support for pixel-based operations was introduced in version 1.5.0.
-If the terminal supports mouse mode 1016 (SGR-Pixel), one can now get
-smooth(er) mouse motion with custom bitmap overlaid mouse.  Below is
-stock xterm, with a custom mouse icon, and SGR-Pixel mode active:
+Jexer has seen inspiration from several other projects:
 
-![Xterm SGR-Pixel Mouse](/screenshots/xterm_pixel_mouse.gif?raw=true "Xterm SGR-Pixel Mouse")
+* Translucent windows were inspired by
+  [notcurses](https://github.com/dankamongmen/notcurses).  Translucent
+  windows and layered images generally look as one would expect in a
+  modern graphical environment...but it's mostly text.
 
-A new sixel encoder was introduced in version 1.6.0, and looks and
-performs much better.  This encoder was inspired in part by
-[chafa's](https://hpjansson.org/chafa/) high-performance principal
-component analysis based sixel encoder.
+* Jexer's (multithread-safe) "high quality" sixel encoder
+  (HQSixelEncoder) -- which supplants its original (single-threaded)
+  2018-era design (LegacySixelEncoder) -- was inspired by
+  [chafa's](https://hpjansson.org/chafa/) high-performance principal
+  component analysis based sixel encoder.  HQSixelEncoder combined
+  with Jexer's cell-based images design approaches 20-bit color depth!
+
+* Pulsing button text, window effects, and soon-to-be desktop effected
+  were inspired by [vtm's](https://github.com/netxs-group/vtm)
+  incredibly slick game-like aesthetic effects.
+
+If you like what you see here, definitely take a look at its
+inspirations.  Again, those are:
+
+* [notcurses](https://github.com/dankamongmen/notcurses)
+
+* [chafa](https://hpjansson.org/chafa/)
+
+* [vtm](https://github.com/netxs-group/vtm)
+
+💖
+
+
+
+Screenshots
+-----------
 
 ![PCA color matching with 128-color palette and translucent windows](/screenshots/pca_match.png?raw=true "PCA color matching with 128-color palette and translucent windows")
 
-Jexer can be run inside its own terminal window, with support for all
-of its features including images and mouse, and more terminals:
+![Jexer with Spanish-language translations, CJK text in terminal, the libsixel snake image, and an ANSI art screen](/screenshots/jexer_espanol.png?raw=true "Jexer with Spanish-language translations, CJK text in terminal, the libsixel snake image, and an ANSI art screen")
 
-![Yo Dawg...](/screenshots/jexer_sixel_in_sixel.png?raw=true "Yo Dawg, I heard you like text windowing systems, so I ran a text windowing system inside your text windowing system so you can have a terminal in your terminal.")
+More screenshots and videos are [at the screenshots web
+page.](https://jexer.sourceforge.io/screenshots.html)
 
 
 
 How...?  What...?
 -----------------
 
-Wondering how I did it?  [Here you
-go.](https://jexer.sourceforge.io/evolution.html)
+Wondering how I did it?  [Here you go!](https://jexer.sourceforge.io/evolution.html)
 
 
 
@@ -276,17 +295,5 @@ Acknowledgements
 
 Jexer makes use of the Terminus TrueType font [made available
 here](http://files.ax86.net/terminus-ttf/) .
-
-Jexer incorporates some ideas done first, or better implemented,
-elsewhere.  If you like what you see here, please take a look at these
-projects too:
-
-* [notcurses](https://github.com/dankamongmen/notcurses)
-
-* [chafa](https://hpjansson.org/chafa/)
-
-* [wezterm](https://wezfurlong.org/wezterm/)
-
-* [vtm](https://github.com/netxs-group/vtm)
 
 💖
