@@ -385,6 +385,22 @@ public class TFileOpenBox extends TWindow {
     }
 
     // ------------------------------------------------------------------------
+    // TWindow ----------------------------------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * If true, disable any window closing effect.  This is used by the
+     * window closing effects themselves so that they can be closed when
+     * finished.
+     *
+     * @return true if the window close effect should be disabled
+     */
+    public boolean disableCloseEffect() {
+        // Let's let this particular dialog vanish immediately.
+        return true;
+    }
+
+    // ------------------------------------------------------------------------
     // TFileOpenBox -----------------------------------------------------------
     // ------------------------------------------------------------------------
 
