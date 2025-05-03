@@ -539,10 +539,15 @@ public class TImage extends TWidget implements EditMenuUser {
                     if (!maybeTransparent) {
                         cell.setOpaqueImage();
                     } else if (!ImageUtils.isFullyTransparent(newImage)) {
-                        cell.flattenImage(false, getApplication().getBackend());
+                        cell.flattenImage(false,
+                            getApplication().getBackend());
+                    } else {
+                        cell.setTo(getWindow().getBackground());
                     }
-                    imageId++;
-                    cell.setImageId(imageId & 0x7FFFFFFF);
+                    if (cell.checkForSingleColor() == false) {
+                        imageId++;
+                        cell.setImageId(imageId & 0x7FFFFFFF);
+                    }
                     cells[x][y] = cell;
                 }
             }
