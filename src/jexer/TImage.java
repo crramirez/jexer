@@ -36,6 +36,7 @@ import java.awt.image.BufferedImage;
 import jexer.bits.Animation;
 import jexer.bits.Cell;
 import jexer.bits.ImageUtils;
+import jexer.bits.UnicodeGlyphImage;
 import jexer.event.TCommandEvent;
 import jexer.event.TKeypressEvent;
 import jexer.event.TMouseEvent;
@@ -75,6 +76,27 @@ public class TImage extends TWidget implements EditMenuUser {
         SCALE,
     }
 
+    /**
+     * Selections for approximating the image as text cells.
+     */
+    public enum DisplayMode {
+        /**
+         * Bitmap image.
+         */
+        BITMAP,
+
+        /**
+         * Converted to Unicode half-block glyphs.
+         */
+        UNICODE_HALVES,
+
+        /**
+         * Converted to Unicode quadrant-block glyphs.
+         */
+        UNICODE_QUADRANTS,
+
+    }
+
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
     // ------------------------------------------------------------------------
@@ -83,6 +105,11 @@ public class TImage extends TWidget implements EditMenuUser {
      * Scaling strategy to use.
      */
     private Scale scale = Scale.NONE;
+
+    /**
+     * Display mode to use.
+     */
+    private DisplayMode displayMode = DisplayMode.BITMAP;
 
     /**
      * Scaling strategy to use.
@@ -373,6 +400,32 @@ public class TImage extends TWidget implements EditMenuUser {
                 return;
             }
         }
+        if (keypress.equals(kbCtrlLeft)) {
+            switch (displayMode) {
+            case BITMAP:
+                setDisplayMode(DisplayMode.UNICODE_QUADRANTS);
+                return;
+            case UNICODE_HALVES:
+                setDisplayMode(DisplayMode.BITMAP);
+                return;
+            case UNICODE_QUADRANTS:
+                setDisplayMode(DisplayMode.UNICODE_HALVES);
+                return;
+            }
+        }
+        if (keypress.equals(kbCtrlRight)) {
+            switch (displayMode) {
+            case BITMAP:
+                setDisplayMode(DisplayMode.UNICODE_HALVES);
+                return;
+            case UNICODE_HALVES:
+                setDisplayMode(DisplayMode.UNICODE_QUADRANTS);
+                return;
+            case UNICODE_QUADRANTS:
+                setDisplayMode(DisplayMode.BITMAP);
+                return;
+            }
+        }
 
         // Pass to parent for the things we don't care about.
         super.onKeypress(keypress);
@@ -548,7 +601,27 @@ public class TImage extends TWidget implements EditMenuUser {
                         imageId++;
                         cell.setImageId(imageId & 0x7FFFFFFF);
                     }
-                    cells[x][y] = cell;
+                    switch (displayMode) {
+                    case BITMAP:
+                        cells[x][y] = cell;
+                        break;
+                    case UNICODE_HALVES:
+                        if (cell.isImage()) {
+                            UnicodeGlyphImage ch = new UnicodeGlyphImage(cell);
+                            cells[x][y] = ch.toHalfBlockGlyph();
+                        } else {
+                            cells[x][y] = cell;
+                        }
+                        break;
+                    case UNICODE_QUADRANTS:
+                        if (cell.isImage()) {
+                            UnicodeGlyphImage ch = new UnicodeGlyphImage(cell);
+                            cells[x][y] = ch.toQuadrantBlockGlyph();
+                        } else {
+                            cells[x][y] = cell;
+                        }
+                        break;
+                    }
                 }
             }
 
@@ -755,6 +828,26 @@ public class TImage extends TWidget implements EditMenuUser {
     public void setScaleFactor(final double scaleFactor) {
         this.scaleFactor = scaleFactor;
         image = null;
+        sizeToImage(true);
+    }
+
+    /**
+     * Get the image display mode.
+     *
+     * @return DisplayMode.BITMAP, DisplayMode.UNICODE_HALVES, etc.
+     */
+    public DisplayMode getDisplayMode() {
+        return displayMode;
+    }
+
+    /**
+     * Set the image display mode.
+     *
+     * @param displayMode DisplayMode.BITMAP, DisplayMode.UNICODE_HALVES, etc.
+     */
+    public void setDisplayMode(final DisplayMode displayMode) {
+        this.displayMode = displayMode;
+        this.image = null;
         sizeToImage(true);
     }
 
