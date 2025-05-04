@@ -285,7 +285,9 @@ public class DemoPixelsWindow extends TWindow {
     public void onClose() {
         super.onClose();
         // Just in case, make sure timer stops ticking.
-        timer3.setRecurring(false);
+        if (timer3 != null) {
+            timer3.setRecurring(false);
+        }
         getApplication().removeTimer(timer3);
     }
 
