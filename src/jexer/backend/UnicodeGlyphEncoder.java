@@ -679,7 +679,7 @@ public class UnicodeGlyphEncoder {
             return result;
         }
 
-        if (true) {
+        if (false && false) {
             // DEBUG: Write the bitmap out to PNG.
             int [] pngArray = new int[rgbArray.length];
             for (int i = 0; i < rgbArray.length; i++) {
@@ -713,7 +713,7 @@ public class UnicodeGlyphEncoder {
          * For now, we will just use halves because my normal home font kinda
          * sucks.  Later we can add more schemes.
          */
-        final boolean debugThisCode = true;
+        final boolean debugThisCode = false;
         if (debugThisCode) {
             for (int i = 0; i < rgbArray.length; i++) {
                 assert ((rgbArray[i] == 0) || (rgbArray[i] == 1));
@@ -731,14 +731,13 @@ public class UnicodeGlyphEncoder {
     }
 
     /**
-     * Determine the Unicode half-glyph that most closely matches this 2-bit
-     * image.
+     * Get the index used to map half blocks and quadrants.
      *
      * @param data the image data as a sequence of 0's and 1's
      * @param width the width of the image
      * @param height the height of the image
      */
-    private int findHalfGlyph(final int [] data, final int width,
+    private int getQuadrantMapValue(final int [] data, final int width,
         final int height) {
 
         /*
@@ -762,6 +761,78 @@ public class UnicodeGlyphEncoder {
          *  |           |           |
          *   -----------------------
          */
+        int foregroundMap = 0x00;
+        int quadrantSize = height * width / 4 / 2;
+
+        int count = 0;
+        for (int y = 0; y < height / 2; y++) {
+            for (int x = 0; x < width / 2; x++) {
+                count += data[(y * width) + x];
+            }
+        }
+        if (verbosity >= 5) {
+            System.err.printf("top-left count: %d / %d\n",
+                count, quadrantSize);
+        }
+        if (count > quadrantSize) {
+            foregroundMap |= 0x01;
+        }
+
+        count = 0;
+        for (int y = 0; y < height / 2; y++) {
+            for (int x = width / 2; x < width; x++) {
+                count += data[(y * width) + x];
+            }
+        }
+        if (verbosity >= 5) {
+            System.err.printf("top-right count: %d / %d\n",
+                count, quadrantSize);
+        }
+        if (count > quadrantSize) {
+            foregroundMap |= 0x02;
+        }
+
+        count = 0;
+        for (int y = height / 2; y < height; y++) {
+            for (int x = 0; x < width / 2; x++) {
+                count += data[(y * width) + x];
+            }
+        }
+        if (verbosity >= 5) {
+            System.err.printf("bottom-left count: %d / %d\n",
+                count, quadrantSize);
+        }
+        if (count > quadrantSize) {
+            foregroundMap |= 0x04;
+        }
+
+        count = 0;
+        for (int y = height / 2; y < height; y++) {
+            for (int x = width / 2; x < width; x++) {
+                count += data[(y * width) + x];
+            }
+        }
+        if (verbosity >= 5) {
+            System.err.printf("bottom-right count: %d / %d\n",
+                count, quadrantSize);
+        }
+        if (count > quadrantSize) {
+            foregroundMap |= 0x08;
+        }
+        return foregroundMap;
+    }
+
+    /**
+     * Determine the Unicode half-glyph that most closely matches this 2-bit
+     * image.
+     *
+     * @param data the image data as a sequence of 0's and 1's
+     * @param width the width of the image
+     * @param height the height of the image
+     */
+    private int findHalfGlyph(final int [] data, final int width,
+        final int height) {
+
         final int [] HALVES = {
             // 0x00 - Empty - only background
             ' ',
@@ -802,66 +873,8 @@ public class UnicodeGlyphEncoder {
             // 0x0f - Full foreground block - 0x2588 - █
             0x2588,
         };
-        int foregroundMap = 0x00;
-        int quadrantSize = height * width / 4 / 2;
 
-        int count = 0;
-        for (int y = 0; y < height / 2; y++) {
-            for (int x = 0; x < width / 2; x++) {
-                count += data[(y * width) + x];
-            }
-        }
-        if (verbosity >= 5) {
-            System.err.printf("top-left count: %d / %d\n",
-                count, quadrantSize);
-        }
-        if (count > quadrantSize) {
-            foregroundMap |= 0x01;
-        }
-
-        count = 0;
-        for (int y = 0; y < height / 2; y++) {
-            for (int x = width / 2; x < width; x++) {
-                count += data[(y * width) + x];
-            }
-        }
-        if (verbosity >= 5) {
-            System.err.printf("top-right count: %d / %d\n",
-                count, quadrantSize);
-        }
-        if (count > quadrantSize) {
-            foregroundMap |= 0x02;
-        }
-
-        count = 0;
-        for (int y = height / 2; y < height; y++) {
-            for (int x = 0; x < width / 2; x++) {
-                count += data[(y * width) + x];
-            }
-        }
-        if (verbosity >= 5) {
-            System.err.printf("bottom-left count: %d / %d\n",
-                count, quadrantSize);
-        }
-        if (count > quadrantSize) {
-            foregroundMap |= 0x04;
-        }
-
-        count = 0;
-        for (int y = height / 2; y < height; y++) {
-            for (int x = width / 2; x < width; x++) {
-                count += data[(y * width) + x];
-            }
-        }
-        if (verbosity >= 5) {
-            System.err.printf("bottom-right count: %d / %d\n",
-                count, quadrantSize);
-        }
-        if (count > quadrantSize) {
-            foregroundMap |= 0x08;
-        }
-
-        return HALVES[foregroundMap];
+        return HALVES[getQuadrantMapValue(data, width, height)];
     }
 
     /**
@@ -875,27 +888,6 @@ public class UnicodeGlyphEncoder {
     private int findQuadrantGlyph(final int [] data, final int width,
         final int height) {
 
-        /*
-         * The map of image area to bits:
-         *
-         *   -----------------------
-         *  |           |           |
-         *  |           |           |
-         *  |           |           |
-         *  |    0x01   |    0x02   |
-         *  |           |           |
-         *  |           |           |
-         *  |           |           |
-         *   -----------------------
-         *  |           |           |
-         *  |           |           |
-         *  |           |           |
-         *  |    0x04   |    0x08   |
-         *  |           |           |
-         *  |           |           |
-         *  |           |           |
-         *   -----------------------
-         */
         final int [] QUADRANTS = {
             // 0x00 - Empty - only background
             ' ',
@@ -930,66 +922,7 @@ public class UnicodeGlyphEncoder {
             // 0x0f - Full foreground block - 0x2588 - █
             0x2588,
         };
-        int foregroundMap = 0x00;
-        int quadrantSize = height * width / 4 / 2;
-
-        int count = 0;
-        for (int y = 0; y < height / 2; y++) {
-            for (int x = 0; x < width / 2; x++) {
-                count += data[(y * width) + x];
-            }
-        }
-        if (verbosity >= 5) {
-            System.err.printf("top-left count: %d / %d\n",
-                count, quadrantSize);
-        }
-        if (count > quadrantSize) {
-            foregroundMap |= 0x01;
-        }
-
-        count = 0;
-        for (int y = 0; y < height / 2; y++) {
-            for (int x = width / 2; x < width; x++) {
-                count += data[(y * width) + x];
-            }
-        }
-        if (verbosity >= 5) {
-            System.err.printf("top-right count: %d / %d\n",
-                count, quadrantSize);
-        }
-        if (count > quadrantSize) {
-            foregroundMap |= 0x02;
-        }
-
-        count = 0;
-        for (int y = height / 2; y < height; y++) {
-            for (int x = 0; x < width / 2; x++) {
-                count += data[(y * width) + x];
-            }
-        }
-        if (verbosity >= 5) {
-            System.err.printf("bottom-left count: %d / %d\n",
-                count, quadrantSize);
-        }
-        if (count > quadrantSize) {
-            foregroundMap |= 0x04;
-        }
-
-        count = 0;
-        for (int y = height / 2; y < height; y++) {
-            for (int x = width / 2; x < width; x++) {
-                count += data[(y * width) + x];
-            }
-        }
-        if (verbosity >= 5) {
-            System.err.printf("bottom-right count: %d / %d\n",
-                count, quadrantSize);
-        }
-        if (count > quadrantSize) {
-            foregroundMap |= 0x08;
-        }
-
-        return QUADRANTS[foregroundMap];
+        return QUADRANTS[getQuadrantMapValue(data, width, height)];
     }
 
     /**
