@@ -720,7 +720,8 @@ public class UnicodeGlyphEncoder {
             }
         }
 
-        int ch = findHalfGlyph(rgbArray, bitmap.getWidth(), bitmap.getHeight());
+        int ch = findHalfGlyph(rgbArray, bitmap.getWidth(),
+            bitmap.getHeight());
         colorRGB(sb, palette.rgbColors[0], false);
         colorRGB(sb, palette.rgbColors[1], true);
         sb.append(Character.toChars(ch));
@@ -861,6 +862,134 @@ public class UnicodeGlyphEncoder {
         }
 
         return HALVES[foregroundMap];
+    }
+
+    /**
+     * Determine the Unicode quadrant glyph that most closely matches this
+     * 2-bit image.
+     *
+     * @param data the image data as a sequence of 0's and 1's
+     * @param width the width of the image
+     * @param height the height of the image
+     */
+    private int findQuadrantGlyph(final int [] data, final int width,
+        final int height) {
+
+        /*
+         * The map of image area to bits:
+         *
+         *   -----------------------
+         *  |           |           |
+         *  |           |           |
+         *  |           |           |
+         *  |    0x01   |    0x02   |
+         *  |           |           |
+         *  |           |           |
+         *  |           |           |
+         *   -----------------------
+         *  |           |           |
+         *  |           |           |
+         *  |           |           |
+         *  |    0x04   |    0x08   |
+         *  |           |           |
+         *  |           |           |
+         *  |           |           |
+         *   -----------------------
+         */
+        final int [] QUADRANTS = {
+            // 0x00 - Empty - only background
+            ' ',
+            // 0x01 - Upper left quadrant - 0x2598 - ▘
+            0x2598,
+            // 0x02 - Upper right quadrant - 0x259d - ▝
+            0x259d,
+            // 0x03 - Full upper half - 0x2580 - ▀
+            0x2580,
+            // 0x04 - Bottom left quadrant - 0x2596 - ▖
+            0x2596,
+            // 0x05 - Full left half - 0x258c - ▌
+            0x258c,
+            // 0x06 - Upper right quadrant and lower left quadrant - 0x259e - ▞
+            0x259e,
+            // 0x07 - Upper half and left half - 0x259b - ▛
+            0x259b,
+            // 0x08 - Bottom right quadrant - 0x2597 - ▗
+            0x2584,
+            // 0x09 - Upper left quadrant and lower right quadrant - 0x259a - ▚
+            0x259a,
+            // 0x0a - Full right half - 0x2590 - ▐
+            0x2590,
+            // 0x0b - Upper half and right half - 0x259c - ▜
+            0x2588,
+            // 0x0c - Full bottom half - 0x2584 - ▄
+            0x2584,
+            // 0x0d - Bottom half and left half - 0x2599 - ▙
+            0x2599,
+            // 0x0e - Bottom half and right half - 0x259f - ▟
+            0x259f,
+            // 0x0f - Full foreground block - 0x2588 - █
+            0x2588,
+        };
+        int foregroundMap = 0x00;
+        int quadrantSize = height * width / 4 / 2;
+
+        int count = 0;
+        for (int y = 0; y < height / 2; y++) {
+            for (int x = 0; x < width / 2; x++) {
+                count += data[(y * width) + x];
+            }
+        }
+        if (verbosity >= 5) {
+            System.err.printf("top-left count: %d / %d\n",
+                count, quadrantSize);
+        }
+        if (count > quadrantSize) {
+            foregroundMap |= 0x01;
+        }
+
+        count = 0;
+        for (int y = 0; y < height / 2; y++) {
+            for (int x = width / 2; x < width; x++) {
+                count += data[(y * width) + x];
+            }
+        }
+        if (verbosity >= 5) {
+            System.err.printf("top-right count: %d / %d\n",
+                count, quadrantSize);
+        }
+        if (count > quadrantSize) {
+            foregroundMap |= 0x02;
+        }
+
+        count = 0;
+        for (int y = height / 2; y < height; y++) {
+            for (int x = 0; x < width / 2; x++) {
+                count += data[(y * width) + x];
+            }
+        }
+        if (verbosity >= 5) {
+            System.err.printf("bottom-left count: %d / %d\n",
+                count, quadrantSize);
+        }
+        if (count > quadrantSize) {
+            foregroundMap |= 0x04;
+        }
+
+        count = 0;
+        for (int y = height / 2; y < height; y++) {
+            for (int x = width / 2; x < width; x++) {
+                count += data[(y * width) + x];
+            }
+        }
+        if (verbosity >= 5) {
+            System.err.printf("bottom-right count: %d / %d\n",
+                count, quadrantSize);
+        }
+        if (count > quadrantSize) {
+            foregroundMap |= 0x08;
+        }
+
+        return QUADRANTS[foregroundMap];
     }
 
     /**
