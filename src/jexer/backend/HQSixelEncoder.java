@@ -956,7 +956,7 @@ public class HQSixelEncoder implements SixelEncoder {
             // on images that have a very wide color range compared to
             // palette entries.  Too high and you lose a lot of detail on
             // otherwise great images.
-            final int blackDiff = 100;
+            final int blackDiff = 10;
             final int whiteDiff = 0;
             if (((red * red) + (green * green) + (blue * blue)) < blackDiff) {
                 if (verbosity >= 10) {
