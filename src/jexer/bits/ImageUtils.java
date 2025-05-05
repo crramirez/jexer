@@ -521,6 +521,47 @@ public class ImageUtils {
     }
 
     /**
+     * Compute the average RGB value of an entire image.
+     *
+     * @param image the image to check
+     * @return the average color
+     */
+    public static int rgbAverage(final BufferedImage image) {
+        assert (image != null);
+
+        int [] rgbArray = image.getRGB(0, 0,
+            image.getWidth(), image.getHeight(), null, 0, image.getWidth());
+
+        if (rgbArray.length == 0) {
+            // No image data, return black.
+            return 0xFF000000;
+        }
+
+        // Compute the average color.
+        long totalRed = 0;
+        long totalGreen = 0;
+        long totalBlue = 0;
+        long count = rgbArray.length;
+        for (int i = 0; i < rgbArray.length; i++) {
+            int rgb = rgbArray[i];
+            int red   = (rgb >>> 16) & 0xFF;
+            int green = (rgb >>>  8) & 0xFF;
+            int blue  =  rgb         & 0xFF;
+            totalRed   += red;
+            totalGreen += green;
+            totalBlue  += blue;
+        }
+        totalRed   = (int) (totalRed   / count);
+        totalGreen = (int) (totalGreen / count);
+        totalBlue  = (int) (totalBlue  / count);
+
+        int result = (int) ((0xFF << 24) | (totalRed   << 16)
+                                         | (totalGreen <<  8)
+                                         |  totalBlue);
+        return result;
+    }
+
+    /**
      * Create a BufferedImage using the same color model as another image.
      *
      * @param image the original image

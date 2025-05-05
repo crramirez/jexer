@@ -86,6 +86,11 @@ public class TImage extends TWidget implements EditMenuUser {
         BITMAP,
 
         /**
+         * Converted to solid space (' ') character blocks.
+         */
+        BLOCKS,
+
+        /**
          * Converted to Unicode half-block glyphs.
          */
         UNICODE_HALVES,
@@ -405,8 +410,11 @@ public class TImage extends TWidget implements EditMenuUser {
             case BITMAP:
                 setDisplayMode(DisplayMode.UNICODE_QUADRANTS);
                 return;
-            case UNICODE_HALVES:
+            case BLOCKS:
                 setDisplayMode(DisplayMode.BITMAP);
+                return;
+            case UNICODE_HALVES:
+                setDisplayMode(DisplayMode.BLOCKS);
                 return;
             case UNICODE_QUADRANTS:
                 setDisplayMode(DisplayMode.UNICODE_HALVES);
@@ -416,6 +424,9 @@ public class TImage extends TWidget implements EditMenuUser {
         if (keypress.equals(kbCtrlRight)) {
             switch (displayMode) {
             case BITMAP:
+                setDisplayMode(DisplayMode.BLOCKS);
+                return;
+            case BLOCKS:
                 setDisplayMode(DisplayMode.UNICODE_HALVES);
                 return;
             case UNICODE_HALVES:
@@ -604,6 +615,17 @@ public class TImage extends TWidget implements EditMenuUser {
                     switch (displayMode) {
                     case BITMAP:
                         cells[x][y] = cell;
+                        break;
+                    case BLOCKS:
+                        if (cell.isImage()) {
+                            int rgb = ImageUtils.rgbAverage(cell.getImage());
+                            Cell newCell = new Cell(' ');
+                            newCell.setForeColorRGB(rgb);
+                            newCell.setBackColorRGB(rgb);
+                            cells[x][y] = newCell;
+                        } else {
+                            cells[x][y] = cell;
+                        }
                         break;
                     case UNICODE_HALVES:
                         if (cell.isImage()) {
