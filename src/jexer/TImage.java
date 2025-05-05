@@ -543,6 +543,12 @@ public class TImage extends TWidget implements EditMenuUser {
 
         scaleBackColor = getApplication().getBackend().attrToBackgroundColor(getWindow().getBackground());
 
+        boolean bleedThrough = true;
+        if (System.getProperty("jexer.TImage.bleedThrough",
+                "true").equals("false")) {
+            bleedThrough = false;
+        }
+
         int textWidth = getScreen().getTextWidth();
         int textHeight = getScreen().getTextHeight();
 
@@ -608,7 +614,9 @@ public class TImage extends TWidget implements EditMenuUser {
                     } else {
                         cell.setTo(getWindow().getBackground());
                     }
-                    if (cell.checkForSingleColor() == false) {
+                    if ((bleedThrough == false)
+                        || (cell.checkForSingleColor() == false)
+                    ) {
                         imageId++;
                         cell.setImageId(imageId & 0x7FFFFFFF);
                     }
