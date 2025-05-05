@@ -710,6 +710,116 @@ public class UnicodeGlyphImage {
     }
 
     /**
+     * Get the index used to map 6-dot Braille and sextants.
+     *
+     * @param data the image data as a sequence of 0's and 1's
+     * @param width the width of the image
+     * @param height the height of the image
+     */
+    private int getSextantMapValue(final int [] data, final int width,
+        final int height) {
+
+        /*
+         * Map the image area to the portions of a Unicode drawing "canvas"
+         * and then literally counting how many 1's are in each area: if the
+         * count is above 50% total coverage for that area, then it is
+         * foreground color.
+         *
+         * The map of image area to bits:
+         *
+         *   -----------------------
+         *  |           |           |
+         *  |           |           |
+         *  |           |           |
+         *  |    0x01   |    0x08   |
+         *  |           |           |
+         *  |           |           |
+         *  |           |           |
+         *   -----------------------
+         *  |           |           |
+         *  |           |           |
+         *  |           |           |
+         *  |    0x02   |    0x10   |
+         *  |           |           |
+         *  |           |           |
+         *  |           |           |
+         *   -----------------------
+         *  |           |           |
+         *  |           |           |
+         *  |           |           |
+         *  |    0x04   |    0x20   |
+         *  |           |           |
+         *  |           |           |
+         *  |           |           |
+         *   -----------------------
+         */
+        int foregroundMap = 0x00;
+        int dotSize = height * width / 6 / 2;
+
+        int count = 0;
+        for (int y = 0; y < height / 3; y++) {
+            for (int x = 0; x < width / 2; x++) {
+                count += data[(y * width) + x];
+            }
+        }
+        if (count > dotSize) {
+            foregroundMap |= 0x01;
+        }
+
+        count = 0;
+        for (int y = 0; y < height / 3; y++) {
+            for (int x = width / 2; x < width; x++) {
+                count += data[(y * width) + x];
+            }
+        }
+        if (count > dotSize) {
+            foregroundMap |= 0x08;
+        }
+
+        count = 0;
+        for (int y = height / 3; y < height * 2 / 3; y++) {
+            for (int x = 0; x < width / 2; x++) {
+                count += data[(y * width) + x];
+            }
+        }
+        if (count > dotSize) {
+            foregroundMap |= 0x02;
+        }
+
+        count = 0;
+        for (int y = height / 3; y < height * 2 / 3; y++) {
+            for (int x = width / 2; x < width; x++) {
+                count += data[(y * width) + x];
+            }
+        }
+        if (count > dotSize) {
+            foregroundMap |= 0x10;
+        }
+
+        count = 0;
+        for (int y = height * 2 / 3; y < height; y++) {
+            for (int x = 0; x < width / 2; x++) {
+                count += data[(y * width) + x];
+            }
+        }
+        if (count > dotSize) {
+            foregroundMap |= 0x04;
+        }
+
+        count = 0;
+        for (int y = height * 2 / 3; y < height; y++) {
+            for (int x = width / 2; x < width; x++) {
+                count += data[(y * width) + x];
+            }
+        }
+        if (count > dotSize) {
+            foregroundMap |= 0x20;
+        }
+
+        return foregroundMap;
+    }
+
+    /**
      * Determine the Unicode half-glyph that most closely matches this 2-bit
      * image.
      *
@@ -835,6 +945,87 @@ public class UnicodeGlyphImage {
     public Cell toQuadrantBlockGlyph() {
         int ch = findQuadrantGlyph(rgbArray, image.getWidth(),
             image.getHeight());
+        Cell cell = new Cell(ch);
+        cell.setBackColorRGB(palette.rgbColors[0]);
+        cell.setForeColorRGB(palette.rgbColors[1]);
+        return cell;
+    }
+
+    /**
+     * Create a single glyph using Unicode 6-dot Braille blocks that best
+     * represents this entire image, with one foreground color on a black
+     * background.
+     *
+     * @return a cell with character and foreground color set
+     */
+    public Cell toSixDotGlyph() {
+        int ch = getSextantMapValue(rgbArray, image.getWidth(),
+            image.getHeight()) + 0x2800;
+        Cell cell = new Cell(ch);
+
+        // We use a single average color as foreground, and leave background
+        // black.
+        int   red = (((palette.rgbColors[0] >>> 16) & 0xFF)
+                  +  ((palette.rgbColors[1] >>> 16) & 0xFF)) / 2;
+        int green = (((palette.rgbColors[0] >>>  8) & 0xFF)
+                  +  ((palette.rgbColors[1] >>>  8) & 0xFF)) / 2;
+        int  blue = (( palette.rgbColors[0]         & 0xFF)
+                  +  ( palette.rgbColors[1]         & 0xFF)) / 2;
+        int rgb = 0xFF000000 | (red << 16) | (green << 8) | blue;
+
+        cell.setForeColorRGB(rgb);
+        return cell;
+    }
+
+    /**
+     * Create a single glyph using Unicode 6-dot Braille blocks that best
+     * represents this entire image.
+     *
+     * @return a cell with character, foreground, and background color set
+     */
+    public Cell toSixDotSolidGlyph() {
+        int ch = getSextantMapValue(rgbArray, image.getWidth(),
+            image.getHeight()) + 0x2800;
+        Cell cell = new Cell(ch);
+        cell.setBackColorRGB(palette.rgbColors[0]);
+        cell.setForeColorRGB(palette.rgbColors[1]);
+        return cell;
+    }
+
+    /**
+     * Create a single glyph using Unicode 6-dot Braille blocks that best
+     * represents this entire image.
+     *
+     * @return a cell with character, foreground, and background color set
+     */
+    public Cell toSextantBlockGlyph() {
+        int ch = getSextantMapValue(rgbArray, image.getWidth(),
+            image.getHeight());
+
+        // The sextant map is almost but not quite a straight bit value like
+        // Braille.  Empty (' '), left-half (0x258c), right-half (0x2590),
+        // and full-block (0x2588) were omitted from the table where they
+        // would otherwise be, so we need to add checks for those gaps.
+        if (ch == 0) {
+            ch = ' ';
+        } else if (ch == 0x3F) {
+            ch = 0x2588;
+        } else if (ch == 0x07) {
+            ch = 0x258c;
+        } else if (ch == 0x38) {
+            ch = 0x2590;
+        } else {
+            ch += 0x1FAFF;
+            if (ch > 0x1fb3b) {
+                ch -= 4;
+            } else if (ch > 0x1fb27) {
+                ch -= 3;
+            } else if (ch > 0x1fb13) {
+                ch -= 2;
+            }
+        }
+        assert (ch <= 0x1fb3b);
+
         Cell cell = new Cell(ch);
         cell.setBackColorRGB(palette.rgbColors[0]);
         cell.setForeColorRGB(palette.rgbColors[1]);

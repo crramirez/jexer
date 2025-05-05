@@ -96,9 +96,26 @@ public class TImage extends TWidget implements EditMenuUser {
         UNICODE_HALVES,
 
         /**
+         * Converted to Unicode sextant glyphs.
+         */
+        UNICODE_SEXTANTS,
+
+        /**
          * Converted to Unicode quadrant-block glyphs.
          */
         UNICODE_QUADRANTS,
+
+        /**
+         * Converted to Unicode 6-dot Braille glyphs on this window's
+         * background color.
+         */
+        UNICODE_SIXDOT,
+
+        /**
+         * Converted to Unicode 6-dot Braille glyphs with
+         * foreground/background color.
+         */
+        UNICODE_SIXDOTSOLID,
 
     }
 
@@ -408,7 +425,7 @@ public class TImage extends TWidget implements EditMenuUser {
         if (keypress.equals(kbCtrlLeft)) {
             switch (displayMode) {
             case BITMAP:
-                setDisplayMode(DisplayMode.UNICODE_QUADRANTS);
+                setDisplayMode(DisplayMode.UNICODE_SIXDOTSOLID);
                 return;
             case BLOCKS:
                 setDisplayMode(DisplayMode.BITMAP);
@@ -416,8 +433,17 @@ public class TImage extends TWidget implements EditMenuUser {
             case UNICODE_HALVES:
                 setDisplayMode(DisplayMode.BLOCKS);
                 return;
-            case UNICODE_QUADRANTS:
+            case UNICODE_SEXTANTS:
                 setDisplayMode(DisplayMode.UNICODE_HALVES);
+                return;
+            case UNICODE_QUADRANTS:
+                setDisplayMode(DisplayMode.UNICODE_SEXTANTS);
+                return;
+            case UNICODE_SIXDOT:
+                setDisplayMode(DisplayMode.UNICODE_QUADRANTS);
+                return;
+            case UNICODE_SIXDOTSOLID:
+                setDisplayMode(DisplayMode.UNICODE_SIXDOT);
                 return;
             }
         }
@@ -430,9 +456,18 @@ public class TImage extends TWidget implements EditMenuUser {
                 setDisplayMode(DisplayMode.UNICODE_HALVES);
                 return;
             case UNICODE_HALVES:
+                setDisplayMode(DisplayMode.UNICODE_SEXTANTS);
+                return;
+            case UNICODE_SEXTANTS:
                 setDisplayMode(DisplayMode.UNICODE_QUADRANTS);
                 return;
             case UNICODE_QUADRANTS:
+                setDisplayMode(DisplayMode.UNICODE_SIXDOT);
+                return;
+            case UNICODE_SIXDOT:
+                setDisplayMode(DisplayMode.UNICODE_SIXDOTSOLID);
+                return;
+            case UNICODE_SIXDOTSOLID:
                 setDisplayMode(DisplayMode.BITMAP);
                 return;
             }
@@ -615,6 +650,7 @@ public class TImage extends TWidget implements EditMenuUser {
                         cell.setTo(getWindow().getBackground());
                     }
                     if ((bleedThrough == false)
+                        || (displayMode != DisplayMode.BITMAP)
                         || (cell.checkForSingleColor() == false)
                     ) {
                         imageId++;
@@ -643,10 +679,35 @@ public class TImage extends TWidget implements EditMenuUser {
                             cells[x][y] = cell;
                         }
                         break;
+                    case UNICODE_SEXTANTS:
+                        if (cell.isImage()) {
+                            UnicodeGlyphImage ch = new UnicodeGlyphImage(cell);
+                            cells[x][y] = ch.toSextantBlockGlyph();
+                        } else {
+                            cells[x][y] = cell;
+                        }
+                        break;
                     case UNICODE_QUADRANTS:
                         if (cell.isImage()) {
                             UnicodeGlyphImage ch = new UnicodeGlyphImage(cell);
                             cells[x][y] = ch.toQuadrantBlockGlyph();
+                        } else {
+                            cells[x][y] = cell;
+                        }
+                        break;
+                    case UNICODE_SIXDOT:
+                        if (cell.isImage()) {
+                            UnicodeGlyphImage ch = new UnicodeGlyphImage(cell);
+                            cells[x][y] = ch.toSixDotGlyph();
+                            cells[x][y].setBackColorRGB(scaleBackColor.getRGB());
+                        } else {
+                            cells[x][y] = cell;
+                        }
+                        break;
+                    case UNICODE_SIXDOTSOLID:
+                        if (cell.isImage()) {
+                            UnicodeGlyphImage ch = new UnicodeGlyphImage(cell);
+                            cells[x][y] = ch.toSixDotSolidGlyph();
                         } else {
                             cells[x][y] = cell;
                         }
