@@ -74,6 +74,11 @@ public class BorderStyle {
      */
     public static final BorderStyle SINGLE_ROUND;
 
+    /**
+     * A single-line border with angled edge corners.
+     */
+    public static final BorderStyle SO_SAY_WE_ALL;
+
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
     // ------------------------------------------------------------------------
@@ -154,6 +159,13 @@ public class BorderStyle {
             0x2570,
             0x256F);
 
+        SO_SAY_WE_ALL = new BorderStyle(GraphicsChars.SINGLE_BAR,
+            GraphicsChars.WINDOW_SIDE,
+            0x25E2,
+            0x25E3,
+            0x25E5,
+            0x25E4);
+
         DEFAULT = SINGLE;
 
     }
@@ -214,6 +226,9 @@ public class BorderStyle {
         }
         if (str.equals("singlehdoublev")) {
             return SINGLE_H_DOUBLE_V;
+        }
+        if (str.equals("sosayweall")) {
+            return SO_SAY_WE_ALL;
         }
 
         // If they didn't get it right, return single.
