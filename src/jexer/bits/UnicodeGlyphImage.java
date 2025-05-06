@@ -608,7 +608,7 @@ public class UnicodeGlyphImage {
     /**
      * Public constructor.
      *
-     * @param bitmap the bitmap data
+     * @param image the bitmap image
      */
     public UnicodeGlyphImage(final BufferedImage image) {
         this.image = image;

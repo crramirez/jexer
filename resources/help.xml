@@ -3,8 +3,8 @@
 <help>
   <name>Jexer Help File</name>
   <author>Autumn Lamonte</author>
-  <version>1.0.0</version>
-  <date>Jan 1, 2020</date>
+  <version>2.0.0</version>
+  <date>Jan 1, 2026</date>
   <topics>
     <topic title="Help">
       <text>
@@ -50,7 +50,7 @@
 
     <topic title="Copyright Infomation">
       <text>
-        Copyright (C) 2022 Autumn Lamonte
+        Copyright (C) 2025 Autumn Lamonte
 
         Available to all under the MIT License.
     </text>

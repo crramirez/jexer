@@ -81,16 +81,6 @@ public class CellAttributes {
     private static final int ANIMATION_TIME_MASK  = 0x00FC0000;
 
     /**
-     * Animation: fade in.
-     */
-    // private static final int ANIMATION_FADE_IN    = 0x00001000;
-
-    /**
-     * Animation: fade out.
-     */
-    // private static final int ANIMATION_FADE_OUT   = 0x00002000;
-
-    /**
      * Animation: pulse slowly.
      */
     private static final int ANIMATION_PULSE      = 0x00004000;
