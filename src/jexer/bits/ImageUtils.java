@@ -521,12 +521,26 @@ public class ImageUtils {
     }
 
     /**
-     * Compute the average RGB value of an entire image.
+     * Compute the average RGB value of an entire image, including pixels
+     * that may be partially or fully transparent.
      *
      * @param image the image to check
      * @return the average color
      */
     public static int rgbAverage(final BufferedImage image) {
+        return rgbAverage(image, false);
+    }
+
+    /**
+     * Compute the average RGB value of an entire image.
+     *
+     * @param image the image to check
+     * @param onlyOpaque if true, only count pixels that are fully opaque
+     * @return the average color
+     */
+    public static int rgbAverage(final BufferedImage image,
+        final boolean onlyOpaque) {
+
         assert (image != null);
 
         int [] rgbArray = image.getRGB(0, 0,
@@ -541,12 +555,16 @@ public class ImageUtils {
         long totalRed = 0;
         long totalGreen = 0;
         long totalBlue = 0;
-        long count = rgbArray.length;
+        long count = 0;
         for (int i = 0; i < rgbArray.length; i++) {
-            int rgb = rgbArray[i];
-            int red   = (rgb >>> 16) & 0xFF;
-            int green = (rgb >>>  8) & 0xFF;
-            int blue  =  rgb         & 0xFF;
+            int argb = rgbArray[i];
+            if ((onlyOpaque == true) && (((argb >>> 24) & 0xFF) != 0xFF)) {
+                continue;
+            }
+            count++;
+            int red   = (argb >>> 16) & 0xFF;
+            int green = (argb >>>  8) & 0xFF;
+            int blue  =  argb         & 0xFF;
             totalRed   += red;
             totalGreen += green;
             totalBlue  += blue;
@@ -559,6 +577,46 @@ public class ImageUtils {
                                          | (totalGreen <<  8)
                                          |  totalBlue);
         return result;
+    }
+
+    /**
+     * Compute the standard deviation of RGB values of an entire image.
+     *
+     * @param image the image to check
+     * @param averageImage the image's "average" pixel values
+     * @return the average color
+     * @throws IllegalArgumentException if the two images are of different
+     * dimensions
+     */
+    public static double rgbStdDev(final BufferedImage image,
+        final BufferedImage averageImage) {
+
+        if (image.getWidth() != averageImage.getWidth()) {
+            throw new IllegalArgumentException("images have different widths");
+        }
+        if (image.getHeight() != averageImage.getHeight()) {
+            throw new IllegalArgumentException("images have different heights");
+        }
+
+        assert (image.getWidth() == averageImage.getWidth());
+        assert (image.getHeight() == averageImage.getHeight());
+
+        int [] imageRgbArray = image.getRGB(0, 0,
+            image.getWidth(), image.getHeight(), null, 0, image.getWidth());
+        int [] averageImageRgbArray = averageImage.getRGB(0, 0,
+            image.getWidth(), image.getHeight(), null, 0, image.getWidth());
+
+        assert (imageRgbArray.length == averageImageRgbArray.length);
+
+        double variance = 0.0;
+        for (int i = 0; i < imageRgbArray.length; i++) {
+            int rgb1 = imageRgbArray[i];
+            int rgb2 = averageImageRgbArray[i];
+            double distance = rgbDistance(rgb1, rgb2);
+            variance += distance;
+        }
+
+        return (variance / (double) imageRgbArray.length);
     }
 
     /**

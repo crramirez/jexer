@@ -640,7 +640,7 @@ public class UnicodeGlyphImage {
 
         /*
          * Map the image area to the portions of a Unicode drawing "canvas"
-         * and then literally counting how many 1's are in each area: if the
+         * and then literally count how many 1's are in each area: if the
          * count is above 50% total coverage for that area, then it is
          * foreground color.
          *
@@ -721,7 +721,7 @@ public class UnicodeGlyphImage {
 
         /*
          * Map the image area to the portions of a Unicode drawing "canvas"
-         * and then literally counting how many 1's are in each area: if the
+         * and then literally count how many 1's are in each area: if the
          * count is above 50% total coverage for that area, then it is
          * foreground color.
          *
@@ -929,10 +929,89 @@ public class UnicodeGlyphImage {
      * @return a cell with character, foreground, and background color set
      */
     public Cell toHalfBlockGlyph() {
-        int ch = findHalfGlyph(rgbArray, image.getWidth(), image.getHeight());
-        Cell cell = new Cell(ch);
-        cell.setBackColorRGB(palette.rgbColors[0]);
-        cell.setForeColorRGB(palette.rgbColors[1]);
+        Cell cell = null;
+
+        if (false) {
+
+            /*
+             * Original fast version: do a median cut, count pixels, pick
+             * glyph.
+             */
+            int ch = findHalfGlyph(rgbArray, image.getWidth(),
+                image.getHeight());
+            cell = new Cell(ch);
+            cell.setBackColorRGB(palette.rgbColors[0]);
+            cell.setForeColorRGB(palette.rgbColors[1]);
+
+        } else {
+
+            /*
+             * New more accurate version: try left half, top half, and full
+             * block, and whichever has the least relative difference to the
+             * image is what we return.
+             */
+            int width = image.getWidth();
+            int height = image.getHeight();
+            BufferedImage averageImage = new BufferedImage(width, height,
+                BufferedImage.TYPE_INT_ARGB);
+            double rgbStdDev = 0.0;
+            int ch = 0x258c;
+
+            // Left half.
+            int foreColorRGB = ImageUtils.rgbAverage(image.
+                getSubimage(0, 0, width / 2, height));
+            int backColorRGB = ImageUtils.rgbAverage(image.
+                getSubimage(width / 2, 0, width / 2, height));
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width / 2; x++) {
+                    averageImage.setRGB(x, y, foreColorRGB);
+                }
+                for (int x = width / 2; x < width; x++) {
+                    averageImage.setRGB(x, y, backColorRGB);
+                }
+            }
+            rgbStdDev = ImageUtils.rgbStdDev(image, averageImage);
+
+            // Top half
+            int newForeColorRGB = ImageUtils.rgbAverage(image.
+                getSubimage(0, 0, width, height / 2));
+            int newBackColorRGB = ImageUtils.rgbAverage(image.
+                getSubimage(0, height / 2, width, height / 2));
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height / 2; y++) {
+                    averageImage.setRGB(x, y, newForeColorRGB);
+                }
+                for (int y = height / 2; y < height; y++) {
+                    averageImage.setRGB(x, y, newBackColorRGB);
+                }
+            }
+            double newRgbStdDev = ImageUtils.rgbStdDev(image, averageImage);
+            if (newRgbStdDev < rgbStdDev) {
+                ch = 0x2580;
+                foreColorRGB = newForeColorRGB;
+                backColorRGB = newBackColorRGB;
+            }
+
+            // Full block
+            int newColorRGB = ImageUtils.rgbAverage(image);
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    averageImage.setRGB(x, y, newColorRGB);
+                }
+            }
+            newRgbStdDev = ImageUtils.rgbStdDev(image, averageImage);
+            if (newRgbStdDev < rgbStdDev) {
+                ch = 0x2588;
+                foreColorRGB = newColorRGB;
+                backColorRGB = newColorRGB;
+            }
+
+            // Assemble the result.
+            cell = new Cell(ch);
+            cell.setBackColorRGB(backColorRGB);
+            cell.setForeColorRGB(foreColorRGB);
+        }
+
         return cell;
     }
 
