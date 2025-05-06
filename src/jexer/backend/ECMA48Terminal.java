@@ -4326,8 +4326,9 @@ public class ECMA48Terminal extends LogicalScreen
         }
 
         for (int i = 0; i < cells.size(); i++) {
-            sb.append(unicodeGlyphEncoder.toUnicodeGlyph(cells.get(i).
-                    getImage()));
+            BufferedImage image = cells.get(i).getImage();
+            sb.append(unicodeGlyphEncoder.toUnicodeGlyph(image,
+                    image.getWidth(), image.getHeight()));
         }
 
         if (saveInCache) {

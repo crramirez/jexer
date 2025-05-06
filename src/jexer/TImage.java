@@ -116,7 +116,6 @@ public class TImage extends TWidget implements EditMenuUser {
          * foreground/background color.
          */
         UNICODE_SIXDOTSOLID,
-
     }
 
     // ------------------------------------------------------------------------
