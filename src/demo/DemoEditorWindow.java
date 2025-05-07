@@ -26,12 +26,12 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.demos;
+package demo;
 
 import java.util.ResourceBundle;
 
 import jexer.TApplication;
-import jexer.TTable;
+import jexer.TEditor;
 import jexer.TWidget;
 import jexer.TWindow;
 import jexer.event.TResizeEvent;
@@ -39,9 +39,9 @@ import static jexer.TCommand.*;
 import static jexer.TKeypress.*;
 
 /**
- * This window demonstates the TTable widget.
+ * This window demonstates the TEditor widget.
  */
-public class DemoTableWindow extends TWindow {
+public class DemoEditorWindow extends TWindow {
 
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
@@ -53,9 +53,9 @@ public class DemoTableWindow extends TWindow {
     private ResourceBundle i18n = null;
 
     /**
-     * Hang onto my TTable so I can resize it with the window.
+     * Hang onto my TEditor so I can resize it with the window.
      */
-    private TTable tableField;
+    private TEditor editField;
 
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
@@ -66,15 +66,17 @@ public class DemoTableWindow extends TWindow {
      *
      * @param parent the main application
      * @param title the text string
+     * @param text the text string
      */
     @SuppressWarnings("this-escape")
-    public DemoTableWindow(final TApplication parent, final String title) {
+    public DemoEditorWindow(final TApplication parent, final String title,
+        final String text) {
 
         super(parent, title, 0, 0, 44, 22, RESIZABLE);
-        i18n = ResourceBundle.getBundle(DemoTableWindow.class.getName(),
+        i18n = ResourceBundle.getBundle(DemoEditorWindow.class.getName(),
             getLocale());
 
-        tableField = new TTable(this, 0, 0, 42, 20);
+        editField = addEditor(text, 0, 0, 42, 20);
 
         statusBar = newStatusBar(i18n.getString("statusBar"));
         statusBar.addShortcutKeypress(kbF1, cmHelp,
@@ -91,11 +93,39 @@ public class DemoTableWindow extends TWindow {
      * @param parent the main application
      */
     @SuppressWarnings("this-escape")
-    public DemoTableWindow(final TApplication parent) {
-        this(parent, "");
-        i18n = ResourceBundle.getBundle(DemoTableWindow.class.getName(),
+    public DemoEditorWindow(final TApplication parent) {
+        this(parent, "",
+"This is an example of an editable text field.  Some example text follows.\n" +
+"\n" +
+"This library implements a text-based windowing system loosely\n" +
+"reminiscent of Borland's [Turbo\n" +
+"Vision](http://en.wikipedia.org/wiki/Turbo_Vision) library.  For those\n" +
+"wishing to use the actual C++ Turbo Vision library, see [Sergio\n" +
+"Sigala's updated version](http://tvision.sourceforge.net/) that runs\n" +
+"on many more platforms.\n" +
+"\n" +
+"This library is licensed MIT.  See the file LICENSE for the full license\n" +
+"for the details.\n" +
+"\n" +
+"package demo;\n" +
+"\n" +
+"import jexer.*;\n" +
+"import jexer.event.*;\n" +
+"import static jexer.TCommand.*;\n" +
+"import static jexer.TKeypress.*;\n" +
+"\n" +
+"/**\n" +
+" * This window demonstates the TText, THScroller, and TVScroller widgets.\n" +
+" */\n" +
+"public class DemoEditorWindow extends TWindow {\n" +
+"\n" +
+"1 2 3 123\n" +
+"\n"
+        );
+        i18n = ResourceBundle.getBundle(DemoEditorWindow.class.getName(),
             getLocale());
         setTitle(i18n.getString("windowTitle"));
+
     }
 
     // ------------------------------------------------------------------------
@@ -111,10 +141,10 @@ public class DemoTableWindow extends TWindow {
     public void onResize(final TResizeEvent event) {
         if (event.getType() == TResizeEvent.Type.WIDGET) {
             // Resize the text field
-            TResizeEvent tableSize = new TResizeEvent(event.getBackend(),
+            TResizeEvent editSize = new TResizeEvent(event.getBackend(),
                 TResizeEvent.Type.WIDGET, event.getWidth() - 2,
                 event.getHeight() - 2);
-            tableField.onResize(tableSize);
+            editField.onResize(editSize);
             return;
         }
 

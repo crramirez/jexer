@@ -26,7 +26,7 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.demos;
+package demo;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -35,7 +35,7 @@ import java.util.ResourceBundle;
 
 import jexer.TApplication;
 import jexer.backend.*;
-import jexer.demos.DemoApplication;
+import demo.DemoApplication;
 import jexer.net.TelnetServerSocket;
 
 

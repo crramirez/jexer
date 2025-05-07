@@ -26,7 +26,7 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.demos;
+package demo;
 
 import jexer.*;
 

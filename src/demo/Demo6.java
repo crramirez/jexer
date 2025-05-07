@@ -26,13 +26,13 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.demos;
+package demo;
 
 import java.util.ResourceBundle;
 
 import jexer.TApplication;
 import jexer.backend.*;
-import jexer.demos.DemoApplication;
+import demo.DemoApplication;
 
 /**
  * This class shows off the use of MultiBackend and MultiScreen.

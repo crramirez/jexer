@@ -30,4 +30,4 @@
 /**
  * Demonstration programs.
  */
-package jexer.demos;
+package demo;

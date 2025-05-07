@@ -26,24 +26,22 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.demos;
+package demo;
 
-import java.io.IOException;
 import java.util.ResourceBundle;
 
 import jexer.TApplication;
+import jexer.TTable;
 import jexer.TWidget;
 import jexer.TWindow;
 import jexer.event.TResizeEvent;
-import jexer.treeview.TDirectoryTreeItem;
-import jexer.treeview.TTreeViewWidget;
 import static jexer.TCommand.*;
 import static jexer.TKeypress.*;
 
 /**
- * This window demonstates the TTreeView widget.
+ * This window demonstates the TTable widget.
  */
-public class DemoTreeViewWindow extends TWindow {
+public class DemoTableWindow extends TWindow {
 
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
@@ -55,40 +53,49 @@ public class DemoTreeViewWindow extends TWindow {
     private ResourceBundle i18n = null;
 
     /**
-     * Hang onto my TTreeView so I can resize it with the window.
+     * Hang onto my TTable so I can resize it with the window.
      */
-    private TTreeViewWidget treeView;
+    private TTable tableField;
 
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
     // ------------------------------------------------------------------------
 
     /**
-     * Public constructor.
+     * Public constructor makes a text window out of any string.
      *
      * @param parent the main application
-     * @throws IOException if a java.io operation throws
+     * @param title the text string
      */
     @SuppressWarnings("this-escape")
-    public DemoTreeViewWindow(final TApplication parent) throws IOException {
-        super(parent, "", 0, 0, 44, 16, TWindow.RESIZABLE);
-        i18n = ResourceBundle.getBundle(DemoTreeViewWindow.class.getName(),
-            getLocale());
-        setTitle(i18n.getString("windowTitle"));
+    public DemoTableWindow(final TApplication parent, final String title) {
 
-        // Load the treeview with "stuff"
-        treeView = addTreeViewWidget(1, 1, 40, 12);
-        new TDirectoryTreeItem(treeView, ".", true);
+        super(parent, title, 0, 0, 44, 22, RESIZABLE);
+        i18n = ResourceBundle.getBundle(DemoTableWindow.class.getName(),
+            getLocale());
+
+        tableField = new TTable(this, 0, 0, 42, 20);
 
         statusBar = newStatusBar(i18n.getString("statusBar"));
         statusBar.addShortcutKeypress(kbF1, cmHelp,
             i18n.getString("statusBarHelp"));
         statusBar.addShortcutKeypress(kbF2, cmShell,
             i18n.getString("statusBarShell"));
-        statusBar.addShortcutKeypress(kbF3, cmOpen,
-            i18n.getString("statusBarOpen"));
         statusBar.addShortcutKeypress(kbF10, cmExit,
             i18n.getString("statusBarExit"));
+    }
+
+    /**
+     * Public constructor.
+     *
+     * @param parent the main application
+     */
+    @SuppressWarnings("this-escape")
+    public DemoTableWindow(final TApplication parent) {
+        this(parent, "");
+        i18n = ResourceBundle.getBundle(DemoTableWindow.class.getName(),
+            getLocale());
+        setTitle(i18n.getString("windowTitle"));
     }
 
     // ------------------------------------------------------------------------
@@ -98,22 +105,22 @@ public class DemoTreeViewWindow extends TWindow {
     /**
      * Handle window/screen resize events.
      *
-     * @param resize resize event
+     * @param event resize event
      */
     @Override
-    public void onResize(final TResizeEvent resize) {
-        if (resize.getType() == TResizeEvent.Type.WIDGET) {
-            // Resize the treeView field
-            TResizeEvent treeSize = new TResizeEvent(resize.getBackend(),
-                TResizeEvent.Type.WIDGET, resize.getWidth() - 4,
-                resize.getHeight() - 4);
-            treeView.onResize(treeSize);
+    public void onResize(final TResizeEvent event) {
+        if (event.getType() == TResizeEvent.Type.WIDGET) {
+            // Resize the text field
+            TResizeEvent tableSize = new TResizeEvent(event.getBackend(),
+                TResizeEvent.Type.WIDGET, event.getWidth() - 2,
+                event.getHeight() - 2);
+            tableField.onResize(tableSize);
             return;
         }
 
         // Pass to children instead
         for (TWidget widget: getChildren()) {
-            widget.onResize(resize);
+            widget.onResize(event);
         }
     }
 

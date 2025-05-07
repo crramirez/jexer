@@ -26,22 +26,24 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.demos;
+package demo;
 
+import java.io.IOException;
 import java.util.ResourceBundle;
 
 import jexer.TApplication;
-import jexer.TEditor;
 import jexer.TWidget;
 import jexer.TWindow;
 import jexer.event.TResizeEvent;
+import jexer.treeview.TDirectoryTreeItem;
+import jexer.treeview.TTreeViewWidget;
 import static jexer.TCommand.*;
 import static jexer.TKeypress.*;
 
 /**
- * This window demonstates the TEditor widget.
+ * This window demonstates the TTreeView widget.
  */
-public class DemoEditorWindow extends TWindow {
+public class DemoTreeViewWindow extends TWindow {
 
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
@@ -53,79 +55,40 @@ public class DemoEditorWindow extends TWindow {
     private ResourceBundle i18n = null;
 
     /**
-     * Hang onto my TEditor so I can resize it with the window.
+     * Hang onto my TTreeView so I can resize it with the window.
      */
-    private TEditor editField;
+    private TTreeViewWidget treeView;
 
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
     // ------------------------------------------------------------------------
 
     /**
-     * Public constructor makes a text window out of any string.
+     * Public constructor.
      *
      * @param parent the main application
-     * @param title the text string
-     * @param text the text string
+     * @throws IOException if a java.io operation throws
      */
     @SuppressWarnings("this-escape")
-    public DemoEditorWindow(final TApplication parent, final String title,
-        final String text) {
-
-        super(parent, title, 0, 0, 44, 22, RESIZABLE);
-        i18n = ResourceBundle.getBundle(DemoEditorWindow.class.getName(),
+    public DemoTreeViewWindow(final TApplication parent) throws IOException {
+        super(parent, "", 0, 0, 44, 16, TWindow.RESIZABLE);
+        i18n = ResourceBundle.getBundle(DemoTreeViewWindow.class.getName(),
             getLocale());
+        setTitle(i18n.getString("windowTitle"));
 
-        editField = addEditor(text, 0, 0, 42, 20);
+        // Load the treeview with "stuff"
+        treeView = addTreeViewWidget(1, 1, 40, 12);
+        new TDirectoryTreeItem(treeView, ".", true);
 
         statusBar = newStatusBar(i18n.getString("statusBar"));
         statusBar.addShortcutKeypress(kbF1, cmHelp,
             i18n.getString("statusBarHelp"));
         statusBar.addShortcutKeypress(kbF2, cmShell,
             i18n.getString("statusBarShell"));
+        statusBar.addShortcutKeypress(kbF3, cmOpen,
+            i18n.getString("statusBarOpen"));
         statusBar.addShortcutKeypress(kbF10, cmExit,
             i18n.getString("statusBarExit"));
-    }
-
-    /**
-     * Public constructor.
-     *
-     * @param parent the main application
-     */
-    @SuppressWarnings("this-escape")
-    public DemoEditorWindow(final TApplication parent) {
-        this(parent, "",
-"This is an example of an editable text field.  Some example text follows.\n" +
-"\n" +
-"This library implements a text-based windowing system loosely\n" +
-"reminiscent of Borland's [Turbo\n" +
-"Vision](http://en.wikipedia.org/wiki/Turbo_Vision) library.  For those\n" +
-"wishing to use the actual C++ Turbo Vision library, see [Sergio\n" +
-"Sigala's updated version](http://tvision.sourceforge.net/) that runs\n" +
-"on many more platforms.\n" +
-"\n" +
-"This library is licensed MIT.  See the file LICENSE for the full license\n" +
-"for the details.\n" +
-"\n" +
-"package jexer.demos;\n" +
-"\n" +
-"import jexer.*;\n" +
-"import jexer.event.*;\n" +
-"import static jexer.TCommand.*;\n" +
-"import static jexer.TKeypress.*;\n" +
-"\n" +
-"/**\n" +
-" * This window demonstates the TText, THScroller, and TVScroller widgets.\n" +
-" */\n" +
-"public class DemoEditorWindow extends TWindow {\n" +
-"\n" +
-"1 2 3 123\n" +
-"\n"
-        );
-        i18n = ResourceBundle.getBundle(DemoEditorWindow.class.getName(),
-            getLocale());
-        setTitle(i18n.getString("windowTitle"));
-
     }
 
     // ------------------------------------------------------------------------
@@ -135,22 +98,22 @@ public class DemoEditorWindow extends TWindow {
     /**
      * Handle window/screen resize events.
      *
-     * @param event resize event
+     * @param resize resize event
      */
     @Override
-    public void onResize(final TResizeEvent event) {
-        if (event.getType() == TResizeEvent.Type.WIDGET) {
-            // Resize the text field
-            TResizeEvent editSize = new TResizeEvent(event.getBackend(),
-                TResizeEvent.Type.WIDGET, event.getWidth() - 2,
-                event.getHeight() - 2);
-            editField.onResize(editSize);
+    public void onResize(final TResizeEvent resize) {
+        if (resize.getType() == TResizeEvent.Type.WIDGET) {
+            // Resize the treeView field
+            TResizeEvent treeSize = new TResizeEvent(resize.getBackend(),
+                TResizeEvent.Type.WIDGET, resize.getWidth() - 4,
+                resize.getHeight() - 4);
+            treeView.onResize(treeSize);
             return;
         }
 
         // Pass to children instead
         for (TWidget widget: getChildren()) {
-            widget.onResize(event);
+            widget.onResize(resize);
         }
     }
 

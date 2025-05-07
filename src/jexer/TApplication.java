@@ -2357,7 +2357,7 @@ public class TApplication implements Runnable {
         String version = getClass().getPackage().getImplementationVersion();
         if (version == null) {
             // This is Java 9+, use a hardcoded string here.
-            version = "1.7.1";
+            version = "2.0.0";
         }
         messageBox(i18n.getString("aboutDialogTitle"),
             MessageFormat.format(i18n.getString("aboutDialogText"), version),

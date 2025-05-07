@@ -26,15 +26,15 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.demos;
+package demo;
 
-import jexer.*;
+import jexer.TApplication;
 
 /**
  * This class is the main driver for a simple demonstration of Jexer's
- * capabilities.  This one shows TDesktop and TWindow API details.
+ * capabilities.
  */
-public class Demo4 {
+public class Demo1 {
 
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
@@ -43,10 +43,10 @@ public class Demo4 {
     /**
      * Default constructor.
      */
-    public Demo4() {}
+    public Demo1() {}
 
     // ------------------------------------------------------------------------
-    // Demo4 ------------------------------------------------------------------
+    // Demo1 ------------------------------------------------------------------
     // ------------------------------------------------------------------------
 
     /**
@@ -72,7 +72,21 @@ public class Demo4 {
                     backendType = TApplication.BackendType.XTERM;
                 }
             }
-            DesktopDemoApplication app = new DesktopDemoApplication(backendType);
+            DemoApplication app;
+            if (backendType == TApplication.BackendType.SWING) {
+                int fontSize = 20;
+                try {
+                    fontSize = Integer.parseInt(
+                        System.getProperty("jexer.Swing.fontSize", "20"));
+                    // Keep requested font size between 16 and 32 pt.
+                    fontSize = Math.min(32, Math.max(16, fontSize));
+                } catch (NumberFormatException e) {
+                    // SQUASH
+                }
+                app = new DemoApplication(backendType, 90, 30, fontSize);
+            } else {
+                app = new DemoApplication(backendType);
+            }
             (new Thread(app)).start();
         } catch (Exception e) {
             e.printStackTrace();

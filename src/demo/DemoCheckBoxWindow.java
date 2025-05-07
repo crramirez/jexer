@@ -26,30 +26,28 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.demos;
+package demo;
 
 import java.text.MessageFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import jexer.TAction;
 import jexer.TApplication;
-import jexer.TCalendar;
-import jexer.TField;
-import jexer.TLabel;
+import jexer.TComboBox;
 import jexer.TMessageBox;
+import jexer.TRadioGroup;
 import jexer.TWindow;
 import jexer.layout.StretchLayoutManager;
 import static jexer.TCommand.*;
 import static jexer.TKeypress.*;
 
 /**
- * This window demonstates the TField and TPasswordField widgets.
+ * This window demonstates the TRadioGroup, TRadioButton, and TCheckBox
+ * widgets.
  */
-public class DemoTextFieldWindow extends TWindow {
+public class DemoCheckBoxWindow extends TWindow {
 
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
@@ -61,21 +59,10 @@ public class DemoTextFieldWindow extends TWindow {
     private ResourceBundle i18n = null;
 
     /**
-     * Calendar.  Has to be at class scope so that it can be accessed by the
+     * Combo box.  Has to be at class scope so that it can be accessed by the
      * anonymous TAction class.
      */
-    TCalendar calendar = null;
-
-    /**
-     * Day of week label is updated with TSpinner clicks.
-     */
-    TLabel dayOfWeekLabel;
-
-    /**
-     * Day of week to demonstrate TSpinner.  Has to be at class scope so that
-     * it can be accessed by the anonymous TAction class.
-     */
-    GregorianCalendar dayOfWeekCalendar = new GregorianCalendar();
+    TComboBox comboBox = null;
 
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
@@ -86,8 +73,8 @@ public class DemoTextFieldWindow extends TWindow {
      *
      * @param parent the main application
      */
-    DemoTextFieldWindow(final TApplication parent) {
-        this(parent, TWindow.CENTERED | TWindow.RESIZABLE);
+    DemoCheckBoxWindow(final TApplication parent) {
+        this(parent, CENTERED | RESIZABLE);
     }
 
     /**
@@ -96,11 +83,11 @@ public class DemoTextFieldWindow extends TWindow {
      * @param parent the main application
      * @param flags bitmask of MODAL, CENTERED, or RESIZABLE
      */
-    DemoTextFieldWindow(final TApplication parent, final int flags) {
-        // Construct a demo window.  X and Y don't matter because it
-        // will be centered on screen.
-        super(parent, "", 0, 0, 60, 20, flags);
-        i18n = ResourceBundle.getBundle(DemoTextFieldWindow.class.getName(),
+    DemoCheckBoxWindow(final TApplication parent, final int flags) {
+        // Construct a demo window.  X and Y don't matter because it will be
+        // centered on screen.
+        super(parent, "", 0, 0, 60, 17, flags);
+        i18n = ResourceBundle.getBundle(DemoCheckBoxWindow.class.getName(),
             getLocale());
         setTitle(i18n.getString("windowTitle"));
 
@@ -109,67 +96,53 @@ public class DemoTextFieldWindow extends TWindow {
 
         int row = 1;
 
-        addLabel(i18n.getString("textField1"), 1, row);
-        addField(35, row++, 15, false, i18n.getString("fieldText"));
-        addLabel(i18n.getString("textField2"), 1, row);
-        addField(35, row++, 15, true);
-        addLabel(i18n.getString("textField3"), 1, row);
-        addPasswordField(35, row++, 15, false);
-        addLabel(i18n.getString("textField4"), 1, row);
-        addPasswordField(35, row++, 15, true, "hunter2");
-        addLabel(i18n.getString("textField5"), 1, row);
-        TField selected = addField(35, row++, 40, false,
-            i18n.getString("textField6"));
-        row += 1;
+        // Add some widgets
+        addLabel(i18n.getString("checkBoxLabel1"), 1, row);
+        addCheckBox(40, row++, i18n.getString("checkBoxText1"), false);
+        addLabel(i18n.getString("checkBoxLabel2"), 1, row);
+        addCheckBox(40, row++, i18n.getString("checkBoxText2"), true);
+        row += 2;
 
-        calendar = addCalendar(1, row++,
+        TRadioGroup group = addRadioGroup(1, row,
+            i18n.getString("radioGroupTitle"));
+        group.addRadioButton(i18n.getString("radioOption1"));
+        group.addRadioButton(i18n.getString("radioOption2"), true);
+        group.addRadioButton(i18n.getString("radioOption3"));
+        group.setRequiresSelection(true);
+
+        List<String> comboValues = new ArrayList<String>();
+        comboValues.add(i18n.getString("comboBoxString0"));
+        comboValues.add(i18n.getString("comboBoxString1"));
+        comboValues.add(i18n.getString("comboBoxString2"));
+        comboValues.add(i18n.getString("comboBoxString3"));
+        comboValues.add(i18n.getString("comboBoxString4"));
+        comboValues.add(i18n.getString("comboBoxString5"));
+        comboValues.add(i18n.getString("comboBoxString6"));
+        comboValues.add(i18n.getString("comboBoxString7"));
+        comboValues.add(i18n.getString("comboBoxString8"));
+        comboValues.add(i18n.getString("comboBoxString9"));
+        comboValues.add(i18n.getString("comboBoxString10"));
+
+        comboBox = addComboBox(35, row, 12, comboValues, 2, 6,
             new TAction() {
                 public void DO() {
-                    getApplication().messageBox(i18n.getString("calendarTitle"),
-                        MessageFormat.format(i18n.getString("calendarMessage"),
-                            new Date(calendar.getValue().getTimeInMillis())),
+                    getApplication().messageBox(i18n.getString("messageBoxTitle"),
+                        MessageFormat.format(i18n.getString("messageBoxPrompt"),
+                            comboBox.getText()),
                         TMessageBox.Type.OK);
                 }
             }
         );
 
-        dayOfWeekLabel = addLabel("Wednesday-", 35, row - 1, "tmenu", false);
-        dayOfWeekLabel.setLabel(String.format("%-10s",
-                dayOfWeekCalendar.getDisplayName(Calendar.DAY_OF_WEEK,
-                    Calendar.LONG, Locale.getDefault())));
-
-        addSpinner(35 + dayOfWeekLabel.getWidth(), row - 1,
-            new TAction() {
-                public void DO() {
-                    dayOfWeekCalendar.add(Calendar.DAY_OF_WEEK, 1);
-                    dayOfWeekLabel.setLabel(String.format("%-10s",
-                            dayOfWeekCalendar.getDisplayName(
-                            Calendar.DAY_OF_WEEK, Calendar.LONG,
-                            Locale.getDefault())));
-                }
-            },
-            new TAction() {
-                public void DO() {
-                    dayOfWeekCalendar.add(Calendar.DAY_OF_WEEK, -1);
-                    dayOfWeekLabel.setLabel(String.format("%-10s",
-                            dayOfWeekCalendar.getDisplayName(
-                            Calendar.DAY_OF_WEEK, Calendar.LONG,
-                            Locale.getDefault())));
-                }
-            }
-        );
-
-
         addButton(i18n.getString("closeWindow"),
             (getWidth() - 14) / 2, getHeight() - 4,
             new TAction() {
                 public void DO() {
-                    getApplication().closeWindow(DemoTextFieldWindow.this);
+                    DemoCheckBoxWindow.this.getApplication()
+                        .closeWindow(DemoCheckBoxWindow.this);
                 }
             }
         );
-
-        activate(selected);
 
         statusBar = newStatusBar(i18n.getString("statusBar"));
         statusBar.addShortcutKeypress(kbF1, cmHelp,
