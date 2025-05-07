@@ -28,6 +28,6 @@
  */
 
 /**
- * A basic text editor backend supporting word highlighting.
+ * An ECMA-48 / ANSI X3.64 style terminal emulator.
  */
-package jexer.teditor;
+package jexer.terminal;

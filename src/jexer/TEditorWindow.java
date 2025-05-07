@@ -34,12 +34,6 @@ import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import java.util.Scanner;
 
-import jexer.TApplication;
-import jexer.TEditorWidget;
-import jexer.THScroller;
-import jexer.TScrollableWindow;
-import jexer.TVScroller;
-import jexer.TWidget;
 import jexer.bits.CellAttributes;
 import jexer.bits.GraphicsChars;
 import jexer.event.TCommandEvent;
@@ -68,7 +62,7 @@ public class TEditorWindow extends TScrollableWindow {
     /**
      * Hang onto my TEditor so I can resize it with the window.
      */
-    private TEditorWidget editField;
+    private TEditor editField;
 
     /**
      * The fully-qualified name of the file being edited.

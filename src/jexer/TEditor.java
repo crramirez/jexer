@@ -38,17 +38,17 @@ import jexer.event.TCommandEvent;
 import jexer.event.TKeypressEvent;
 import jexer.event.TMouseEvent;
 import jexer.event.TResizeEvent;
-import jexer.teditor.Document;
-import jexer.teditor.Line;
-import jexer.teditor.Word;
+import jexer.texteditor.Document;
+import jexer.texteditor.Line;
+import jexer.texteditor.Word;
 import static jexer.TCommand.*;
 import static jexer.TKeypress.*;
 
 /**
- * TEditorWidget displays an editable text document.  It is unaware of
+ * TEditor displays an editable text document.  It is unaware of
  * scrolling behavior, but can respond to mouse and keyboard events.
  */
-public class TEditorWidget extends TWidget implements EditMenuUser {
+public class TEditor extends TWidget implements EditMenuUser {
 
     // ------------------------------------------------------------------------
     // Constants --------------------------------------------------------------
@@ -169,7 +169,7 @@ public class TEditorWidget extends TWidget implements EditMenuUser {
      * @param height height of text area
      */
     @SuppressWarnings("this-escape")
-    public TEditorWidget(final TWidget parent, final String text, final int x,
+    public TEditor(final TWidget parent, final String text, final int x,
         final int y, final int width, final int height) {
 
         // Set parent and window
@@ -721,7 +721,7 @@ public class TEditorWidget extends TWidget implements EditMenuUser {
     }
 
     // ------------------------------------------------------------------------
-    // TEditorWidget ----------------------------------------------------------
+    // TEditor ----------------------------------------------------------------
     // ------------------------------------------------------------------------
 
     /**

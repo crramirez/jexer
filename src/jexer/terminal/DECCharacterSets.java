@@ -26,7 +26,7 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.tterminal;
+package jexer.terminal;
 
 /**
  * This class contains a collection of the DEC VT100 and VT220 character set

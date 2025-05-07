@@ -26,7 +26,7 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.ttree;
+package jexer.treeview;
 
 import java.io.File;
 import java.io.IOException;

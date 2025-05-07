@@ -49,7 +49,7 @@ import static jexer.TKeypress.kbUp;
  * TText implements a simple scrollable text area. It reflows automatically on
  * resize.
  */
-public class TText extends TScrollableWidget {
+public class TText extends TScrollable {
 
     // ------------------------------------------------------------------------
     // Constants --------------------------------------------------------------
@@ -173,7 +173,7 @@ public class TText extends TScrollableWidget {
     }
 
     // ------------------------------------------------------------------------
-    // TScrollableWidget ------------------------------------------------------
+    // TScrollable ------------------------------------------------------------
     // ------------------------------------------------------------------------
 
     /**

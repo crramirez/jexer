@@ -36,7 +36,6 @@ import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
-import jexer.TScrollableWidget;
 import jexer.backend.ECMA48Terminal;
 import jexer.backend.GlyphMaker;
 import jexer.backend.SwingTerminal;
@@ -44,9 +43,9 @@ import jexer.bits.Cell;
 import jexer.event.TKeypressEvent;
 import jexer.event.TMouseEvent;
 import jexer.event.TResizeEvent;
-import jexer.tterminal.DisplayLine;
-import jexer.tterminal.DisplayListener;
-import jexer.tterminal.ECMA48;
+import jexer.terminal.DisplayLine;
+import jexer.terminal.DisplayListener;
+import jexer.terminal.ECMA48;
 import static jexer.TKeypress.*;
 
 
@@ -54,8 +53,7 @@ import static jexer.TKeypress.*;
  * TTextPicture displays a color-and-text canvas, also called "ANSI Art" or
  * "ASCII Art".
  */
-public class TTextPicture extends TScrollableWidget
-                          implements DisplayListener {
+public class TTextPicture extends TScrollable implements DisplayListener {
 
     // ------------------------------------------------------------------------
     // Constants --------------------------------------------------------------
@@ -239,7 +237,7 @@ public class TTextPicture extends TScrollableWidget
     }
 
     // ------------------------------------------------------------------------
-    // TScrollableWidget ------------------------------------------------------
+    // TScrollable ------------------------------------------------------------
     // ------------------------------------------------------------------------
 
     /**

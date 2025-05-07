@@ -36,9 +36,9 @@ import java.util.ResourceBundle;
 import jexer.backend.SwingTerminal;
 import jexer.bits.GraphicsChars;
 import jexer.event.TKeypressEvent;
-import jexer.ttree.TDirectoryTreeItem;
-import jexer.ttree.TTreeItem;
-import jexer.ttree.TTreeViewWidget;
+import jexer.treeview.TDirectoryTreeItem;
+import jexer.treeview.TTreeItem;
+import jexer.treeview.TTreeViewWidget;
 import static jexer.TKeypress.*;
 
 /**

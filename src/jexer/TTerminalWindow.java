@@ -56,7 +56,7 @@ public class TTerminalWindow extends TScrollableWindow {
     /**
      * The terminal.
      */
-    protected TTerminalWidget terminal;
+    protected TTerminal terminal;
 
     /**
      * If true, close the window when the shell exits.
@@ -167,7 +167,7 @@ public class TTerminalWindow extends TScrollableWindow {
             i18n.getString("statusBarMenu"));
 
         // Spin it up
-        terminal = new TTerminalWidget(this, 0, 0, command, new TAction() {
+        terminal = new TTerminal(this, 0, 0, command, new TAction() {
             public void DO() {
                 onShellExit();
             }
@@ -237,7 +237,7 @@ public class TTerminalWindow extends TScrollableWindow {
             i18n.getString("statusBarMenu"));
 
         // Spin it up
-        terminal = new TTerminalWidget(this, 0, 0, new TAction() {
+        terminal = new TTerminal(this, 0, 0, new TAction() {
             public void DO() {
                 onShellExit();
             }

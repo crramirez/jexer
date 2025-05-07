@@ -51,9 +51,9 @@ import jexer.layout.LayoutManager;
 import jexer.menu.TMenu;
 import jexer.tackboard.MousePointer;
 import jexer.tackboard.Tackboard;
-import jexer.ttree.TTreeItem;
-import jexer.ttree.TTreeView;
-import jexer.ttree.TTreeViewWidget;
+import jexer.treeview.TTreeItem;
+import jexer.treeview.TTreeView;
+import jexer.treeview.TTreeViewWidget;
 import static jexer.TKeypress.*;
 
 /**
@@ -2603,10 +2603,10 @@ public abstract class TWidget implements Comparable<TWidget> {
      * @param height height of text area
      * @return the new text box
      */
-    public final TEditorWidget addEditor(final String text, final int x,
+    public final TEditor addEditor(final String text, final int x,
         final int y, final int width, final int height) {
 
-        return new TEditorWidget(this, text, x, y, width, height);
+        return new TEditor(this, text, x, y, width, height);
     }
 
     /**
@@ -3089,10 +3089,10 @@ public abstract class TWidget implements Comparable<TWidget> {
      * @param height height of widget
      * @return the new table
      */
-    public TTableWidget addTable(final int x, final int y, final int width,
+    public TTable addTable(final int x, final int y, final int width,
         final int height) {
 
-        return new TTableWidget(this, x, y, width, height);
+        return new TTable(this, x, y, width, height);
     }
 
     /**
@@ -3107,10 +3107,10 @@ public abstract class TWidget implements Comparable<TWidget> {
      * @param gridRows number of rows in grid
      * @return the new table
      */
-    public TTableWidget addTable(final int x, final int y, final int width,
+    public TTable addTable(final int x, final int y, final int width,
         final int height, final int gridColumns, final int gridRows) {
 
-        return new TTableWidget(this, x, y, width, height, gridColumns,
+        return new TTable(this, x, y, width, height, gridColumns,
             gridRows);
     }
 

@@ -53,17 +53,17 @@ import jexer.event.TMenuEvent;
 import jexer.event.TMouseEvent;
 import jexer.event.TResizeEvent;
 import jexer.menu.TMenu;
-import jexer.tterminal.DisplayLine;
-import jexer.tterminal.DisplayListener;
-import jexer.tterminal.ECMA48;
+import jexer.terminal.DisplayLine;
+import jexer.terminal.DisplayListener;
+import jexer.terminal.ECMA48;
 import static jexer.TCommand.*;
 import static jexer.TKeypress.*;
 
 /**
- * TTerminalWidget exposes a ECMA-48 / ANSI X3.64 style terminal in a widget.
+ * TTerminal exposes a ECMA-48 / ANSI X3.64 style terminal in a widget.
  */
-public class TTerminalWidget extends TScrollableWidget
-                             implements DisplayListener, EditMenuUser {
+public class TTerminal extends TScrollable
+                       implements DisplayListener, EditMenuUser {
 
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
@@ -183,7 +183,7 @@ public class TTerminalWidget extends TScrollableWidget
      * @param y row relative to parent
      * @param commandLine the command line to execute
      */
-    public TTerminalWidget(final TWidget parent, final int x, final int y,
+    public TTerminal(final TWidget parent, final int x, final int y,
         final String commandLine) {
 
         this(parent, x, y, commandLine.split("\\s+"));
@@ -201,7 +201,7 @@ public class TTerminalWidget extends TScrollableWidget
      * java.lang.ProcessBuilder for further operating-system specific
      * details.
      */
-    public TTerminalWidget(final TWidget parent, final int x, final int y,
+    public TTerminal(final TWidget parent, final int x, final int y,
         final String [] command) {
 
         this(parent, x, y, command, null);
@@ -220,7 +220,7 @@ public class TTerminalWidget extends TScrollableWidget
      * details.
      * @param closeAction action to perform when the shell exits
      */
-    public TTerminalWidget(final TWidget parent, final int x, final int y,
+    public TTerminal(final TWidget parent, final int x, final int y,
         final String [] command, final TAction closeAction) {
 
         this(parent, x, y, 80, 24, command, closeAction);
@@ -242,12 +242,12 @@ public class TTerminalWidget extends TScrollableWidget
      * @param closeAction action to perform when the shell exits
      */
     @SuppressWarnings("this-escape")
-    public TTerminalWidget(final TWidget parent, final int x, final int y,
+    public TTerminal(final TWidget parent, final int x, final int y,
         final int width, final int height, final String [] command,
         final TAction closeAction) {
 
         super(parent, x, y, width, height);
-        i18n = ResourceBundle.getBundle(TTerminalWidget.class.getName(),
+        i18n = ResourceBundle.getBundle(TTerminal.class.getName(),
             getLocale());
 
         setMouseStyle("text");
@@ -320,7 +320,7 @@ public class TTerminalWidget extends TScrollableWidget
      * @param x column relative to parent
      * @param y row relative to parent
      */
-    public TTerminalWidget(final TWidget parent, final int x, final int y) {
+    public TTerminal(final TWidget parent, final int x, final int y) {
         this(parent, x, y, (TAction) null);
     }
 
@@ -332,7 +332,7 @@ public class TTerminalWidget extends TScrollableWidget
      * @param y row relative to parent
      * @param closeAction action to perform when the shell exits
      */
-    public TTerminalWidget(final TWidget parent, final int x, final int y,
+    public TTerminal(final TWidget parent, final int x, final int y,
         final TAction closeAction) {
 
         this(parent, x, y, 80, 24, closeAction);
@@ -349,11 +349,11 @@ public class TTerminalWidget extends TScrollableWidget
      * @param closeAction action to perform when the shell exits
      */
     @SuppressWarnings("this-escape")
-    public TTerminalWidget(final TWidget parent, final int x, final int y,
+    public TTerminal(final TWidget parent, final int x, final int y,
         final int width, final int height, final TAction closeAction) {
 
         super(parent, x, y, width, height);
-        i18n = ResourceBundle.getBundle(TTerminalWidget.class.getName(),
+        i18n = ResourceBundle.getBundle(TTerminal.class.getName(),
             getLocale());
 
         setMouseStyle("text");
@@ -642,7 +642,7 @@ public class TTerminalWidget extends TScrollableWidget
     }
 
     // ------------------------------------------------------------------------
-    // TScrollableWidget ------------------------------------------------------
+    // TScrollable ------------------------------------------------------------
     // ------------------------------------------------------------------------
 
     /**
@@ -821,7 +821,7 @@ public class TTerminalWidget extends TScrollableWidget
     }
 
     // ------------------------------------------------------------------------
-    // TTerminalWidget --------------------------------------------------------
+    // TTerminal --------------------------------------------------------------
     // ------------------------------------------------------------------------
 
     /**
@@ -1159,7 +1159,7 @@ public class TTerminalWidget extends TScrollableWidget
                 // could be executed during draw() when syncing with ECMA48.
                 app.invokeLater(new Runnable() {
                     public void run() {
-                        closeAction.DO(TTerminalWidget.this);
+                        closeAction.DO(TTerminal.this);
                     }
                 });
             }

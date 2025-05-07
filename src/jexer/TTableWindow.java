@@ -61,7 +61,7 @@ public class TTableWindow extends TScrollableWindow {
     /**
      * The table widget.
      */
-    private TTableWidget tableField;
+    private TTable tableField;
 
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
@@ -713,11 +713,11 @@ public class TTableWindow extends TScrollableWindow {
     }
 
     /**
-     * Retrieve the underlying TTableWidget.
+     * Retrieve the underlying TTable.
      *
      * @return the table widget
      */
-    public TTableWidget getTableWidget() {
+    public TTable getTableWidget() {
         return tableField;
     }
 

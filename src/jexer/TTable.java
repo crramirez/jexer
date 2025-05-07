@@ -45,14 +45,14 @@ import jexer.event.TResizeEvent;
 import static jexer.TKeypress.*;
 
 /**
- * TTableWidget is used to display and edit regular two-dimensional tables of
+ * TTable is used to display and edit regular two-dimensional tables of
  * cells.
  *
  * This class was inspired by a TTable implementation originally developed by
  * David "Niki" ROULET [niki@nikiroo.be], made available under MIT at
  * https://github.com/nikiroo/jexer/tree/ttable_pull.
  */
-public class TTableWidget extends TWidget {
+public class TTable extends TWidget {
 
     // ------------------------------------------------------------------------
     // Constants --------------------------------------------------------------
@@ -396,7 +396,7 @@ public class TTableWidget extends TWidget {
          * @param row row index of this cell
          */
         @SuppressWarnings("this-escape")
-        public Cell(final TTableWidget parent, final int x, final int y,
+        public Cell(final TTable parent, final int x, final int y,
             final int width, final int height, final int column,
             final int row) {
 
@@ -431,9 +431,9 @@ public class TTableWidget extends TWidget {
 
             if (isActive()) {
                 // Let the table know that I was activated.
-                ((TTableWidget) getParent()).setSelectedRowNumber(row);
-                ((TTableWidget) getParent()).setSelectedColumnNumber(column);
-                ((TTableWidget) getParent()).alignGrid();
+                ((TTable) getParent()).setSelectedRowNumber(row);
+                ((TTable) getParent()).setSelectedColumnNumber(column);
+                ((TTable) getParent()).alignGrid();
             }
         }
 
@@ -449,9 +449,9 @@ public class TTableWidget extends TWidget {
 
             if (isActive()) {
                 // Let the table know that I was activated.
-                ((TTableWidget) getParent()).setSelectedRowNumber(row);
-                ((TTableWidget) getParent()).setSelectedColumnNumber(column);
-                ((TTableWidget) getParent()).alignGrid();
+                ((TTable) getParent()).setSelectedRowNumber(row);
+                ((TTable) getParent()).setSelectedColumnNumber(column);
+                ((TTable) getParent()).alignGrid();
             }
         }
 
@@ -467,9 +467,9 @@ public class TTableWidget extends TWidget {
 
             if (isActive()) {
                 // Let the table know that I was activated.
-                ((TTableWidget) getParent()).setSelectedRowNumber(row);
-                ((TTableWidget) getParent()).setSelectedColumnNumber(column);
-                ((TTableWidget) getParent()).alignGrid();
+                ((TTable) getParent()).setSelectedRowNumber(row);
+                ((TTable) getParent()).setSelectedColumnNumber(column);
+                ((TTable) getParent()).alignGrid();
             }
         }
 
@@ -538,7 +538,7 @@ public class TTableWidget extends TWidget {
          */
         @Override
         public void draw() {
-            TTableWidget table = (TTableWidget) getParent();
+            TTable table = (TTable) getParent();
 
             if (isAbsoluteActive()) {
                 if (isEditing) {
@@ -629,7 +629,7 @@ public class TTableWidget extends TWidget {
      * @param gridRows number of rows in grid
      */
     @SuppressWarnings("this-escape")
-    public TTableWidget(final TWidget parent, final int x, final int y,
+    public TTable(final TWidget parent, final int x, final int y,
         final int width, final int height, final int gridColumns,
         final int gridRows) {
 
@@ -646,7 +646,7 @@ public class TTableWidget extends TWidget {
      * @param width width of widget
      * @param height height of widget
      */
-    public TTableWidget(final TWidget parent, final int x, final int y,
+    public TTable(final TWidget parent, final int x, final int y,
         final int width, final int height) {
 
         this(parent, x, y, width, height,
@@ -953,7 +953,7 @@ public class TTableWidget extends TWidget {
     }
 
     // ------------------------------------------------------------------------
-    // TTableWidget -----------------------------------------------------------
+    // TTable -----------------------------------------------------------------
     // ------------------------------------------------------------------------
 
     /**
@@ -1406,8 +1406,8 @@ public class TTableWidget extends TWidget {
             if ((x < left) || (x > right)) {
                 for (int i = 0; i < rows.size(); i++) {
                     columns.get(x).get(i).setVisible(false);
-                    // Just need a value guaranteed to be outside
-                    // TTableWidget's visible width.
+                    // Just need a value guaranteed to be outside TTable's
+                    // visible width.
                     columns.get(x).setX(getWidth() + rowLabelWidth + 2);
                 }
                 continue;

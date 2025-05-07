@@ -52,7 +52,7 @@ module jexer {
     exports jexer.menu;
     exports jexer.net;
     exports jexer.tackboard;
-    exports jexer.teditor;
-    exports jexer.tterminal;
-    exports jexer.ttree;
+    exports jexer.terminal;
+    exports jexer.texteditor;
+    exports jexer.treeview;
 }

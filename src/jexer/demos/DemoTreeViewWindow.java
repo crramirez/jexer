@@ -35,8 +35,8 @@ import jexer.TApplication;
 import jexer.TWidget;
 import jexer.TWindow;
 import jexer.event.TResizeEvent;
-import jexer.ttree.TDirectoryTreeItem;
-import jexer.ttree.TTreeViewWidget;
+import jexer.treeview.TDirectoryTreeItem;
+import jexer.treeview.TTreeViewWidget;
 import static jexer.TCommand.*;
 import static jexer.TKeypress.*;
 

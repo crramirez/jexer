@@ -40,7 +40,7 @@ import static jexer.TKeypress.*;
 /**
  * TList shows a list of strings, and lets the user select one.
  */
-public class TList extends TScrollableWidget {
+public class TList extends TScrollable {
 
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
@@ -325,7 +325,7 @@ public class TList extends TScrollableWidget {
     }
 
     // ------------------------------------------------------------------------
-    // TScrollableWidget ------------------------------------------------------
+    // TScrollable ------------------------------------------------------------
     // ------------------------------------------------------------------------
 
     /**

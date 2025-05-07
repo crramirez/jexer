@@ -28,6 +28,6 @@
  */
 
 /**
- * TTreeView and supporting classes.
+ * TTreeView supporting classes.
  */
-package jexer.ttree;
+package jexer.treeview;

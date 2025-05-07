@@ -26,12 +26,12 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.ttree;
+package jexer.treeview;
 
 import jexer.TAction;
-import jexer.TApplication;
 import jexer.THScroller;
-import jexer.TScrollableWindow;
+import jexer.TKeypress;
+import jexer.TScrollable;
 import jexer.TVScroller;
 import jexer.TWidget;
 import jexer.bits.StringUtils;
@@ -41,10 +41,9 @@ import jexer.event.TResizeEvent;
 import static jexer.TKeypress.*;
 
 /**
- * TTreeViewWindow wraps a tree view with horizontal and vertical scrollbars
- * in a standalone window.
+ * TTreeViewWidget wraps a tree view with horizontal and vertical scrollbars.
  */
-public class TTreeViewWindow extends TScrollableWindow {
+public class TTreeViewWidget extends TScrollable {
 
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
@@ -73,57 +72,64 @@ public class TTreeViewWindow extends TScrollableWindow {
     /**
      * Public constructor.
      *
-     * @param parent the main application
-     * @param title the window title
+     * @param parent parent widget
      * @param x column relative to parent
      * @param y row relative to parent
      * @param width width of tree view
-     * @param flags bitmask of RESIZABLE, CENTERED, or MODAL
      * @param height height of tree view
      */
-    public TTreeViewWindow(final TApplication parent, final String title,
-        final int x, final int y, final int width, final int height,
-        final int flags) {
+    public TTreeViewWidget(final TWidget parent, final int x, final int y,
+        final int width, final int height) {
 
-        this(parent, title, x, y, width, height, flags, null);
+        this(parent, x, y, width, height, null);
     }
 
     /**
      * Public constructor.
      *
-     * @param parent the main application
-     * @param title the window title
+     * @param parent parent widget
      * @param x column relative to parent
      * @param y row relative to parent
      * @param width width of tree view
      * @param height height of tree view
-     * @param flags bitmask of RESIZABLE, CENTERED, or MODAL
      * @param action action to perform when an item is selected
      */
     @SuppressWarnings("this-escape")
-    public TTreeViewWindow(final TApplication parent, final String title,
-        final int x, final int y, final int width, final int height,
-        final int flags, final TAction action) {
+    public TTreeViewWidget(final TWidget parent, final int x, final int y,
+        final int width, final int height, final TAction action) {
 
-        super(parent, title, x, y, width, height, flags);
+        super(parent, x, y, width, height);
 
-        treeView = new TTreeView(this, 0, 0, getWidth() - 2, getHeight() - 2,
+        treeView = new TTreeView(this, 0, 0, getWidth() - 1, getHeight() - 1,
             action);
 
-        hScroller = new THScroller(this, 17, getHeight() - 2, getWidth() - 20);
-        vScroller = new TVScroller(this, getWidth() - 2, 0, getHeight() - 2);
+        vScroller = new TVScroller(this, getWidth() - 1, 0, getHeight() - 1);
+        hScroller = new THScroller(this, 0, getHeight() - 1, getWidth() - 1);
 
-        /*
-        System.err.println("TTreeViewWindow()");
-        for (TWidget w: getChildren()) {
-            System.err.println("    " + w + " " + w.isActive());
-        }
-        */
     }
 
     // ------------------------------------------------------------------------
     // Event handlers ---------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Handle window/screen resize events.
+     *
+     * @param event resize event
+     */
+    @Override
+    public void onResize(final TResizeEvent event) {
+        super.onResize(event);
+
+        if (event.getType() == TResizeEvent.Type.WIDGET) {
+            treeView.onResize(new TResizeEvent(event.getBackend(),
+                    TResizeEvent.Type.WIDGET, getWidth() - 1,
+                    getHeight() - 1));
+            return;
+        } else {
+            super.onResize(event);
+        }
+    }
 
     /**
      * Handle mouse press events.
@@ -186,19 +192,6 @@ public class TTreeViewWindow extends TScrollableWindow {
      */
     @Override
     public void onKeypress(final TKeypressEvent keypress) {
-        if (inKeyboardResize) {
-            // Let TWindow do its job.
-            super.onKeypress(keypress);
-            return;
-        }
-
-        // Give the shortcut bar a shot at this.
-        if (statusBar != null) {
-            if (statusBar.statusBarKeypress(keypress)) {
-                return;
-            }
-        }
-
         if (keypress.equals(kbShiftLeft)
             || keypress.equals(kbCtrlLeft)
             || keypress.equals(kbAltLeft)
@@ -229,6 +222,38 @@ public class TTreeViewWindow extends TScrollableWindow {
             || keypress.equals(kbAltPgDn)
         ) {
             bigVerticalIncrement();
+        } else if (keypress.equals(kbPgDn)) {
+            for (int i = 0; i < getHeight() - 2; i++) {
+                treeView.onKeypress(new TKeypressEvent(keypress.getBackend(),
+                        TKeypress.kbDown));
+            }
+            reflowData();
+            return;
+        } else if (keypress.equals(kbPgUp)) {
+            for (int i = 0; i < getHeight() - 2; i++) {
+                treeView.onKeypress(new TKeypressEvent(keypress.getBackend(),
+                        TKeypress.kbUp));
+            }
+            reflowData();
+            return;
+        } else if (keypress.equals(kbHome)) {
+            treeView.setSelected((TTreeItem) treeView.getChildren().get(0),
+                false);
+            treeView.setTopLine(0);
+            reflowData();
+            return;
+        } else if (keypress.equals(kbEnd)) {
+            treeView.setSelected((TTreeItem)  treeView.getChildren().get(
+                treeView.getChildren().size() - 1), true);
+            reflowData();
+            return;
+        } else if (keypress.equals(kbTab)) {
+            getParent().switchWidget(true);
+            return;
+        } else if (keypress.equals(kbShiftTab)
+                || keypress.equals(kbBackTab)) {
+            getParent().switchWidget(false);
+            return;
         } else {
             treeView.onKeypress(keypress);
 
@@ -244,33 +269,47 @@ public class TTreeViewWindow extends TScrollableWindow {
     }
 
     // ------------------------------------------------------------------------
-    // TScrollableWindow ------------------------------------------------------
+    // TScrollable ------------------------------------------------------------
     // ------------------------------------------------------------------------
 
     /**
-     * Handle window/screen resize events.
+     * Override TWidget's width: we need to set child widget widths.
      *
-     * @param resize resize event
+     * @param width new widget width
      */
     @Override
-    public void onResize(final TResizeEvent resize) {
-        if (resize.getType() == TResizeEvent.Type.WIDGET) {
-            // Resize the treeView field.
-            TResizeEvent treeSize = new TResizeEvent(resize.getBackend(),
-                TResizeEvent.Type.WIDGET, resize.getWidth() - 2,
-                resize.getHeight() - 2);
-            treeView.onResize(treeSize);
-
-            // Have TScrollableWindow handle the scrollbars.
-            super.onResize(resize);
-
-            // Now re-center the treeView field.
-            if (treeView.getSelected() != null) {
-                treeView.setSelected(treeView.getSelected(), true);
-            }
-            reflowData();
-            return;
+    public void setWidth(final int width) {
+        super.setWidth(width);
+        if (hScroller != null) {
+            hScroller.setWidth(getWidth() - 1);
         }
+        if (vScroller != null) {
+            vScroller.setX(getWidth() - 1);
+        }
+        if (treeView != null) {
+            treeView.setWidth(getWidth() - 1);
+        }
+        reflowData();
+    }
+
+    /**
+     * Override TWidget's height: we need to set child widget heights.
+     *
+     * @param height new widget height
+     */
+    @Override
+    public void setHeight(final int height) {
+        super.setHeight(height);
+        if (hScroller != null) {
+            hScroller.setY(getHeight() - 1);
+        }
+        if (vScroller != null) {
+            vScroller.setHeight(getHeight() - 1);
+        }
+        if (treeView != null) {
+            treeView.setHeight(getHeight() - 1);
+        }
+        reflowData();
     }
 
     /**
@@ -278,6 +317,10 @@ public class TTreeViewWindow extends TScrollableWindow {
      */
     @Override
     public void reflowData() {
+        if (treeView == null) {
+            return;
+        }
+
         int selectedRow = 0;
         boolean foundSelectedRow = false;
 
@@ -313,7 +356,7 @@ public class TTreeViewWindow extends TScrollableWindow {
 
         if ((centerWindow) && (foundSelectedRow)) {
             if ((selectedRow < getVerticalValue())
-                || (selectedRow > getVerticalValue() + getHeight() - 3)
+                || (selectedRow > getVerticalValue() + getHeight() - 2)
             ) {
                 treeView.setTopLine(selectedRow);
                 centerWindow = false;
@@ -323,17 +366,18 @@ public class TTreeViewWindow extends TScrollableWindow {
 
         // Rescale the scroll bars
         setVerticalValue(treeView.getTopLine());
-        setBottomValue(treeView.getTotalLineCount() - (getHeight() - 2));
+        setBottomValue(treeView.getTotalLineCount() - (getHeight() - 1));
         if (getBottomValue() < getTopValue()) {
             setBottomValue(getTopValue());
         }
         if (getVerticalValue() > getBottomValue()) {
             setVerticalValue(getBottomValue());
         }
-        setRightValue(maxLineWidth - 4);
+        setRightValue(maxLineWidth - 2);
         if (getHorizontalValue() > getRightValue()) {
             setHorizontalValue(getRightValue());
         }
+
     }
 
     // ------------------------------------------------------------------------

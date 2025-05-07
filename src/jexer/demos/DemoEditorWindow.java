@@ -31,7 +31,7 @@ package jexer.demos;
 import java.util.ResourceBundle;
 
 import jexer.TApplication;
-import jexer.TEditorWidget;
+import jexer.TEditor;
 import jexer.TWidget;
 import jexer.TWindow;
 import jexer.event.TResizeEvent;
@@ -55,7 +55,7 @@ public class DemoEditorWindow extends TWindow {
     /**
      * Hang onto my TEditor so I can resize it with the window.
      */
-    private TEditorWidget editField;
+    private TEditor editField;
 
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------

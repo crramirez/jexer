@@ -26,7 +26,7 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.teditor;
+package jexer.texteditor;
 
 import java.io.FileOutputStream;
 import java.io.IOException;

@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jexer.THelpWindow;
-import jexer.TScrollableWidget;
+import jexer.TScrollable;
 import jexer.TVScroller;
 import jexer.TWidget;
 import jexer.bits.CellAttributes;
@@ -45,7 +45,7 @@ import static jexer.TKeypress.*;
  * THelpText displays help text with clickable links in a scrollable text
  * area. It reflows automatically on resize.
  */
-public class THelpText extends TScrollableWidget {
+public class THelpText extends TScrollable {
 
     // ------------------------------------------------------------------------
     // Constants --------------------------------------------------------------
@@ -93,7 +93,7 @@ public class THelpText extends TScrollableWidget {
     }
 
     // ------------------------------------------------------------------------
-    // TScrollableWidget ------------------------------------------------------
+    // TScrollable ------------------------------------------------------------
     // ------------------------------------------------------------------------
 
     /**

@@ -26,7 +26,7 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.tterminal;
+package jexer.terminal;
 
 import java.awt.Color;
 import java.awt.Graphics2D;

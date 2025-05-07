@@ -26,7 +26,7 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.tterminal;
+package jexer.terminal;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;

@@ -26,7 +26,7 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.teditor;
+package jexer.texteditor;
 
 import jexer.bits.CellAttributes;
 import jexer.bits.StringUtils;

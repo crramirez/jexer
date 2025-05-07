@@ -31,10 +31,9 @@ package jexer;
 import jexer.event.TResizeEvent;
 
 /**
- * TScrollableWidget is a convenience superclass for widgets that have
- * scrollbars.
+ * TScrollable is a convenience superclass for widgets that have scrollbars.
  */
-public class TScrollableWidget extends TWidget implements Scrollable {
+public class TScrollable extends TWidget implements Scrollable {
 
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
@@ -59,7 +58,7 @@ public class TScrollableWidget extends TWidget implements Scrollable {
      *
      * @param parent parent widget
      */
-    protected TScrollableWidget(final TWidget parent) {
+    protected TScrollable(final TWidget parent) {
         super(parent);
     }
 
@@ -72,7 +71,7 @@ public class TScrollableWidget extends TWidget implements Scrollable {
      * @param width width of widget
      * @param height height of widget
      */
-    protected TScrollableWidget(final TWidget parent, final int x, final int y,
+    protected TScrollable(final TWidget parent, final int x, final int y,
         final int width, final int height) {
 
         super(parent, x, y, width, height);
@@ -84,7 +83,7 @@ public class TScrollableWidget extends TWidget implements Scrollable {
      * @param parent parent widget
      * @param enabled if true assume enabled
      */
-    protected TScrollableWidget(final TWidget parent, final boolean enabled) {
+    protected TScrollable(final TWidget parent, final boolean enabled) {
 
         super(parent, enabled);
     }
@@ -99,7 +98,7 @@ public class TScrollableWidget extends TWidget implements Scrollable {
      * @param width width of widget
      * @param height height of widget
      */
-    protected TScrollableWidget(final TWidget parent, final boolean enabled,
+    protected TScrollable(final TWidget parent, final boolean enabled,
         final int x, final int y, final int width, final int height) {
 
         super(parent, enabled, x, y, width, height);
@@ -129,7 +128,7 @@ public class TScrollableWidget extends TWidget implements Scrollable {
     }
 
     // ------------------------------------------------------------------------
-    // TScrollableWidget ------------------------------------------------------
+    // TScrollable ------------------------------------------------------------
     // ------------------------------------------------------------------------
 
     /**

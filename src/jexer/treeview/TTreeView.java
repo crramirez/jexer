@@ -26,7 +26,7 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.ttree;
+package jexer.treeview;
 
 import jexer.TAction;
 import jexer.TKeypress;

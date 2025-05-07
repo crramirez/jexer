@@ -31,7 +31,7 @@ package jexer.demos;
 import java.util.ResourceBundle;
 
 import jexer.TApplication;
-import jexer.TTableWidget;
+import jexer.TTable;
 import jexer.TWidget;
 import jexer.TWindow;
 import jexer.event.TResizeEvent;
@@ -55,7 +55,7 @@ public class DemoTableWindow extends TWindow {
     /**
      * Hang onto my TTable so I can resize it with the window.
      */
-    private TTableWidget tableField;
+    private TTable tableField;
 
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
@@ -74,7 +74,7 @@ public class DemoTableWindow extends TWindow {
         i18n = ResourceBundle.getBundle(DemoTableWindow.class.getName(),
             getLocale());
 
-        tableField = new TTableWidget(this, 0, 0, 42, 20);
+        tableField = new TTable(this, 0, 0, 42, 20);
 
         statusBar = newStatusBar(i18n.getString("statusBar"));
         statusBar.addShortcutKeypress(kbF1, cmHelp,
