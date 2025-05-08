@@ -311,6 +311,12 @@ public class TFileOpenBox extends TWindow {
             break;
         }
 
+        // Set status bar text to first filename
+        if (directoryList.getMaxSelectedIndex() > 0) {
+            getStatusBar().setText(directoryList.getPath().
+                getCanonicalPath());
+        }
+
         // Set the secondaryFiber to run me
         getApplication().enableSecondaryEventReceiver(this);
 

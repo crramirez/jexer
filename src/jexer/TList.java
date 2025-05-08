@@ -35,6 +35,7 @@ import jexer.bits.CellAttributes;
 import jexer.bits.StringUtils;
 import jexer.event.TKeypressEvent;
 import jexer.event.TMouseEvent;
+import jexer.event.TResizeEvent;
 import static jexer.TKeypress.*;
 
 /**
@@ -319,6 +320,19 @@ public class TList extends TScrollable {
         }
     }
 
+    /**
+     * Handle window/screen resize events.
+     *
+     * @param event resize event
+     */
+    @Override
+    public void onResize(final TResizeEvent event) {
+        // Retain selection through list resizes.
+        int selectedIndex = getSelectedIndex();
+        super.onResize(event);
+        setSelectedIndex(selectedIndex);
+    }
+
     // ------------------------------------------------------------------------
     // TScrollable ------------------------------------------------------------
     // ------------------------------------------------------------------------
@@ -483,6 +497,16 @@ public class TList extends TScrollable {
      */
     public final String getListItem(final int idx) {
         return strings.get(idx);
+    }
+
+    /**
+     * Set a selectable string by index.
+     *
+     * @param idx index into list
+     * @param str the new string to use at idx in the list
+     */
+    public final void setListItem(final int idx, final String str) {
+        strings.set(idx, str);
     }
 
     /**

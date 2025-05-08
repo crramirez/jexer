@@ -30,9 +30,7 @@ package jexer;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import jexer.bits.StringUtils;
 
@@ -46,9 +44,10 @@ public class TDirectoryList extends TList {
     // ------------------------------------------------------------------------
 
     /**
-     * Files in the directory.
+     * Files in the directory, with the same index as the TList strings
+     * variable.
      */
-    private Map<String, File> files;
+    private List<File> files;
 
     /**
      * Root path containing files to display.
@@ -141,7 +140,7 @@ public class TDirectoryList extends TList {
         final TAction singleClickAction, final List<String> filters) {
 
         super(parent, null, x, y, width, height, action);
-        files = new HashMap<String, File>();
+        files = new ArrayList<File>();
         this.filters = filters;
         this.singleClickAction = singleClickAction;
 
@@ -155,6 +154,20 @@ public class TDirectoryList extends TList {
     // ------------------------------------------------------------------------
     // TList ------------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Resize for a new width/height.
+     */
+    @Override
+    public void reflowData() {
+        if (files != null) {
+            for (int i = 0; i < files.size(); i++) {
+                String displayName = renderFile(files.get(i));
+                setListItem(i, displayName);
+            }
+        }
+        super.reflowData();
+    }
 
     // ------------------------------------------------------------------------
     // TDirectoryList ---------------------------------------------------------
@@ -191,19 +204,20 @@ public class TDirectoryList extends TList {
                         */
 
                         if (newFiles[i].getName().matches(pattern)) {
-                            String key = renderFile(newFiles[i]);
-                            files.put(key, newFiles[i]);
-                            newStrings.add(key);
+                            String str = renderFile(newFiles[i]);
+                            files.add(newFiles[i]);
+                            newStrings.add(str);
                             break;
                         }
                     }
                 } else {
-                    String key = renderFile(newFiles[i]);
-                    files.put(key, newFiles[i]);
-                    newStrings.add(key);
+                    String str = renderFile(newFiles[i]);
+                    files.add(newFiles[i]);
+                    newStrings.add(str);
                 }
             }
         }
+        assert (newStrings.size() == files.size());
         setList(newStrings);
 
         // Select the first entry
@@ -218,7 +232,7 @@ public class TDirectoryList extends TList {
      * @return the path
      */
     public File getPath() {
-        path = files.get(getSelected());
+        path = files.get(getSelectedIndex());
         return path;
     }
 
