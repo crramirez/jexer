@@ -57,11 +57,6 @@ public class TList extends TScrollable {
     private int selectedString = -1;
 
     /**
-     * Maximum width of a single line.
-     */
-    private int maxLineWidth;
-
-    /**
      * The action to perform when the user selects an item (double-clicks or
      * enter).
      */
@@ -369,7 +364,7 @@ public class TList extends TScrollable {
 
         // Reset the lines
         selectedString = -1;
-        maxLineWidth = 0;
+        int maxLineWidth = 0;
 
         for (int i = 0; i < strings.size(); i++) {
             String line = strings.get(i);
@@ -384,9 +379,9 @@ public class TList extends TScrollable {
             setBottomValue(0);
         }
 
-        setRightValue(maxLineWidth - getWidth() + 1);
-        if (getRightValue() < 0) {
-            setRightValue(0);
+        setRightValue(Math.max(0, maxLineWidth - getWidth() + 1));
+        if (getHorizontalValue() > getRightValue()) {
+            setHorizontalValue(getRightValue());
         }
     }
 

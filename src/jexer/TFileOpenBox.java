@@ -36,6 +36,7 @@ import java.util.ResourceBundle;
 import jexer.backend.SwingTerminal;
 import jexer.bits.GraphicsChars;
 import jexer.event.TKeypressEvent;
+import jexer.layout.StretchLayoutManager;
 import static jexer.TKeypress.*;
 
 /**
@@ -155,9 +156,14 @@ public class TFileOpenBox extends TWindow {
         final Type type, final List<String> filters) throws IOException {
 
         // Register with the TApplication
-        super(application, "", 0, 0, 78, 22, MODAL);
+        super(application, "", 0, 0, 78, 22, MODAL | RESIZABLE);
         i18n = ResourceBundle.getBundle(TFileOpenBox.class.getName(),
             getLocale());
+
+        setLayoutManager(new StretchLayoutManager(getWidth() - 2,
+                getHeight() - 2));
+
+        TStatusBar statusBar = newStatusBar("");
 
         // Add text field
         entryField = addField(1, 1, getWidth() - 4, false,
@@ -230,6 +236,7 @@ public class TFileOpenBox extends TWindow {
                         entryField.end();
                         openButton.setEnabled(true);
                         activate(entryField);
+                        getStatusBar().setText(entryField.getText());
                     } catch (IOException e) {
                         // If the backend is Swing, we can emit the stack
                         // trace to stderr.  Otherwise, just squash it.
@@ -331,6 +338,27 @@ public class TFileOpenBox extends TWindow {
             return;
         }
 
+        if (directoryList.isActive()) {
+            if ((keypress.equals(kbUp))
+                || (keypress.equals(kbDown))
+                || (keypress.equals(kbPgUp))
+                || (keypress.equals(kbPgDn))
+                || (keypress.equals(kbHome))
+                || (keypress.equals(kbEnd))
+            ) {
+                // Directory list will be changing, update the status bar.
+                super.onKeypress(keypress);
+
+                try {
+                    getStatusBar().setText(directoryList.getPath().
+                        getCanonicalPath());
+                } catch (IOException e) {
+                    getStatusBar().setText("");
+                }
+                return;
+            }
+        }
+
         if (treeView.isActive()) {
             if ((keypress.equals(kbEnter))
                 || (keypress.equals(kbUp))
@@ -359,6 +387,7 @@ public class TFileOpenBox extends TWindow {
                         e.printStackTrace();
                     }
                 }
+                getStatusBar().setText("");
                 return;
             }
         }
@@ -377,8 +406,11 @@ public class TFileOpenBox extends TWindow {
     @Override
     public void draw() {
         super.draw();
-        vLineXY(33, 4, getHeight() - 6, GraphicsChars.WINDOW_SIDE,
-            getBackground());
+        int columnX = ((treeView.getX() + treeView.getWidth() +
+                directoryList.getX()) / 2) + 1;
+        int columnY = treeView.getY() + 1;
+        vLineXY(columnX, columnY, treeView.getHeight(),
+            GraphicsChars.WINDOW_SIDE, getBackground());
     }
 
     // ------------------------------------------------------------------------
@@ -412,7 +444,8 @@ public class TFileOpenBox extends TWindow {
 
     /**
      * See if there is a valid filename to return.  If the filename is a
-     * directory, then
+     * directory, then switch the tree view and directory list to that
+     * directory.
      *
      * @param newFilename the filename to check and return
      * @throws IOException of a java.io operation throws

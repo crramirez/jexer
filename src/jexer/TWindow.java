@@ -417,7 +417,6 @@ public class TWindow extends TWidget {
     protected boolean mouseOnResize() {
         if (((flags & RESIZABLE) != 0)
             && (getBorderStyle() != BorderStyle.NONE)
-            && !isModal()
             && (mouse != null)
             && (mouse.getAbsoluteY() == getY() + getHeight() - 1)
             && ((mouse.getAbsoluteX() == getX() + getWidth() - 1)
@@ -1059,8 +1058,7 @@ public class TWindow extends TWidget {
             }
 
             // Draw the resize corner
-            if (!isModal()
-                && ((flags & RESIZABLE) != 0)
+            if (((flags & RESIZABLE) != 0)
                 && (getBorderStyle() != BorderStyle.NONE)
             ) {
                 if ((flags & RESIZABLE) != 0) {
@@ -1556,7 +1554,7 @@ public class TWindow extends TWidget {
         ) {
             assert (isActive());
             return getTheme().getColor("twindow.background.windowmove");
-        } else if (isModal() && inWindowMove) {
+        } else if (isModal() && (inWindowMove || inWindowResize)) {
             assert (isActive());
             return getTheme().getColor("twindow.background.modal");
         } else if (isModal()) {
@@ -1592,7 +1590,7 @@ public class TWindow extends TWidget {
             }
 
             return getTheme().getColor("twindow.border.windowmove");
-        } else if (isModal() && inWindowMove) {
+        } else if (isModal() && (inWindowMove || inWindowResize)) {
             assert (isActive());
             return getTheme().getColor("twindow.border.modal.windowmove");
         } else if (isModal()) {
@@ -1633,9 +1631,10 @@ public class TWindow extends TWidget {
         ) {
             assert (isActive());
             return borderStyleMoving;
-        } else if (isModal() && inWindowMove) {
+        } else if (isModal() && (inWindowMove || inWindowResize)) {
             assert (isActive());
-            // Modals cannot be resized, hence the separate check.
+            // Modals cannot be resized via keyboard, hence the separate
+            // check.
             return borderStyleMoving;
         } else if (isModal()) {
             if (isActive()) {

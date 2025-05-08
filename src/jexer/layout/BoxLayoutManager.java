@@ -97,6 +97,11 @@ public class BoxLayoutManager implements LayoutManager {
             width = resize.getWidth();
             height = resize.getHeight();
             layoutChildren();
+            for (TWidget child: children) {
+                child.onResize(new TResizeEvent(resize.getBackend(),
+                        TResizeEvent.Type.WIDGET,
+                        child.getWidth(), child.getHeight()));
+            }
         }
     }
 

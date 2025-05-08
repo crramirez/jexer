@@ -149,6 +149,10 @@ public class TDirectoryList extends TList {
     }
 
     // ------------------------------------------------------------------------
+    // Event handlers ---------------------------------------------------------
+    // ------------------------------------------------------------------------
+
+    // ------------------------------------------------------------------------
     // TList ------------------------------------------------------------------
     // ------------------------------------------------------------------------
 
@@ -226,10 +230,12 @@ public class TDirectoryList extends TList {
      */
     private String renderFile(final File file) {
         String name = file.getName();
-        if (StringUtils.width(name) > 20) {
-            name = name.substring(0, 17) + "...";
+        int maxWidth = getWidth() - 8;
+        if (StringUtils.width(name) > maxWidth) {
+            name = name.substring(0, maxWidth - 3) + "...";
         }
-        return String.format("%-20s %5dk", name, (file.length() / 1024));
+        return String.format("%-" + maxWidth + "s %5dk", name,
+            (file.length() / 1024));
     }
 
 }

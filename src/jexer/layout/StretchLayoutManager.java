@@ -101,6 +101,12 @@ public class StretchLayoutManager implements LayoutManager {
             width = resize.getWidth();
             height = resize.getHeight();
             layoutChildren();
+
+            for (TWidget child: children.keySet()) {
+                child.onResize(new TResizeEvent(resize.getBackend(),
+                        TResizeEvent.Type.WIDGET,
+                        child.getWidth(), child.getHeight()));
+            }
         }
     }
 
