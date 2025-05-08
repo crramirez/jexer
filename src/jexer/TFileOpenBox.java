@@ -36,9 +36,6 @@ import java.util.ResourceBundle;
 import jexer.backend.SwingTerminal;
 import jexer.bits.GraphicsChars;
 import jexer.event.TKeypressEvent;
-import jexer.treeview.TDirectoryTreeItem;
-import jexer.treeview.TTreeItem;
-import jexer.treeview.TTreeViewWidget;
 import static jexer.TKeypress.*;
 
 /**
@@ -99,7 +96,7 @@ public class TFileOpenBox extends TWindow {
     /**
      * The left-side tree view pane.
      */
-    private TTreeViewWidget treeView;
+    private TTreeViewScrollable treeView;
 
     /**
      * The data behind treeView.

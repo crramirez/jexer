@@ -26,7 +26,7 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.treeview;
+package jexer;
 
 import jexer.TAction;
 import jexer.THScroller;
@@ -41,9 +41,10 @@ import jexer.event.TResizeEvent;
 import static jexer.TKeypress.*;
 
 /**
- * TTreeViewWidget wraps a tree view with horizontal and vertical scrollbars.
+ * TTreeViewScrollable wraps a tree view with horizontal and vertical
+ * scrollbars.
  */
-public class TTreeViewWidget extends TScrollable {
+public class TTreeViewScrollable extends TScrollable {
 
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
@@ -78,7 +79,7 @@ public class TTreeViewWidget extends TScrollable {
      * @param width width of tree view
      * @param height height of tree view
      */
-    public TTreeViewWidget(final TWidget parent, final int x, final int y,
+    public TTreeViewScrollable(final TWidget parent, final int x, final int y,
         final int width, final int height) {
 
         this(parent, x, y, width, height, null);
@@ -95,7 +96,7 @@ public class TTreeViewWidget extends TScrollable {
      * @param action action to perform when an item is selected
      */
     @SuppressWarnings("this-escape")
-    public TTreeViewWidget(final TWidget parent, final int x, final int y,
+    public TTreeViewScrollable(final TWidget parent, final int x, final int y,
         final int width, final int height, final TAction action) {
 
         super(parent, x, y, width, height);

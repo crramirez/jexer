@@ -32,11 +32,11 @@ import java.io.IOException;
 import java.util.ResourceBundle;
 
 import jexer.TApplication;
+import jexer.TDirectoryTreeItem;
+import jexer.TTreeViewScrollable;
 import jexer.TWidget;
 import jexer.TWindow;
 import jexer.event.TResizeEvent;
-import jexer.treeview.TDirectoryTreeItem;
-import jexer.treeview.TTreeViewWidget;
 import static jexer.TCommand.*;
 import static jexer.TKeypress.*;
 
@@ -57,7 +57,7 @@ public class DemoTreeViewWindow extends TWindow {
     /**
      * Hang onto my TTreeView so I can resize it with the window.
      */
-    private TTreeViewWidget treeView;
+    private TTreeViewScrollable treeView;
 
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------

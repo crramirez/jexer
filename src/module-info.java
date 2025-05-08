@@ -54,5 +54,4 @@ module jexer {
     exports jexer.tackboard;
     exports jexer.terminal;
     exports jexer.texteditor;
-    exports jexer.treeview;
 }

@@ -51,9 +51,6 @@ import jexer.layout.LayoutManager;
 import jexer.menu.TMenu;
 import jexer.tackboard.MousePointer;
 import jexer.tackboard.Tackboard;
-import jexer.treeview.TTreeItem;
-import jexer.treeview.TTreeView;
-import jexer.treeview.TTreeViewWidget;
 import static jexer.TKeypress.*;
 
 /**
@@ -2747,10 +2744,10 @@ public abstract class TWidget implements Comparable<TWidget> {
      * @param height height of tree view
      * @return the new tree view
      */
-    public final TTreeViewWidget addTreeViewWidget(final int x, final int y,
+    public final TTreeViewScrollable addTreeViewWidget(final int x, final int y,
         final int width, final int height) {
 
-        return new TTreeViewWidget(this, x, y, width, height);
+        return new TTreeViewScrollable(this, x, y, width, height);
     }
 
     /**
@@ -2764,10 +2761,10 @@ public abstract class TWidget implements Comparable<TWidget> {
      * @param action action to perform when an item is selected
      * @return the new tree view
      */
-    public final TTreeViewWidget addTreeViewWidget(final int x, final int y,
+    public final TTreeViewScrollable addTreeViewWidget(final int x, final int y,
         final int width, final int height, final TAction action) {
 
-        return new TTreeViewWidget(this, x, y, width, height, action);
+        return new TTreeViewScrollable(this, x, y, width, height, action);
     }
 
     /**

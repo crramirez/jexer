@@ -26,15 +26,13 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.treeview;
+package jexer;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.LinkedList;
-
-import jexer.TWidget;
 
 /**
  * TDirectoryTreeItem is a single item in a disk directory tree view.
@@ -51,9 +49,9 @@ public class TDirectoryTreeItem extends TTreeItem {
     private File file;
 
     /**
-     * The TTreeViewWidget containing this directory tree.
+     * The TTreeViewScrollable containing this directory tree.
      */
-    private TTreeViewWidget treeViewWidget;
+    private TTreeViewScrollable treeViewWidget;
 
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
@@ -62,12 +60,12 @@ public class TDirectoryTreeItem extends TTreeItem {
     /**
      * Public constructor.
      *
-     * @param view root TTreeViewWidget
+     * @param view root TTreeViewScrollable
      * @param text text for this item
      * @param expanded if true, have it expanded immediately
      * @throws IOException if a java.io operation throws
      */
-    public TDirectoryTreeItem(final TTreeViewWidget view, final String text,
+    public TDirectoryTreeItem(final TTreeViewScrollable view, final String text,
         final boolean expanded) throws IOException {
 
         this(view, text, expanded, true);
@@ -76,7 +74,7 @@ public class TDirectoryTreeItem extends TTreeItem {
     /**
      * Public constructor.
      *
-     * @param view root TTreeViewWidget
+     * @param view root TTreeViewScrollable
      * @param text text for this item
      * @param expanded if true, have it expanded immediately
      * @param openParents if true, expand all paths up the root path and
@@ -84,7 +82,7 @@ public class TDirectoryTreeItem extends TTreeItem {
      * @throws IOException if a java.io operation throws
      */
     @SuppressWarnings("this-escape")
-    public TDirectoryTreeItem(final TTreeViewWidget view, final String text,
+    public TDirectoryTreeItem(final TTreeViewScrollable view, final String text,
         final boolean expanded, final boolean openParents) throws IOException {
 
         super(view.getTreeView(), text, false);

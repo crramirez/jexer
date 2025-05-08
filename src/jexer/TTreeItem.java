@@ -26,12 +26,11 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.treeview;
+package jexer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import jexer.TWidget;
 import jexer.bits.CellAttributes;
 import jexer.bits.GraphicsChars;
 import jexer.bits.StringUtils;
