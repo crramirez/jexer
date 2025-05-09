@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.ResourceBundle;
 
 import jexer.bits.CellAttributes;
+import jexer.layout.StretchLayoutManager;
 
 /**
  * TExceptionDialog displays an exception and its stack trace to the user,
@@ -68,6 +69,11 @@ public class TExceptionDialog extends TWindow {
      */
     private TList stackTrace;
 
+    /**
+     * The exception string label.
+     */
+    private TLabel exceptionString;
+
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
     // ------------------------------------------------------------------------
@@ -82,25 +88,21 @@ public class TExceptionDialog extends TWindow {
     public TExceptionDialog(final TApplication application,
         final Throwable exception) {
 
-        super(application, "", 1, 1, 78, 22, CENTERED | MODAL);
+        super(application, "", 1, 1, 78, 22, CENTERED | RESIZABLE | MODAL);
         i18n = ResourceBundle.getBundle(TExceptionDialog.class.getName(),
             getLocale());
         setTitle(i18n.getString("windowTitle"));
 
+        setLayoutManager(new StretchLayoutManager(getWidth() - 2,
+                getHeight() - 2));
+
         this.exception = exception;
 
-        addLabel(i18n.getString("captionLine1"), 1, 1,
-            "twindow.background.modal");
-        addLabel(i18n.getString("captionLine2"), 1, 2,
-            "twindow.background.modal");
-        addLabel(i18n.getString("captionLine3"), 1, 3,
-            "twindow.background.modal");
-        addLabel(i18n.getString("captionLine4"), 1, 4,
-            "twindow.background.modal");
-        addLabel(i18n.getString("captionLine5"), 1, 5,
+        addText(i18n.getString("captionText"), 2, 1, getWidth() - 6, 5,
             "twindow.background.modal");
 
-        addLabel(MessageFormat.format(i18n.getString("exceptionString"),
+        exceptionString = addLabel(MessageFormat.format(
+            i18n.getString("exceptionString"),
                 exception.getClass().getName(), exception.getMessage()),
             2, 7, "ttext", false);
 
@@ -146,7 +148,8 @@ public class TExceptionDialog extends TWindow {
         super.draw();
 
         CellAttributes boxColor = getTheme().getColor("ttext");
-        hLineXY(3, 8, getWidth() - 6, ' ', boxColor);
+        hLineXY(exceptionString.getX() + 1, exceptionString.getY() + 1,
+            stackTrace.getWidth(), ' ', boxColor);
     }
 
     // ------------------------------------------------------------------------
