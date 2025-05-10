@@ -69,6 +69,7 @@
         <exclude name="**/*TTF-4.49.1.ttf" />
         <exclude name="**/*Italic*.ttf" />
         <exclude name="demo/**" />
+        <exclude name="**/emoji/**" />
       </fileset>
 
       <!-- Include properties files. -->
@@ -87,6 +88,7 @@
         <exclude name="**/terminus**/**" />
         <exclude name="**/help.xml" />
         <exclude name="**/logo_128.png" />
+        <exclude name="**/emoji/**" />
       </fileset>
 
       <!-- Include properties files. -->
@@ -96,6 +98,15 @@
         <attribute name="Main-Class" value="demo.Demo1"/>
         <attribute name="Implementation-Version" value="${version}"/>
       </manifest>
+    </jar>
+  </target>
+
+  <target name="emoji-jar">
+    <mkdir dir="${jar.dir}"/>
+    <jar destfile="${jar.dir}/emoji.jar">
+      <fileset dir="${resources.dir}">
+        <exclude name="**/emoji/**" />
+      </fileset>
     </jar>
   </target>
 
