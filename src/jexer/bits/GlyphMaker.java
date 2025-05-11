@@ -26,7 +26,7 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.backend;
+package jexer.bits;
 
 import java.awt.Font;
 import java.awt.FontFormatException;
@@ -38,6 +38,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.util.HashMap;
 
+import jexer.backend.Backend;
 import jexer.bits.Cell;
 import jexer.bits.StringUtils;
 
@@ -501,6 +502,10 @@ public class GlyphMaker {
             }
         }
         if (StringUtils.isEmoji(ch)) {
+            // Pull from color emoji's first.
+
+            // TODO
+
             if (makerEmoji.canDisplay(ch)) {
                 // System.err.println("emoji: " + String.format("0x%x", ch));
                 return makerEmoji.getImage(cell, cellWidth, cellHeight, backend,

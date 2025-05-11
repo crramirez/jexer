@@ -37,9 +37,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import jexer.backend.ECMA48Terminal;
-import jexer.backend.GlyphMaker;
 import jexer.backend.SwingTerminal;
 import jexer.bits.Cell;
+import jexer.bits.GlyphMaker;
 import jexer.event.TKeypressEvent;
 import jexer.event.TMouseEvent;
 import jexer.event.TResizeEvent;

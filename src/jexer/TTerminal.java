@@ -44,9 +44,9 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import jexer.backend.ECMA48Terminal;
-import jexer.backend.GlyphMaker;
 import jexer.backend.SwingTerminal;
 import jexer.bits.Cell;
+import jexer.bits.GlyphMaker;
 import jexer.event.TCommandEvent;
 import jexer.event.TKeypressEvent;
 import jexer.event.TMenuEvent;

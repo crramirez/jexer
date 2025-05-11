@@ -36,6 +36,7 @@ import jexer.bits.BorderStyle;
 import jexer.bits.Cell;
 import jexer.bits.CellAttributes;
 import jexer.bits.Clipboard;
+import jexer.bits.GlyphMaker;
 import jexer.bits.GraphicsChars;
 import jexer.bits.ImageUtils;
 import jexer.bits.StringUtils;

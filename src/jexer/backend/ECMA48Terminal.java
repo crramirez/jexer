@@ -59,6 +59,7 @@ import javax.imageio.ImageIO;
 import jexer.bits.Cell;
 import jexer.bits.CellAttributes;
 import jexer.bits.Color;
+import jexer.bits.GlyphMaker;
 import jexer.bits.ImageUtils;
 import jexer.bits.StringUtils;
 import jexer.event.TCommandEvent;

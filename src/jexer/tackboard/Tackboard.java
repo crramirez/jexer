@@ -33,9 +33,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import jexer.backend.GlyphMaker;
 import jexer.backend.Screen;
 import jexer.bits.Cell;
+import jexer.bits.GlyphMaker;
 import jexer.bits.ImageUtils;
 
 /**

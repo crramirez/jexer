@@ -31,7 +31,6 @@ package jexer.bits;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 import jexer.backend.Backend;
-import jexer.backend.GlyphMaker;
 import jexer.backend.SwingTerminal;
 
 /**

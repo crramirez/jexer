@@ -64,6 +64,7 @@ import javax.swing.SwingUtilities;
 import jexer.TKeypress;
 import jexer.bits.Cell;
 import jexer.bits.CellAttributes;
+import jexer.bits.GlyphMaker;
 import jexer.bits.StringUtils;
 import jexer.event.TCommandEvent;
 import jexer.event.TInputEvent;

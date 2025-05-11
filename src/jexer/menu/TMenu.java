@@ -415,7 +415,7 @@ public class TMenu extends TWindow {
     /**
      * If true, draw icons with menu items.  Note package private access.
      */
-    boolean useIcons = false;
+    boolean useIcons = true;
 
     /**
      * If true, this is a context menu.
@@ -456,8 +456,8 @@ public class TMenu extends TWindow {
 
         setActive(false);
 
-        if (System.getProperty("jexer.menuIcons", "false").equals("true")) {
-            useIcons = true;
+        if (System.getProperty("jexer.menuIcons", "true").equals("false")) {
+            useIcons = false;
         }
 
         // Set the border style from the system properties
