@@ -45,7 +45,7 @@ public class ComplexCell extends Cell {
     /**
      * The codepoints at this cell.
      */
-    private int [] codepoints = new int[1];
+    private int [] codePoints = new int[1];
 
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
@@ -65,25 +65,35 @@ public class ComplexCell extends Cell {
      * Public constructor sets a single codepoint.  Attributes are the same
      * as default.
      *
-     * @param codepoint the codepoint to set to
+     * @param codePoint the codepoint to set to
      * @see #reset()
      */
-    public ComplexCell(final int codepoint) {
-        super(codepoint);
-        codepoints[0] = codepoint;
+    public ComplexCell(final int codePoint) {
+        super(codePoint);
+        codePoints[0] = codePoint;
     }
 
     /**
      * Public constructor sets multiple codepoints.  Attributes are the same
      * as default.
      *
-     * @param codepoints the codepoints to set to
+     * @param codePoints the codepoints to set to
      * @see #reset()
      */
-    public ComplexCell(final int [] codepoints) {
-        super(codepoints[0]);
-        this.codepoints = new int[codepoints.length];
-        System.arraycopy(codepoints, 0, this.codepoints, 0, codepoints.length);
+    public ComplexCell(final int [] codePoints) {
+        super(codePoints[0]);
+        this.codePoints = new int[codePoints.length];
+        System.arraycopy(codePoints, 0, this.codePoints, 0, codePoints.length);
+    }
+
+    /**
+     * Public constructor creates a duplicate.
+     *
+     * @param cell the instance to copy
+     */
+    @SuppressWarnings("this-escape")
+    public ComplexCell(final Cell cell) {
+        setTo(cell);
     }
 
     // ------------------------------------------------------------------------
@@ -97,7 +107,7 @@ public class ComplexCell extends Cell {
      */
     @Override
     public int getChar() {
-        return codepoints[0];
+        return codePoints[0];
     }
 
     /**
@@ -107,8 +117,8 @@ public class ComplexCell extends Cell {
      */
     @Override
     public void setChar(final int ch) {
-        codepoints = new int[1];
-        codepoints[0] = ch;
+        codePoints = new int[1];
+        codePoints[0] = ch;
     }
 
     /**
@@ -117,8 +127,8 @@ public class ComplexCell extends Cell {
     @Override
     public void reset() {
         super.reset();
-        codepoints = new int[1];
-        codepoints[0] = ' ';
+        codePoints = new int[1];
+        codePoints[0] = ' ';
     }
 
     /**
@@ -128,8 +138,8 @@ public class ComplexCell extends Cell {
     @Override
     public void unset() {
         super.reset();
-        codepoints = new int[1];
-        codepoints[0] = super.getChar();
+        codePoints = new int[1];
+        codePoints[0] = super.getChar();
     }
 
     /**
@@ -145,11 +155,11 @@ public class ComplexCell extends Cell {
         }
 
         ComplexCell that = (ComplexCell) rhs;
-        if (this.codepoints.length != that.codepoints.length) {
+        if (this.codePoints.length != that.codePoints.length) {
             return false;
         }
-        for (int i = 0; i < codepoints.length; i++) {
-            if (this.codepoints[i] != that.codepoints[i]) {
+        for (int i = 0; i < codePoints.length; i++) {
+            if (this.codePoints[i] != that.codePoints[i]) {
                 return false;
             }
         }
@@ -168,8 +178,8 @@ public class ComplexCell extends Cell {
         int B = 23;
         int hash = A;
         hash = (B * hash) + super.hashCode();
-        for (int i = 0; i < codepoints.length; i++) {
-            hash = (B * hash) + codepoints[i];
+        for (int i = 0; i < codePoints.length; i++) {
+            hash = (B * hash) + codePoints[i];
         }
         return hash;
     }
@@ -183,15 +193,15 @@ public class ComplexCell extends Cell {
     public void setTo(final Object rhs) {
         if (rhs instanceof ComplexCell) {
             ComplexCell that = (ComplexCell) rhs;
-            this.codepoints = new int[codepoints.length];
-            System.arraycopy(codepoints, 0, this.codepoints, 0,
-                codepoints.length);
+            this.codePoints = new int[codePoints.length];
+            System.arraycopy(codePoints, 0, this.codePoints, 0,
+                codePoints.length);
         } else {
-            this.codepoints = new int[1];
+            this.codePoints = new int[1];
         }
         // Let this throw a ClassCastException
         Cell thatCell = (Cell) rhs;
-        this.codepoints[0] = thatCell.getChar();
+        this.codePoints[0] = thatCell.getChar();
         super.setTo(thatCell);
     }
 
@@ -216,6 +226,20 @@ public class ComplexCell extends Cell {
     public String toHtml() {
         // TODO - handle the complex cell
         return super.toHtml();
+    }
+
+    // ------------------------------------------------------------------------
+    // ComplexCell ------------------------------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * Getter for cell codepoints.  Note this returns the internal array, not
+     * a copy.
+     *
+     * @return the codepoints
+     */
+    public int [] getCodePoints() {
+        return codePoints;
     }
 
 }

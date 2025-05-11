@@ -105,8 +105,15 @@
     <mkdir dir="${jar.dir}"/>
     <jar destfile="${jar.dir}/emoji.jar">
       <fileset dir="${resources.dir}">
-        <exclude name="**/emoji/**" />
+        <exclude name="**/terminus**/**" />
+        <exclude name="**/help.xml" />
+        <exclude name="**/logo_128.png" />
+        <include name="**/emoji/**" />
       </fileset>
+
+      <manifest>
+        <attribute name="Implementation-Version" value="${version}"/>
+      </manifest>
     </jar>
   </target>
 

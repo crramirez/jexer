@@ -506,8 +506,11 @@ public class GlyphMaker {
         }
         if (StringUtils.isEmoji(ch)) {
             // Pull from color emoji's first.
-
-            // TODO
+            if (ColorEmojiGlyphMaker.canDisplay(ch)) {
+                ComplexCell complexCell = new ComplexCell(cell);
+                return ColorEmojiGlyphMaker.getImage(complexCell,
+                    cellWidth, cellHeight, backend, blinkVisible);
+            }
 
             if (makerEmoji.canDisplay(ch)) {
                 // System.err.println("emoji: " + String.format("0x%x", ch));
