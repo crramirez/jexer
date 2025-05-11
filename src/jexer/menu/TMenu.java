@@ -904,14 +904,17 @@ public class TMenu extends TWindow {
 
         case MID_VIEW_IMAGE:
             label = i18n.getString("menuViewImage");
+            icon = 0x1F5BC;
             break;
 
         case MID_VIEW_ANSI:
             label = i18n.getString("menuViewAnsiArt");
+            icon = 0x1F4F0;
             break;
 
         case MID_SCREEN_OPTIONS:
             label = i18n.getString("menuScreenOptions");
+            icon = 0x1F527;
             break;
 
         case MID_NEW:
@@ -939,10 +942,12 @@ public class TMenu extends TWindow {
         case MID_UNDO:
             label = i18n.getString("menuUndo");
             key = kbCtrlZ;
+            icon = 0x2B6F;
             break;
         case MID_REDO:
             label = i18n.getString("menuRedo");
             key = kbCtrlY;
+            icon = 0x2B6E;
             break;
         case MID_CUT:
             label = i18n.getString("menuCut");
@@ -980,6 +985,7 @@ public class TMenu extends TWindow {
 
         case MID_TILE:
             label = i18n.getString("menuWindowTile");
+            icon = 0x229E;
             break;
         case MID_CASCADE:
             label = i18n.getString("menuWindowCascade");
@@ -991,7 +997,7 @@ public class TMenu extends TWindow {
         case MID_WINDOW_MOVE:
             label = i18n.getString("menuWindowMove");
             key = kbCtrlF5;
-            icon = 0x263C;
+            icon = 0x261D;
             break;
         case MID_WINDOW_ZOOM:
             label = i18n.getString("menuWindowZoom");
@@ -1011,6 +1017,7 @@ public class TMenu extends TWindow {
         case MID_WINDOW_CLOSE:
             label = i18n.getString("menuWindowClose");
             key = kbCtrlW;
+            icon = 0x263C;
             break;
 
         case MID_HELP_CONTENTS:

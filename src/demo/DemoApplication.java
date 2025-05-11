@@ -469,7 +469,9 @@ public class DemoApplication extends TApplication {
         if (getScreen() instanceof SwingTerminal) {
             TMenu swingMenu = addMenu(i18n.getString("swing"));
             item = swingMenu.addItem(3000, i18n.getString("bigger"));
+            item.setIcon(0x1f5da);
             item = swingMenu.addItem(3001, i18n.getString("smaller"));
+            item.setIcon(0x1f5db);
         }
 
         addTableMenu();

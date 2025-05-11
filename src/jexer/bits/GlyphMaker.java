@@ -220,7 +220,10 @@ class GlyphMakerFont {
         } else {
             image = glyphCache.get(cell);
         }
-        if (image != null) {
+        if ((image != null)
+            && (image.getWidth() == cellWidth)
+            && (image.getHeight() == cellHeight)
+        ) {
             return image;
         }
 

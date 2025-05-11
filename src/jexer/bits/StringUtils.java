@@ -473,6 +473,16 @@ public class StringUtils {
                 // Symbols for Legacy Computing, 1 or 2?
                 // || ((ch >= 0x1fb00) && (ch <= 0x1fbff))
                 || ((ch >= 0x1fc00) && (ch <= 0x1fffd))
+                // Arrows
+                || ((ch >= 0x2190) && (ch <= 0x21ff))
+                // Supplemental Arrows
+                || ((ch >= 0x2900) && (ch <= 0x297f))
+                // Miscellaneous Symbols
+                || ((ch >= 0x2600) && (ch <= 0x26ff))
+                // Miscellaneous Symbols and Arrows
+                || ((ch >= 0x2b00) && (ch <= 0x2bff))
+                // Dingbats
+                || ((ch >= 0x2700) && (ch <= 0x27bf))
             )
         ) {
             return 2;
