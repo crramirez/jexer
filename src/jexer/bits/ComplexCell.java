@@ -138,6 +138,7 @@ public class ComplexCell extends Cell {
      */
     @Override
     public void setChar(final int ch) {
+        super.setChar(ch);
         codePoints = new int[1];
         codePoints[0] = ch;
     }
