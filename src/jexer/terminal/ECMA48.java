@@ -55,6 +55,7 @@ import jexer.backend.Backend;
 import jexer.bits.Color;
 import jexer.bits.Cell;
 import jexer.bits.CellAttributes;
+import jexer.bits.ComplexCell;
 import jexer.bits.GlyphMaker;
 import jexer.bits.ImageUtils;
 import jexer.bits.StringUtils;
@@ -2046,7 +2047,7 @@ public class ECMA48 implements Runnable {
         }
 
         // "Print" the character
-        Cell newCell = new Cell(ch);
+        ComplexCell newCell = new ComplexCell(ch);
         CellAttributes newCellAttributes = (CellAttributes) newCell;
         newCellAttributes.setTo(currentState.attr);
         DisplayLine line = display.get(currentState.cursorY);
@@ -4160,7 +4161,7 @@ public class ECMA48 implements Runnable {
      */
     private void decaln() {
         screenIsDirty = true;
-        Cell newCell = new Cell('E');
+        ComplexCell newCell = new ComplexCell('E');
         for (DisplayLine line: display) {
             for (int i = 0; i < line.length(); i++) {
                 line.replace(i, newCell);
@@ -4367,7 +4368,7 @@ public class ECMA48 implements Runnable {
         screenIsDirty = true;
         int n = getCsiParam(0, 1);
         DisplayLine line = display.get(currentState.cursorY);
-        Cell blank = new Cell();
+        ComplexCell blank = new ComplexCell();
         for (int i = 0; i < n; i++) {
             line.delete(currentState.cursorX, blank);
         }
@@ -4380,7 +4381,7 @@ public class ECMA48 implements Runnable {
         screenIsDirty = true;
         int n = getCsiParam(0, 1);
         DisplayLine line = display.get(currentState.cursorY);
-        Cell blank = new Cell();
+        ComplexCell blank = new ComplexCell();
         for (int i = 0; i < n; i++) {
             line.insert(currentState.cursorX, blank);
         }
@@ -5887,7 +5888,13 @@ public class ECMA48 implements Runnable {
                     return;
                 }
 
+                if (StringUtils.isEmoji(ch)) {
+                    // TODO: run through the emoji state machine
+                }
+
                 // Hang onto this character
+
+                // TODO: handle multi-codepoint repCh
                 repCh = mapCharacter(ch);
 
                 // Print this character
@@ -7972,7 +7979,7 @@ public class ECMA48 implements Runnable {
             lastTextHeight = textHeight;
         }
 
-        Cell cell = new Cell(ch, currentState.attr);
+        ComplexCell cell = new ComplexCell(ch, currentState.attr);
         BufferedImage image = glyphMaker.getImage(cell, textWidth * 2,
             textHeight, backend);
         BufferedImage leftImage = image.getSubimage(0, 0, textWidth,
@@ -7980,13 +7987,13 @@ public class ECMA48 implements Runnable {
         BufferedImage rightImage = image.getSubimage(textWidth, 0, textWidth,
             textHeight);
 
-        Cell left = new Cell(cell);
+        ComplexCell left = new ComplexCell(cell);
         left.setImage(leftImage, Math.abs(leftImage.hashCode()));
         left.setOpaqueImage();
         left.setWidth(Cell.Width.LEFT);
         display.get(leftY).replace(leftX, left);
 
-        Cell right = new Cell(cell);
+        ComplexCell right = new ComplexCell(cell);
         right.setImage(rightImage, Math.abs(rightImage.hashCode()));
         right.setOpaqueImage();
         right.setWidth(Cell.Width.RIGHT);
@@ -8587,7 +8594,7 @@ public class ECMA48 implements Runnable {
         // Break the image up into an array of cells.
         int imageId = System.identityHashCode(this);
         imageId ^= (int) System.currentTimeMillis();
-        Cell [][] cells = new Cell[cellColumns][cellRows];
+        ComplexCell [][] cells = new ComplexCell[cellColumns][cellRows];
         for (int x = 0; x < cellColumns; x++) {
             for (int y = 0; y < cellRows; y++) {
                 int width = textWidth;
@@ -8603,7 +8610,7 @@ public class ECMA48 implements Runnable {
                 // array copy is better than lots of subImages.  Memory
                 // pressure is killing it at high animation rates.  For now,
                 // we will ALWAYS make a copy.
-                Cell cell = new Cell();
+                ComplexCell cell = new ComplexCell();
 
                 BufferedImage imageSlice = image.getSubimage(x * textWidth,
                     y * textHeight, width, height);
@@ -8659,7 +8666,7 @@ public class ECMA48 implements Runnable {
 
                 // Keep the character data from the old cell, putting the
                 // image data over it.
-                Cell oldCell = line.charAt(currentState.cursorX);
+                ComplexCell oldCell = line.charAt(currentState.cursorX);
                 cells[x][y].setChar(oldCell.getChar());
                 cells[x][y].setAttr(oldCell, true);
                 if (transparent && maybeTransparent

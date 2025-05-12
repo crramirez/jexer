@@ -30,8 +30,8 @@ package jexer.terminal;
 
 import java.util.ArrayList;
 
-import jexer.bits.Cell;
 import jexer.bits.CellAttributes;
+import jexer.bits.ComplexCell;
 
 /**
  * This represents a single line of the display buffer.
@@ -49,7 +49,7 @@ public class DisplayLine {
     /**
      * The characters/attributes of the line.
      */
-    private ArrayList<Cell> chars = new ArrayList<Cell>();
+    private ArrayList<ComplexCell> chars = new ArrayList<ComplexCell>();
 
     /**
      * Double-width line flag.
@@ -88,8 +88,8 @@ public class DisplayLine {
      * @param line the line to duplicate
      */
     public DisplayLine(final DisplayLine line) {
-        for (Cell cell: line.chars) {
-            chars.add(new Cell(cell));
+        for (ComplexCell cell: line.chars) {
+            chars.add(new ComplexCell(cell));
         }
         attr = new CellAttributes(line.attr);
         doubleWidth = line.doubleWidth;
@@ -116,11 +116,11 @@ public class DisplayLine {
      * @param idx the character index
      * @return the Cell
      */
-    public Cell charAt(final int idx) {
+    public ComplexCell charAt(final int idx) {
         while (idx >= chars.size()) {
-            chars.add(new Cell(attr));
+            chars.add(new ComplexCell(attr));
         }
-        return new Cell(chars.get(idx));
+        return new ComplexCell(chars.get(idx));
     }
 
     /**
@@ -190,24 +190,24 @@ public class DisplayLine {
      * Insert a character at the specified position.
      *
      * @param idx the character index
-     * @param newCell the new Cell
+     * @param newCell the new ComplexCell
      */
-    public void insert(final int idx, final Cell newCell) {
+    public void insert(final int idx, final ComplexCell newCell) {
         while (idx >= chars.size()) {
-            chars.add(new Cell(attr));
+            chars.add(new ComplexCell(attr));
         }
-        chars.add(idx, new Cell(newCell));
+        chars.add(idx, new ComplexCell(newCell));
     }
 
     /**
      * Replace character at the specified position.
      *
      * @param idx the character index
-     * @param newCell the new Cell
+     * @param newCell the new ComplexCell
      */
-    public void replace(final int idx, final Cell newCell) {
+    public void replace(final int idx, final ComplexCell newCell) {
         while (idx >= chars.size()) {
-            chars.add(new Cell(attr));
+            chars.add(new ComplexCell(attr));
         }
         chars.get(idx).setTo(newCell);
     }
@@ -219,7 +219,7 @@ public class DisplayLine {
      */
     public void setBlank(final int idx) {
         while (idx >= chars.size()) {
-            chars.add(new Cell(attr));
+            chars.add(new ComplexCell(attr));
         }
         chars.get(idx).reset();
     }
@@ -233,7 +233,7 @@ public class DisplayLine {
      */
     public void setChar(final int idx, final int ch) {
         while (idx >= chars.size()) {
-            chars.add(new Cell(attr));
+            chars.add(new ComplexCell(attr));
         }
         chars.get(idx).setChar(ch);
     }
@@ -247,7 +247,7 @@ public class DisplayLine {
      */
     public void setAttr(final int idx, final CellAttributes attr) {
         while (idx >= chars.size()) {
-            chars.add(new Cell(attr));
+            chars.add(new ComplexCell(attr));
         }
         chars.get(idx).setAttr(attr);
     }
@@ -257,11 +257,11 @@ public class DisplayLine {
      * character on the right with newCell.
      *
      * @param idx the character index
-     * @param newCell the new Cell
+     * @param newCell the new ComplexCell
      */
-    public void delete(final int idx, final Cell newCell) {
+    public void delete(final int idx, final ComplexCell newCell) {
         while (idx >= chars.size()) {
-            chars.add(new Cell(attr));
+            chars.add(new ComplexCell(attr));
         }
         chars.remove(idx);
     }
@@ -272,7 +272,7 @@ public class DisplayLine {
      * @return true if the line has image data
      */
     public boolean isImage() {
-        for (Cell cell: chars) {
+        for (ComplexCell cell: chars) {
             if (cell.isImage()) {
                 return true;
             }
@@ -284,7 +284,7 @@ public class DisplayLine {
      * Clear image data from line.
      */
     public void clearImages() {
-        for (Cell cell: chars) {
+        for (ComplexCell cell: chars) {
             if (cell.isImage()) {
                 cell.reset();
             }

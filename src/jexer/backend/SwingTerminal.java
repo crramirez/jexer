@@ -1493,9 +1493,9 @@ public class SwingTerminal extends LogicalScreen
 
         GlyphMaker glyphMaker = GlyphMaker.getInstance(textHeight);
         int ch = cell.getChar();
-            // If a fallback font is available that can support Symbols for
-            // Legacy Computing, always use it.  This is for consistency --
-            // we assume the fallback font has better coverage than Terminus.
+        // If a fallback font is available that can support Symbols for
+        // Legacy Computing, always use it.  This is for consistency -- we
+        // assume the fallback font has better coverage than Terminus.
         if (((StringUtils.isLegacyComputingSymbol(ch)
                     || StringUtils.isBraille(ch))
                 && glyphMaker.canDisplay(ch))

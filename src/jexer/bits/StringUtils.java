@@ -522,17 +522,131 @@ public class StringUtils {
     }
 
     /**
-     * Check if character is in the emoji range.
+     * Check if character is in the emoji range (Emoji,
+     * Extended_Pictographic).
      *
      * @param ch character to check
      * @return true if this character is in the emoji range
      */
     public static boolean isEmoji(final int ch) {
-        if ((ch >= 0x1fb00) && (ch <= 0x1fbff)) {
-            // Unicode Symbols for Legacy Computing
-            return false;
+        // Emoji Version 16.0 Extended Pictographic range.
+        if (false
+            /*
+             * These codepoints can be displayed as either text style
+             * (0xFE0E) or emoji style (0xFE0F), and typically we will want
+             * them text style.  For now, leave them out of the emoji check
+             * so that they go through the font mechanism (GlyphEncoder)
+             * rather than the PNG blit mechanism (ColorEmojiGlyphMaker).
+             */
+            /*
+            || (ch == 0x00A9)
+            || (ch == 0x00AE)
+            || (ch == 0x203C)
+            || (ch == 0x2049)
+            || (ch == 0x2122)
+            || (ch == 0x2139)
+            || ((ch >= 0x2194) && (ch <= 0x2199))
+            || ((ch >= 0x21A9) && (ch <= 0x21AA))
+            || ((ch >= 0x231A) && (ch <= 0x231B))
+            || (ch == 0x2328)
+            || (ch == 0x2388)
+            || (ch == 0x23CF)
+            || ((ch >= 0x23E9) && (ch <= 0x23F3))
+            || ((ch >= 0x23F8) && (ch <= 0x23FA))
+            || (ch == 0x24C2)
+            || ((ch >= 0x25AA) && (ch <= 0x25AB))
+            || (ch == 0x25B6)
+            || (ch == 0x25C0)
+            || ((ch >= 0x25FB) && (ch <= 0x2605))
+            || ((ch >= 0x2607) && (ch <= 0x2612))
+            || ((ch >= 0x2614) && (ch <= 0x2685))
+            || ((ch >= 0x2690) && (ch <= 0x2705))
+            || ((ch >= 0x2708) && (ch <= 0x2712))
+            || (ch == 0x2714)
+            || (ch == 0x2716)
+            || (ch == 0x271D)
+            || (ch == 0x2721)
+            || (ch == 0x2728)
+            || ((ch >= 0x2733) && (ch <= 0x2734))
+            || (ch == 0x2744)
+            || (ch == 0x2747)
+            || (ch == 0x274C)
+            || (ch == 0x274E)
+            || ((ch >= 0x2753) && (ch <= 0x2755))
+            || (ch == 0x2757)
+            || ((ch >= 0x2763) && (ch <= 0x2767))
+            || ((ch >= 0x2795) && (ch <= 0x2797))
+            || (ch == 0x27A1)
+            || (ch == 0x27B0)
+            || (ch == 0x27BF)
+            || ((ch >= 0x2934) && (ch <= 0x2935))
+            || ((ch >= 0x2B05) && (ch <= 0x2B07))
+            || ((ch >= 0x2B1B) && (ch <= 0x2B1C))
+            || (ch == 0x2B50)
+            || (ch == 0x2B55)
+            || (ch == 0x3030)
+            || (ch == 0x303D)
+            || (ch == 0x3297)
+            || (ch == 0x3299)
+             */
+            || ((ch >= 0x1F000) && (ch <= 0x1F0FF))
+            || ((ch >= 0x1F10D) && (ch <= 0x1F10F))
+            || (ch == 0x1F12F)
+            || ((ch >= 0x1F16C) && (ch <= 0x1F171))
+            || ((ch >= 0x1F17E) && (ch <= 0x1F17F))
+            || (ch == 0x1F18E)
+            || ((ch >= 0x1F191) && (ch <= 0x1F19A))
+            || ((ch >= 0x1F1AD) && (ch <= 0x1F1E5))
+            || ((ch >= 0x1F201) && (ch <= 0x1F20F))
+            || (ch == 0x1F21A)
+            || (ch == 0x1F22F)
+            || ((ch >= 0x1F232) && (ch <= 0x1F23A))
+            || ((ch >= 0x1F23C) && (ch <= 0x1F23F))
+            || ((ch >= 0x1F249) && (ch <= 0x1F319))
+            || ((ch >= 0x1F31A) && (ch <= 0x1F3FA))
+            || ((ch >= 0x1F400) && (ch <= 0x1F53D))
+            || ((ch >= 0x1F546) && (ch <= 0x1F64F))
+            || ((ch >= 0x1F680) && (ch <= 0x1F6FF))
+            || ((ch >= 0x1F774) && (ch <= 0x1F77F))
+            || ((ch >= 0x1F7D5) && (ch <= 0x1F7FF))
+            || ((ch >= 0x1F80C) && (ch <= 0x1F80F))
+            || ((ch >= 0x1F848) && (ch <= 0x1F84F))
+            || ((ch >= 0x1F85A) && (ch <= 0x1F85F))
+            || ((ch >= 0x1F888) && (ch <= 0x1F88F))
+            || ((ch >= 0x1F8AE) && (ch <= 0x1F8FF))
+            || ((ch >= 0x1F90C) && (ch <= 0x1F93A))
+            || ((ch >= 0x1F93C) && (ch <= 0x1F945))
+            || ((ch >= 0x1F947) && (ch <= 0x1FAFF))
+            || ((ch >= 0x1FC00) && (ch <= 0x1FFFD))
+        ) {
+            return true;
         }
-        return ((ch >= 0x1f004) && (ch <= 0x1fffd));
+        return false;
+    }
+
+    /**
+     * Check if character is in the Emoji_Component range.  Emoji_Component
+     * codepoints are part of larger sequences, but some of them can also
+     * stand alone to represent glyphs (Emoji, Extended_Pictographic).
+     *
+     * @param ch character to check
+     * @return true if this character is in the emoji component range
+     */
+    public static boolean isEmojiComponent(final int ch) {
+        if ((ch == 0x0023)
+            || (ch == 0x002A)
+            || ((ch >= 0x0030) && (ch <= 0x0039))
+            || (ch == 0x200D)
+            || (ch == 0x20E3)
+            || (ch == 0xFE0F)
+            || ((ch >= 0x1F1E6) && (ch <= 0x1F1FF))
+            || ((ch >= 0x1F3FB) && (ch <= 0x1F3FF))
+            || ((ch >= 0x1F9B0) && (ch <= 0x1F9B3))
+            || ((ch >= 0xE0020) && (ch <= 0xE007F))
+        ) {
+            return true;
+        }
+        return false;
     }
 
     /**

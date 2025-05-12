@@ -460,7 +460,7 @@ public class CellAttributes {
     }
 
     /**
-     * Set my field values to that's field.
+     * Set my field values to rhs's field.
      *
      * @param rhs another CellAttributes instance
      */

@@ -880,7 +880,7 @@ public class Cell extends CellAttributes {
     }
 
     /**
-     * Set my field values to that's field.
+     * Set my field values to rhs's field.
      *
      * @param rhs an instance of either Cell or CellAttributes
      */

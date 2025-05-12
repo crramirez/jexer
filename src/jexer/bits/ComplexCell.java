@@ -62,6 +62,27 @@ public class ComplexCell extends Cell {
     }
 
     /**
+     * Public constructor sets the attributes.
+     *
+     * @param attr attributes to use
+     */
+    public ComplexCell(final CellAttributes attr) {
+        super(attr);
+        codePoints[0] = ' ';
+    }
+
+    /**
+     * Public constructor sets a single codepoint and attributes.
+     *
+     * @param codePoint the codepoint to set to
+     * @param attr attributes to use
+     */
+    public ComplexCell(final int codePoint, final CellAttributes attr) {
+        super(codePoint, attr);
+        codePoints[0] = codePoint;
+    }
+
+    /**
      * Public constructor sets a single codepoint.  Attributes are the same
      * as default.
      *
@@ -185,7 +206,7 @@ public class ComplexCell extends Cell {
     }
 
     /**
-     * Set my field values to that's field.
+     * Set my field values to rhs's field.
      *
      * @param rhs an instance of either Cell or CellAttributes
      */
@@ -198,11 +219,13 @@ public class ComplexCell extends Cell {
                 codePoints.length);
         } else {
             this.codePoints = new int[1];
+            this.codePoints[0] = ' ';
         }
-        // Let this throw a ClassCastException
-        Cell thatCell = (Cell) rhs;
-        this.codePoints[0] = thatCell.getChar();
-        super.setTo(thatCell);
+        if (rhs instanceof Cell) {
+            Cell thatCell = (Cell) rhs;
+            this.codePoints[0] = thatCell.getChar();
+        }
+        super.setTo(rhs);
     }
 
 
@@ -233,13 +256,14 @@ public class ComplexCell extends Cell {
     // ------------------------------------------------------------------------
 
     /**
-     * Getter for cell codepoints.  Note this returns the internal array, not
-     * a copy.
+     * Getter for cell codepoints.
      *
-     * @return the codepoints
+     * @return a copy of the codepoints
      */
     public int [] getCodePoints() {
-        return codePoints;
+        int [] result = new int[codePoints.length];
+        System.arraycopy(result, 0, codePoints, 0, codePoints.length);
+        return result;
     }
 
 }
