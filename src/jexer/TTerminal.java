@@ -991,7 +991,9 @@ public class TTerminal extends TScrollable
                     langString = langString.substring(0, dotIndex);
                 }
             }
-            env.put("TERM", ECMA48.deviceTypeTerm(deviceType));
+            String termString = System.getProperty("jexer.TTerminal.TERM",
+                "xterm-direct");
+            env.put("TERM", termString);
             env.put("LANG", ECMA48.deviceTypeLang(deviceType, langString));
             env.put("COLUMNS", "80");
             env.put("LINES", "24");
