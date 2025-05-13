@@ -473,8 +473,11 @@ public class StringUtils {
                 // Symbols for Legacy Computing, 1 or 2?
                 // || ((ch >= 0x1fb00) && (ch <= 0x1fbff))
                 || ((ch >= 0x1fc00) && (ch <= 0x1fffd))
-                // Arrows
-                || ((ch >= 0x2190) && (ch <= 0x21ff))
+
+                // Arrows - but not the ones in CP437
+                // || ((ch >= 0x2190) && (ch <= 0x21ff))
+                || ((ch >= 0x2196) && (ch <= 0x21ff))
+
                 // Supplemental Arrows
                 || ((ch >= 0x2900) && (ch <= 0x297f))
                 // Miscellaneous Symbols
