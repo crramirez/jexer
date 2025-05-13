@@ -8175,7 +8175,9 @@ public class ECMA48 implements Runnable {
             // System.err.println("XTGETTCAP: '" + name + "'");
 
             if (name.toString().equals("TN")) {
-                writeXtgettcapResponse(name.toString(), "xterm-256color");
+                writeXtgettcapResponse(name.toString(),
+                    System.getProperty("jexer.TTerminal.TERM",
+                        "xterm-direct"));
             }
             if (name.toString().equals("RGB")) {
                 /*
