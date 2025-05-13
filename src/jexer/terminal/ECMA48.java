@@ -1984,10 +1984,12 @@ public class ECMA48 implements Runnable {
     }
 
     /**
-     * Reprint the last emoji with the new sequence of codepoints in
-     * repCodePoints.
+     * Print a 2-column emoji with the sequence of codepoints in repCodePoints.
+     *
+     * @param x X location to render to
+     * @param y Y location to render to
      */
-    private void reprintEmoji() {
+    private void printEmojiXY(final int x, final int y) {
         screenIsDirty = true;
         int [] codePoints = new int[repCodePoints.size()];
         for (int i = 0; i < repCodePoints.size(); i++) {
@@ -2014,13 +2016,13 @@ public class ECMA48 implements Runnable {
         left.setImage(leftImage, Math.abs(leftImage.hashCode()));
         left.setOpaqueImage();
         left.setWidth(Cell.Width.LEFT);
-        display.get(lastEmojiY).replace(lastEmojiX, left);
+        display.get(y).replace(x, left);
 
         ComplexCell right = new ComplexCell(cell);
         right.setImage(rightImage, Math.abs(rightImage.hashCode()));
         right.setOpaqueImage();
         right.setWidth(Cell.Width.RIGHT);
-        display.get(lastEmojiY).replace(lastEmojiX + 1, right);
+        display.get(y).replace(x + 1, right);
     }
 
     /**
@@ -4479,8 +4481,38 @@ public class ECMA48 implements Runnable {
     private void rep() {
         int n = getCsiParam(0, 1);
         for (int i = 0; i < n; i++) {
-            // TODO: fix for multiple codepoints
-            // printCharacter(repCh);
+            if ((repCodePoints.size() > 1)
+                || (StringUtils.width(repCodePoints.get(0)) == 2)
+            ) {
+                int x0 = currentState.cursorX;
+                int y0 = currentState.cursorY;
+                printCharacter(' ');
+                printCharacter(' ');
+                if ((currentState.cursorX == x0 + 2)
+                    && (currentState.cursorY == y0)
+                ) {
+                    // We can draw both halves of the character.
+                    printEmojiXY(x0, y0);
+                } else if ((currentState.cursorX == x0 + 1)
+                    && (currentState.cursorY == y0)
+                ) {
+                    // VT100 line wrap behavior: we should be at the right
+                    // margin.  We can draw both halves of the character.
+                    printEmojiXY(x0, y0);
+                } else {
+                    // The character splits across the line.  Draw the entire
+                    // character on the new line, giving one more space for it.
+                    x0 = currentState.cursorX - 1;
+                    y0 = currentState.cursorY;
+                    printCharacter(' ');
+                    printEmojiXY(x0, y0);
+                }
+                lastEmojiX = x0;
+                lastEmojiY = y0;
+            } else {
+                assert (repCodePoints.size() == 1);
+                printCharacter(repCodePoints.get(0));
+            }
         }
     }
 
@@ -5975,7 +6007,7 @@ public class ECMA48 implements Runnable {
 
                     // Modify the last printed graphic character, replace
                     // with repCodePoints.
-                    reprintEmoji();
+                    printEmojiXY(lastEmojiX, lastEmojiY);
                 } else if ((repCodePoints.size() > 0)
                     && (repCodePoints.get(repCodePoints.size() - 1) == 0x200D)
                     && (lastScanState == ScanState.GROUND)
@@ -5987,14 +6019,14 @@ public class ECMA48 implements Runnable {
                     if (repCodePoints.size() > 1) {
                         // Modify the last printed graphic character, replace
                         // with repCodePoints.
-                        reprintEmoji();
+                        printEmojiXY(lastEmojiX, lastEmojiY);
                     }
                     repCodePoints.clear();
                     repCodePoints.add(mapCharacter(ch));
                     assert (repCodePoints.size() == 1);
 
                     // Print single-codepoint character.
-                    printCharacter(ch);
+                    printCharacter(mapCharacter(ch));
                 }
             }
             return;

@@ -476,16 +476,49 @@ public class StringUtils {
 
                 // Arrows - but not the ones in CP437
                 // || ((ch >= 0x2190) && (ch <= 0x21ff))
-                || ((ch >= 0x2196) && (ch <= 0x21ff))
+                || ((ch >= 0x2196) && (ch <= 0x21ff) && (ch != 0x21a8))
 
                 // Supplemental Arrows
                 || ((ch >= 0x2900) && (ch <= 0x297f))
-                // Miscellaneous Symbols
-                || ((ch >= 0x2600) && (ch <= 0x26ff))
-                // Miscellaneous Symbols and Arrows
-                || ((ch >= 0x2b00) && (ch <= 0x2bff))
-                // Dingbats
-                || ((ch >= 0x2700) && (ch <= 0x27bf))
+
+                // Miscellaneous Symbols - a random smattering
+                // || ((ch >= 0x2600) && (ch <= 0x26ff))
+                || (ch >= 0x2614) && (ch <= 0x2615)
+                || (ch >= 0x2630) && (ch <= 0x2637)
+                || (ch >= 0x2648) && (ch <= 0x2653)
+                || (ch == 0x267f)
+                || (ch >= 0x268a) && (ch <= 0x268f)
+                || (ch == 0x2693)
+                || (ch == 0x26a1)
+                || (ch >= 0x26aa) && (ch <= 0x26ab)
+                || (ch >= 0x26bd) && (ch <= 0x26be)
+                || (ch >= 0x26c4) && (ch <= 0x26c5)
+                || (ch == 0x26ce)
+                || (ch == 0x26d4)
+                || (ch == 0x26ea)
+                || (ch >= 0x26f2) && (ch <= 0x26f3)
+                || (ch == 0x26f5)
+                || (ch == 0x26fa)
+                || (ch == 0x26fd)
+
+                // Dingbats - a smattering
+                // || ((ch >= 0x2700) && (ch <= 0x27bf))
+                || (ch == 0x2705)
+                || (ch >= 0x270a) && (ch <= 0x270b)
+                || (ch == 0x2728)
+                || (ch == 0x274c)
+                || (ch == 0x274e)
+                || (ch >= 0x2753) && (ch <= 0x2755)
+                || (ch == 0x2757)
+                || (ch >= 0x2795) && (ch <= 0x2797)
+                || (ch == 0x27b0)
+                || (ch == 0x27bf)
+
+                // Miscellaneous Symbols and Arrows - a smattering
+                // || ((ch >= 0x2b00) && (ch <= 0x2bff))
+                || (ch >= 0x2b1b) && (ch <= 0x2b1c)
+                || (ch == 0x2b50)
+                || (ch == 0x2b55)
             )
         ) {
             return 2;
