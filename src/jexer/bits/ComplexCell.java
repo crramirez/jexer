@@ -108,6 +108,19 @@ public class ComplexCell extends Cell {
     }
 
     /**
+     * Public constructor sets multiple codepoints and attributes.
+     * as default.
+     *
+     * @param codePoints the codepoints to set to
+     * @param attr attributes to use
+     */
+    public ComplexCell(final int [] codePoints, final CellAttributes attr) {
+        super(codePoints[0], attr);
+        this.codePoints = new int[codePoints.length];
+        System.arraycopy(codePoints, 0, this.codePoints, 0, codePoints.length);
+    }
+
+    /**
      * Public constructor creates a duplicate.
      *
      * @param cell the instance to copy
@@ -216,7 +229,7 @@ public class ComplexCell extends Cell {
         if (rhs instanceof ComplexCell) {
             ComplexCell that = (ComplexCell) rhs;
             this.codePoints = new int[codePoints.length];
-            System.arraycopy(codePoints, 0, this.codePoints, 0,
+            System.arraycopy(that.codePoints, 0, this.codePoints, 0,
                 codePoints.length);
         } else {
             this.codePoints = new int[1];
@@ -263,8 +276,20 @@ public class ComplexCell extends Cell {
      */
     public int [] getCodePoints() {
         int [] result = new int[codePoints.length];
-        System.arraycopy(result, 0, codePoints, 0, codePoints.length);
+        System.arraycopy(codePoints, 0, result, 0, codePoints.length);
         return result;
+    }
+
+    /**
+     * Append one codepoint to the end of the sequence.
+     *
+     * @param codePoint the codepoint to add
+     */
+    public void add(final int codePoint) {
+        int [] oldCodePoints = codePoints;
+        codePoints = new int[oldCodePoints.length + 1];
+        System.arraycopy(codePoints, 0, oldCodePoints, 0, oldCodePoints.length);
+        codePoints[oldCodePoints.length] = codePoint;
     }
 
 }

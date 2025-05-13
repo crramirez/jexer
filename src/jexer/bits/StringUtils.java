@@ -653,6 +653,28 @@ public class StringUtils {
     }
 
     /**
+     * Check if character will always be part of a larger emoji sequence.
+     *
+     * @param ch character to check
+     * @return true if this character is only used to combine/modify emoji
+     * codepoints.
+     */
+    public static boolean isEmojiCombiner(final int ch) {
+        if ((ch == 0xFE0E)
+            || (ch == 0xFE0F)
+            || (ch == 0x200D)
+            || (ch == 0x20E3)
+            || ((ch >= 0x1F1E6) && (ch <= 0x1F1FF))
+            || ((ch >= 0x1F3FB) && (ch <= 0x1F3FF))
+            || ((ch >= 0x1F9B0) && (ch <= 0x1F9B3))
+            || ((ch >= 0xE0020) && (ch <= 0xE007F))
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Check if character is in the Symbols for Legacy Computing range.
      *
      * @param ch character to check

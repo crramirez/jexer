@@ -53,6 +53,7 @@ import javax.imageio.ImageIO;
 import jexer.TKeypress;
 import jexer.backend.Backend;
 import jexer.bits.Color;
+import jexer.bits.ColorEmojiGlyphMaker;
 import jexer.bits.Cell;
 import jexer.bits.CellAttributes;
 import jexer.bits.ComplexCell;
@@ -350,6 +351,11 @@ public class ECMA48 implements Runnable {
     private ScanState scanState;
 
     /**
+     * Scanning state from the previous call to consume().
+     */
+    private ScanState lastScanState;
+
+    /**
      * Which mouse protocol is active.
      */
     private MouseProtocol mouseProtocol = MouseProtocol.OFF;
@@ -417,9 +423,19 @@ public class ECMA48 implements Runnable {
     private int rightMargin = 79;
 
     /**
-     * Last character printed.
+     * Last Unicode grapheme printed.
      */
-    private int repCh;
+    private List<Integer> repCodePoints = new ArrayList<Integer>(5);
+
+    /**
+     * Last cursor X location of full-width grapheme printed.
+     */
+    private int lastEmojiX = 0;
+
+    /**
+     * Last cursor Y location of full-width grapheme printed.
+     */
+    private int lastEmojiY = 0;
 
     /**
      * VT100-style line wrapping: a character is placed in column 80 (or
@@ -868,6 +884,7 @@ public class ECMA48 implements Runnable {
                                 } else {
                                     consume(ch);
                                 }
+                                lastScanState = scanState;
                             }
                         }
                     } else {
@@ -883,6 +900,7 @@ public class ECMA48 implements Runnable {
                                 } else {
                                     consume(readBuffer[i]);
                                 }
+                                lastScanState = scanState;
                             }
                         }
                     }
@@ -1043,7 +1061,9 @@ public class ECMA48 implements Runnable {
     }
 
     /**
-     * Return the proper TERM environment variable for this device type.
+     * Return the most commonly-used TERM environment variable for this
+     * device type.  Note that jexer.TTerminal pulls TERM from the System
+     * property jexer.TTerminal.TERM, rather than using on the value here.
      *
      * @param deviceType DeviceType.VT100, DeviceType, XTERM, etc.
      * @return "vt100", "xterm", etc.
@@ -1819,6 +1839,7 @@ public class ECMA48 implements Runnable {
         currentState            = new SaveableState();
         savedState              = new SaveableState();
         scanState               = ScanState.GROUND;
+        lastScanState           = ScanState.GROUND;
         if (displayListener != null) {
             width = displayListener.getDisplayWidth();
             height = displayListener.getDisplayHeight();
@@ -1963,6 +1984,46 @@ public class ECMA48 implements Runnable {
     }
 
     /**
+     * Reprint the last emoji with the new sequence of codepoints in
+     * repCodePoints.
+     */
+    private void reprintEmoji() {
+        screenIsDirty = true;
+        int [] codePoints = new int[repCodePoints.size()];
+        for (int i = 0; i < repCodePoints.size(); i++) {
+            codePoints[i] = repCodePoints.get(i);
+        }
+        BufferedImage image = null;
+        ComplexCell cell = new ComplexCell(codePoints, currentState.attr);
+        if (ColorEmojiGlyphMaker.canDisplay(codePoints)) {
+            image = ColorEmojiGlyphMaker.getImage(cell,
+                textWidth * 2, textHeight, backend, true);
+        } else {
+            if (lastTextHeight != textHeight) {
+                glyphMaker = GlyphMaker.getInstance(textHeight);
+                lastTextHeight = textHeight;
+            }
+            image = glyphMaker.getImage(cell,
+                textWidth * 2, textHeight, backend, true);
+        }
+        BufferedImage leftImage = image.getSubimage(0, 0, textWidth,
+            textHeight);
+        BufferedImage rightImage = image.getSubimage(textWidth, 0, textWidth,
+            textHeight);
+        ComplexCell left = new ComplexCell(cell);
+        left.setImage(leftImage, Math.abs(leftImage.hashCode()));
+        left.setOpaqueImage();
+        left.setWidth(Cell.Width.LEFT);
+        display.get(lastEmojiY).replace(lastEmojiX, left);
+
+        ComplexCell right = new ComplexCell(cell);
+        right.setImage(rightImage, Math.abs(rightImage.hashCode()));
+        right.setOpaqueImage();
+        right.setWidth(Cell.Width.RIGHT);
+        display.get(lastEmojiY).replace(lastEmojiX + 1, right);
+    }
+
+    /**
      * Prints one character to the display buffer.
      *
      * @param ch character to display
@@ -1998,6 +2059,8 @@ public class ECMA48 implements Runnable {
                 printCharacter(' ');
                 drawHalves(x0, y0, x0 + 1, y0, ch);
             }
+            lastEmojiX = x0;
+            lastEmojiY = y0;
             return;
         }
 
@@ -3684,6 +3747,7 @@ public class ECMA48 implements Runnable {
                         } else {
                             // Reset DECSDM: Enable sixel scrolling (default).
                             sixelScrolling = true;
+                            // System.err.println("DECSDM de-activated");
                         }
                     }
                 }
@@ -4415,7 +4479,8 @@ public class ECMA48 implements Runnable {
     private void rep() {
         int n = getCsiParam(0, 1);
         for (int i = 0; i < n; i++) {
-            printCharacter(repCh);
+            // TODO: fix for multiple codepoints
+            // printCharacter(repCh);
         }
     }
 
@@ -5597,6 +5662,20 @@ public class ECMA48 implements Runnable {
                 return;
             }
             break;
+        case 2:
+            if (action == 1) {
+                // Report maximum sixel geometry.  Match xterm default of
+                // 1000x1000.
+                if (s8c1t == true) {
+                    writeRemote(String.format("\u009b?%d;%d;%d;%dS", item, 0,
+                            1000, 1000));
+                } else {
+                    writeRemote(String.format("\033[?%d;%d;%d;%dS", item, 0,
+                            1000, 1000));
+                }
+                return;
+            }
+            break;
         default:
             break;
         }
@@ -5758,6 +5837,7 @@ public class ECMA48 implements Runnable {
             } else {
                 writeRemote(String.format("\033[?%d;%d$y", i, Ps));
             }
+            return;
         }
 
         switch (i) {
@@ -5789,7 +5869,6 @@ public class ECMA48 implements Runnable {
         } else {
             writeRemote(String.format("\033[%d;%d$y", i, Ps));
         }
-
 
     }
 
@@ -5888,17 +5967,35 @@ public class ECMA48 implements Runnable {
                     return;
                 }
 
-                if (StringUtils.isEmoji(ch)) {
-                    // TODO: run through the emoji state machine
+                if (StringUtils.isEmojiCombiner(ch)
+                    && (lastScanState == ScanState.GROUND)
+                ) {
+                    // Modify the grapheme, or combine with upcoming.
+                    repCodePoints.add(ch);
+
+                    // Modify the last printed graphic character, replace
+                    // with repCodePoints.
+                    reprintEmoji();
+                } else if ((repCodePoints.size() > 0)
+                    && (repCodePoints.get(repCodePoints.size() - 1) == 0x200D)
+                    && (lastScanState == ScanState.GROUND)
+                ) {
+                    // ZWJ combine with previous.
+                    repCodePoints.add(ch);
+                } else {
+                    // Fresh new codepoint has arrived.
+                    if (repCodePoints.size() > 1) {
+                        // Modify the last printed graphic character, replace
+                        // with repCodePoints.
+                        reprintEmoji();
+                    }
+                    repCodePoints.clear();
+                    repCodePoints.add(mapCharacter(ch));
+                    assert (repCodePoints.size() == 1);
+
+                    // Print single-codepoint character.
+                    printCharacter(ch);
                 }
-
-                // Hang onto this character
-
-                // TODO: handle multi-codepoint repCh
-                repCh = mapCharacter(ch);
-
-                // Print this character
-                printCharacter(repCh);
             }
             return;
 
