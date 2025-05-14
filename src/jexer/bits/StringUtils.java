@@ -519,6 +519,11 @@ public class StringUtils {
                 || (ch >= 0x2b1b) && (ch <= 0x2b1c)
                 || (ch == 0x2b50)
                 || (ch == 0x2b55)
+
+                // Specific glyphs we use in Jexer
+                || (ch == 0x2b6e)
+                || (ch == 0x2b6f)
+
             )
         ) {
             return 2;
@@ -558,8 +563,81 @@ public class StringUtils {
     }
 
     /**
-     * Check if character is in the emoji range (Emoji,
-     * Extended_Pictographic).
+     * Check if character is in the emoji range of the Basic Multilingual
+     * Plane (Emoji, Emoji_Component, Extended_Pictographic).
+     *
+     * @param ch character to check
+     * @return true if this character is in the emoji range
+     */
+    public static boolean isEmojiBMP(final int ch) {
+        // Emoji Version 16.0 Extended Pictographic range.
+        if (false
+            /*
+             * These codepoints can be displayed as either text style
+             * (0xFE0E) or emoji style (0xFE0F), and for UI work we typically
+             * will want them text style, so they are omitted from the
+             * isEmoji() check.  But for completeness, one should also be
+             * able to identify these as emoji.
+             */
+            || (ch == 0x00A9)
+            || (ch == 0x00AE)
+            || (ch == 0x203C)
+            || (ch == 0x2049)
+            || (ch == 0x2122)
+            || (ch == 0x2139)
+            || ((ch >= 0x2194) && (ch <= 0x2199))
+            || ((ch >= 0x21A9) && (ch <= 0x21AA))
+            || ((ch >= 0x231A) && (ch <= 0x231B))
+            || (ch == 0x2328)
+            || (ch == 0x2388)
+            || (ch == 0x23CF)
+            || ((ch >= 0x23E9) && (ch <= 0x23F3))
+            || ((ch >= 0x23F8) && (ch <= 0x23FA))
+            || (ch == 0x24C2)
+            || ((ch >= 0x25AA) && (ch <= 0x25AB))
+            || (ch == 0x25B6)
+            || (ch == 0x25C0)
+            || ((ch >= 0x25FB) && (ch <= 0x2605))
+            || ((ch >= 0x2607) && (ch <= 0x2612))
+            || ((ch >= 0x2614) && (ch <= 0x2685))
+            || ((ch >= 0x2690) && (ch <= 0x2705))
+            || ((ch >= 0x2708) && (ch <= 0x2712))
+            || (ch == 0x2714)
+            || (ch == 0x2716)
+            || (ch == 0x271D)
+            || (ch == 0x2721)
+            || (ch == 0x2728)
+            || ((ch >= 0x2733) && (ch <= 0x2734))
+            || (ch == 0x2744)
+            || (ch == 0x2747)
+            || (ch == 0x274C)
+            || (ch == 0x274E)
+            || ((ch >= 0x2753) && (ch <= 0x2755))
+            || (ch == 0x2757)
+            || ((ch >= 0x2763) && (ch <= 0x2767))
+            || ((ch >= 0x2795) && (ch <= 0x2797))
+            || (ch == 0x27A1)
+            || (ch == 0x27B0)
+            || (ch == 0x27BF)
+            || ((ch >= 0x2934) && (ch <= 0x2935))
+            || ((ch >= 0x2B05) && (ch <= 0x2B07))
+            || ((ch >= 0x2B1B) && (ch <= 0x2B1C))
+            || (ch == 0x2B50)
+            || (ch == 0x2B55)
+            || (ch == 0x3030)
+            || (ch == 0x303D)
+            || (ch == 0x3297)
+            || (ch == 0x3299)
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check if character is in the emoji range (Emoji, Emoji_Component,
+     * Extended_Pictographic) AND not in the Basic Multilingual Plane.  For a
+     * full check of ALL emoji, use 'isEmoji(x) || isEmojiBMP(x)'.
      *
      * @param ch character to check
      * @return true if this character is in the emoji range
@@ -570,9 +648,9 @@ public class StringUtils {
             /*
              * These codepoints can be displayed as either text style
              * (0xFE0E) or emoji style (0xFE0F), and typically we will want
-             * them text style.  For now, leave them out of the emoji check
-             * so that they go through the font mechanism (GlyphEncoder)
-             * rather than the PNG blit mechanism (ColorEmojiGlyphMaker).
+             * them text style.  They are left out of isEmoji() so that they
+             * go through the font mechanism (GlyphEncoder) rather than the
+             * PNG blit mechanism (ColorEmojiGlyphMaker).
              */
             /*
             || (ch == 0x00A9)

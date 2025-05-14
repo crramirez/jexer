@@ -1995,6 +1995,13 @@ public class ECMA48 implements Runnable {
         for (int i = 0; i < repCodePoints.size(); i++) {
             codePoints[i] = repCodePoints.get(i);
         }
+
+        // The first codepoint in a sequence might have been narrow-width.
+        // If so, advance the cursor to make room for the right half.
+        if (x + 1 == currentState.cursorX) {
+            printCharacter(' ');
+        }
+
         BufferedImage image = null;
         ComplexCell cell = new ComplexCell(codePoints, currentState.attr);
         if (ColorEmojiGlyphMaker.canDisplay(codePoints)) {
@@ -2035,7 +2042,13 @@ public class ECMA48 implements Runnable {
 
         int rightMargin = this.rightMargin;
 
-        if (StringUtils.width(ch) == 2) {
+        if ((StringUtils.width(ch) == 2)
+            || StringUtils.isEmoji(ch)
+            // Component: skin-tone
+            || ((ch >= 0x1F3FB) && (ch <= 0x1F3FF))
+            // Component: hair-style
+            || ((ch >= 0x1F9B0) && (ch <= 0x1F9B3))
+        ) {
             // This is a full-width character.  Save two spaces, and then
             // draw the character as two image halves.
             int x0 = currentState.cursorX;
@@ -6001,6 +6014,8 @@ public class ECMA48 implements Runnable {
 
                 if (StringUtils.isEmojiCombiner(ch)
                     && (lastScanState == ScanState.GROUND)
+                    && (StringUtils.isEmoji(repCodePoints.get(0))
+                        || StringUtils.isEmojiBMP(repCodePoints.get(0)))
                 ) {
                     // Modify the grapheme, or combine with upcoming.
                     repCodePoints.add(ch);
@@ -8108,9 +8123,19 @@ public class ECMA48 implements Runnable {
             lastTextHeight = textHeight;
         }
 
+        BufferedImage image = null;
         ComplexCell cell = new ComplexCell(ch, currentState.attr);
-        BufferedImage image = glyphMaker.getImage(cell, textWidth * 2,
-            textHeight, backend);
+        if (ColorEmojiGlyphMaker.canDisplay(ch)) {
+            image = ColorEmojiGlyphMaker.getImage(cell,
+                textWidth * 2, textHeight, backend, true);
+        } else {
+            if (lastTextHeight != textHeight) {
+                glyphMaker = GlyphMaker.getInstance(textHeight);
+                lastTextHeight = textHeight;
+            }
+            image = glyphMaker.getImage(cell,
+                textWidth * 2, textHeight, backend, true);
+        }
         BufferedImage leftImage = image.getSubimage(0, 0, textWidth,
             textHeight);
         BufferedImage rightImage = image.getSubimage(textWidth, 0, textWidth,

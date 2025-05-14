@@ -78,6 +78,10 @@ public class ColorEmojiGlyphMaker {
         StringBuilder sb = new StringBuilder();
         sb.append("emoji/");
         sb.append(String.format("%04x", codePoints[0]).toUpperCase());
+        if ((codePoints.length == 2) && (codePoints[1] == 0xFE0F)) {
+            sb.append(".png");
+            return sb.toString();
+        }
         for (int i = 1; i < codePoints.length; i++) {
             sb.append("-");
             sb.append(String.format("%04x", codePoints[i]).toUpperCase());
