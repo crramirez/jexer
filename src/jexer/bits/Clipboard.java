@@ -222,7 +222,7 @@ public class Clipboard {
     }
 
     /**
-     * Copy image from the clipboard to text.
+     * Copy image from the clipboard to this.image.
      */
     private void getClipboardImage() {
         if (systemClipboard != null) {
@@ -245,7 +245,7 @@ public class Clipboard {
     }
 
     /**
-     * Copy text string from the clipboard to text.
+     * Copy text string from the clipboard to this.text.
      */
     private void getClipboardText() {
         if (systemClipboard != null) {
