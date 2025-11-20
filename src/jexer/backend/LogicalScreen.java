@@ -1539,7 +1539,7 @@ public class LogicalScreen implements Screen {
                         if (backend != null) {
                             thisBg = backend.attrToBackgroundColor(cell).getRGB();
                         } else {
-                            thisBg = SwingTerminal.attrToBackgroundColor(cell).getRGB();
+                            thisBg = ColorUtils.attrToBackgroundColor(cell).getRGB();
                         }
                     }
                     int thisFg = cell.getForeColorRGB();
@@ -1547,7 +1547,7 @@ public class LogicalScreen implements Screen {
                         if (backend != null) {
                             thisFg = backend.attrToForegroundColor(cell).getRGB();
                         } else {
-                            thisFg = SwingTerminal.attrToForegroundColor(cell).getRGB();
+                            thisFg = ColorUtils.attrToForegroundColor(cell).getRGB();
                         }
                     }
 
@@ -1559,7 +1559,7 @@ public class LogicalScreen implements Screen {
                         if (backend != null) {
                             overFg = backend.attrToForegroundColor(over).getRGB();
                         } else {
-                            overFg = SwingTerminal.attrToForegroundColor(over).getRGB();
+                            overFg = ColorUtils.attrToForegroundColor(over).getRGB();
                         }
                     }
                     int overBg = over.getBackColorRGB();
@@ -1567,7 +1567,7 @@ public class LogicalScreen implements Screen {
                         if (backend != null) {
                             overBg = backend.attrToBackgroundColor(over).getRGB();
                         } else {
-                            overBg = SwingTerminal.attrToBackgroundColor(over).getRGB();
+                            overBg = ColorUtils.attrToBackgroundColor(over).getRGB();
                         }
                     }
                     thisFg |= OPAQUE;

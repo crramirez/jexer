@@ -31,7 +31,7 @@ package jexer.bits;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 import jexer.backend.Backend;
-import jexer.backend.SwingTerminal;
+import jexer.backend.ColorUtils;
 
 /**
  * This class represents a single text cell or bit of image on the screen.
@@ -326,7 +326,7 @@ public class Cell extends CellAttributes {
         if (backend != null) {
             gr.setColor(backend.attrToBackgroundColor(this));
         } else {
-            gr.setColor(SwingTerminal.attrToBackgroundColor(this));
+            gr.setColor(ColorUtils.attrToBackgroundColor(this));
         }
 
         if (overGlyph) {

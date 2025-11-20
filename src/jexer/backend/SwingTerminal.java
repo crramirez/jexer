@@ -1189,56 +1189,11 @@ public class SwingTerminal extends LogicalScreen
      *
      * @param attr the text attributes
      * @return the AWT Color
+     * @deprecated Use ColorUtils.attrToForegroundColor instead
      */
+    @Deprecated
     public static Color attrToForegroundColor(final CellAttributes attr) {
-        int rgb = attr.getForeColorRGB();
-        if (rgb >= 0) {
-            int red     = (rgb >>> 16) & 0xFF;
-            int green   = (rgb >>>  8) & 0xFF;
-            int blue    =  rgb         & 0xFF;
-
-            return new Color(red, green, blue);
-        }
-
-        if (attr.isBold()) {
-            if (attr.getForeColor().equals(jexer.bits.Color.BLACK)) {
-                return MYBOLD_BLACK;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.RED)) {
-                return MYBOLD_RED;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.BLUE)) {
-                return MYBOLD_BLUE;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.GREEN)) {
-                return MYBOLD_GREEN;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.YELLOW)) {
-                return MYBOLD_YELLOW;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.CYAN)) {
-                return MYBOLD_CYAN;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.MAGENTA)) {
-                return MYBOLD_MAGENTA;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.WHITE)) {
-                return MYBOLD_WHITE;
-            }
-        } else {
-            if (attr.getForeColor().equals(jexer.bits.Color.BLACK)) {
-                return MYBLACK;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.RED)) {
-                return MYRED;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.BLUE)) {
-                return MYBLUE;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.GREEN)) {
-                return MYGREEN;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.YELLOW)) {
-                return MYYELLOW;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.CYAN)) {
-                return MYCYAN;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.MAGENTA)) {
-                return MYMAGENTA;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.WHITE)) {
-                return MYWHITE;
-            }
-        }
-        throw new IllegalArgumentException("Invalid color: " +
-            attr.getForeColor().getValue());
+        return ColorUtils.attrToForegroundColor(attr);
     }
 
     /**
@@ -1246,36 +1201,11 @@ public class SwingTerminal extends LogicalScreen
      *
      * @param attr the text attributes
      * @return the AWT Color
+     * @deprecated Use ColorUtils.attrToBackgroundColor instead
      */
+    @Deprecated
     public static Color attrToBackgroundColor(final CellAttributes attr) {
-        int rgb = attr.getBackColorRGB();
-        if (rgb >= 0) {
-            int red     = (rgb >>> 16) & 0xFF;
-            int green   = (rgb >>>  8) & 0xFF;
-            int blue    =  rgb         & 0xFF;
-
-            return new Color(red, green, blue);
-        }
-
-        if (attr.getBackColor().equals(jexer.bits.Color.BLACK)) {
-            return MYBLACK;
-        } else if (attr.getBackColor().equals(jexer.bits.Color.RED)) {
-            return MYRED;
-        } else if (attr.getBackColor().equals(jexer.bits.Color.BLUE)) {
-            return MYBLUE;
-        } else if (attr.getBackColor().equals(jexer.bits.Color.GREEN)) {
-            return MYGREEN;
-        } else if (attr.getBackColor().equals(jexer.bits.Color.YELLOW)) {
-            return MYYELLOW;
-        } else if (attr.getBackColor().equals(jexer.bits.Color.CYAN)) {
-            return MYCYAN;
-        } else if (attr.getBackColor().equals(jexer.bits.Color.MAGENTA)) {
-            return MYMAGENTA;
-        } else if (attr.getBackColor().equals(jexer.bits.Color.WHITE)) {
-            return MYWHITE;
-        }
-        throw new IllegalArgumentException("Invalid color: " +
-            attr.getBackColor().getValue());
+        return ColorUtils.attrToBackgroundColor(attr);
     }
 
     /**

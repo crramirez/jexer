@@ -393,8 +393,8 @@ public class MultiBackend implements Backend {
      * @return the AWT Color
      */
     public java.awt.Color attrToForegroundColor(final CellAttributes attr) {
-        // Use Swing colors.
-        return SwingTerminal.attrToForegroundColor(attr);
+        // Use color utility.
+        return ColorUtils.attrToForegroundColor(attr);
     }
 
     /**
@@ -404,8 +404,8 @@ public class MultiBackend implements Backend {
      * @return the AWT Color
      */
     public java.awt.Color attrToBackgroundColor(final CellAttributes attr) {
-        // Use Swing colors.
-        return SwingTerminal.attrToBackgroundColor(attr);
+        // Use color utility.
+        return ColorUtils.attrToBackgroundColor(attr);
     }
 
 }
