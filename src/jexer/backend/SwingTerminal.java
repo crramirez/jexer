@@ -1189,12 +1189,11 @@ public class SwingTerminal extends LogicalScreen
      *
      * @param attr the text attributes
      * @return the AWT Color
-     * @deprecated Use ColorUtils.attrToForegroundColor and ColorRGB.toAwtColor instead
+     * @deprecated Use ColorUtils.attrToForegroundColor instead
      */
     @Deprecated
     public static Color attrToForegroundColor(final CellAttributes attr) {
-        jexer.bits.ColorRGB colorRGB = ColorUtils.attrToForegroundColor(attr);
-        return new Color(colorRGB.getRed(), colorRGB.getGreen(), colorRGB.getBlue());
+        return ColorUtils.attrToForegroundColor(attr);
     }
 
     /**
@@ -1202,12 +1201,11 @@ public class SwingTerminal extends LogicalScreen
      *
      * @param attr the text attributes
      * @return the AWT Color
-     * @deprecated Use ColorUtils.attrToBackgroundColor and ColorRGB.toAwtColor instead
+     * @deprecated Use ColorUtils.attrToBackgroundColor instead
      */
     @Deprecated
     public static Color attrToBackgroundColor(final CellAttributes attr) {
-        jexer.bits.ColorRGB colorRGB = ColorUtils.attrToBackgroundColor(attr);
-        return new Color(colorRGB.getRed(), colorRGB.getGreen(), colorRGB.getBlue());
+        return ColorUtils.attrToBackgroundColor(attr);
     }
 
     /**

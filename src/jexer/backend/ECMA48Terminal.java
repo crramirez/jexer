@@ -4421,23 +4421,97 @@ public class ECMA48Terminal extends LogicalScreen
     }
 
     /**
-     * Convert a CellAttributes foreground color to a ColorRGB.
+     * Convert a CellAttributes foreground color to an AWT Color.
      *
      * @param attr the text attributes
-     * @return the ColorRGB
+     * @return the AWT Color
      */
-    public jexer.bits.ColorRGB attrToForegroundColor(final CellAttributes attr) {
-        return ColorUtils.attrToForegroundColor(attr);
+    public java.awt.Color attrToForegroundColor(final CellAttributes attr) {
+        int rgb = attr.getForeColorRGB();
+        if (rgb >= 0) {
+            int red     = (rgb >>> 16) & 0xFF;
+            int green   = (rgb >>>  8) & 0xFF;
+            int blue    =  rgb         & 0xFF;
+
+            return new java.awt.Color(red, green, blue);
+        }
+
+        if (attr.isBold()) {
+            if (attr.getForeColor().equals(Color.BLACK)) {
+                return MYBOLD_BLACK;
+            } else if (attr.getForeColor().equals(Color.RED)) {
+                return MYBOLD_RED;
+            } else if (attr.getForeColor().equals(Color.BLUE)) {
+                return MYBOLD_BLUE;
+            } else if (attr.getForeColor().equals(Color.GREEN)) {
+                return MYBOLD_GREEN;
+            } else if (attr.getForeColor().equals(Color.YELLOW)) {
+                return MYBOLD_YELLOW;
+            } else if (attr.getForeColor().equals(Color.CYAN)) {
+                return MYBOLD_CYAN;
+            } else if (attr.getForeColor().equals(Color.MAGENTA)) {
+                return MYBOLD_MAGENTA;
+            } else if (attr.getForeColor().equals(Color.WHITE)) {
+                return MYBOLD_WHITE;
+            }
+        } else {
+            if (attr.getForeColor().equals(Color.BLACK)) {
+                return MYBLACK;
+            } else if (attr.getForeColor().equals(Color.RED)) {
+                return MYRED;
+            } else if (attr.getForeColor().equals(Color.BLUE)) {
+                return MYBLUE;
+            } else if (attr.getForeColor().equals(Color.GREEN)) {
+                return MYGREEN;
+            } else if (attr.getForeColor().equals(Color.YELLOW)) {
+                return MYYELLOW;
+            } else if (attr.getForeColor().equals(Color.CYAN)) {
+                return MYCYAN;
+            } else if (attr.getForeColor().equals(Color.MAGENTA)) {
+                return MYMAGENTA;
+            } else if (attr.getForeColor().equals(Color.WHITE)) {
+                return MYWHITE;
+            }
+        }
+        throw new IllegalArgumentException("Invalid color: " +
+            attr.getForeColor().getValue());
     }
 
     /**
-     * Convert a CellAttributes background color to a ColorRGB.
+     * Convert a CellAttributes background color to an AWT Color.
      *
      * @param attr the text attributes
-     * @return the ColorRGB
+     * @return the AWT Color
      */
-    public jexer.bits.ColorRGB attrToBackgroundColor(final CellAttributes attr) {
-        return ColorUtils.attrToBackgroundColor(attr);
+    public java.awt.Color attrToBackgroundColor(final CellAttributes attr) {
+        int rgb = attr.getBackColorRGB();
+        if (rgb >= 0) {
+            int red     = (rgb >>> 16) & 0xFF;
+            int green   = (rgb >>>  8) & 0xFF;
+            int blue    =  rgb         & 0xFF;
+
+            return new java.awt.Color(red, green, blue);
+        }
+
+        if (attr.getBackColor().equals(Color.BLACK)) {
+            return MYBLACK;
+        } else if (attr.getBackColor().equals(Color.RED)) {
+            return MYRED;
+        } else if (attr.getBackColor().equals(Color.BLUE)) {
+            return MYBLUE;
+        } else if (attr.getBackColor().equals(Color.GREEN)) {
+            return MYGREEN;
+        } else if (attr.getBackColor().equals(Color.YELLOW)) {
+            return MYYELLOW;
+        } else if (attr.getBackColor().equals(Color.CYAN)) {
+            return MYCYAN;
+        } else if (attr.getBackColor().equals(Color.MAGENTA)) {
+            return MYMAGENTA;
+        } else if (attr.getBackColor().equals(Color.WHITE)) {
+            return MYWHITE;
+        }
+        throw new IllegalArgumentException("Invalid color: " +
+            attr.getBackColor().getValue());
     }
 
     /**

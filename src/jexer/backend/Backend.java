@@ -31,7 +31,6 @@ package jexer.backend;
 import java.util.List;
 
 import jexer.bits.CellAttributes;
-import jexer.bits.ColorRGB;
 import jexer.event.TInputEvent;
 
 /**
@@ -149,19 +148,19 @@ public interface Backend {
     public void setMouseStyle(final String mouseStyle);
 
     /**
-     * Convert a CellAttributes foreground color to a ColorRGB.
+     * Convert a CellAttributes foreground color to an AWT Color.
      *
      * @param attr the text attributes
-     * @return the ColorRGB
+     * @return the AWT Color
      */
-    public ColorRGB attrToForegroundColor(final CellAttributes attr);
+    public java.awt.Color attrToForegroundColor(final CellAttributes attr);
 
     /**
-     * Convert a CellAttributes background color to a ColorRGB.
+     * Convert a CellAttributes background color to an AWT Color.
      *
      * @param attr the text attributes
-     * @return the ColorRGB
+     * @return the AWT Color
      */
-    public ColorRGB attrToBackgroundColor(final CellAttributes attr);
+    public java.awt.Color attrToBackgroundColor(final CellAttributes attr);
 
 }

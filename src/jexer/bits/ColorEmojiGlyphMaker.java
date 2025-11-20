@@ -35,7 +35,6 @@ import java.util.HashMap;
 import javax.imageio.ImageIO;
 
 import jexer.backend.Backend;
-import jexer.bits.ColorRGB;
 
 /**
  * ColorEmojiGlyphMaker provides access to the color emoji image files
@@ -189,8 +188,7 @@ public class ColorEmojiGlyphMaker {
         }
 
         // Draw the background rectangle.
-        ColorRGB bgColor = backend.attrToBackgroundColor(cellColor);
-        gr2.setColor((java.awt.Color) bgColor.toAwtColor());
+        gr2.setColor(backend.attrToBackgroundColor(cellColor));
         gr2.fillRect(0, 0, cellWidth, cellHeight);
 
         BufferedImage emojiImage = getEmoji(complexCell.getCodePoints());
@@ -218,8 +216,7 @@ public class ColorEmojiGlyphMaker {
             && (!complexCell.isBlink()
                 || (complexCell.isBlink() && blinkVisible))
         ) {
-            ColorRGB fgColor = backend.attrToForegroundColor(cellColor);
-            gr2.setColor((java.awt.Color) fgColor.toAwtColor());
+            gr2.setColor(backend.attrToForegroundColor(cellColor));
             gr2.fillRect(0, cellHeight - 2, cellWidth, 2);
         }
         gr2.dispose();
