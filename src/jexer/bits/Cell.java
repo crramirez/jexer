@@ -323,11 +323,13 @@ public class Cell extends CellAttributes {
         BufferedImage newImage = ImageUtils.createImage(image,
             textWidth, textHeight);
         java.awt.Graphics gr = newImage.getGraphics();
+        jexer.bits.ColorRGB colorRGB;
         if (backend != null) {
-            gr.setColor(backend.attrToBackgroundColor(this));
+            colorRGB = backend.attrToBackgroundColor(this);
         } else {
-            gr.setColor(ColorUtils.attrToBackgroundColor(this));
+            colorRGB = ColorUtils.attrToBackgroundColor(this);
         }
+        gr.setColor((java.awt.Color) colorRGB.toAwtColor());
 
         if (overGlyph) {
             // Render this cell to a flat image.  The bad news is that we

@@ -83,15 +83,63 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <version>3.4.2</version>
-        <configuration>
-          <archive>
-            <manifest>
-            </manifest>
-            <manifestEntries>
-              <Implementation-Version>${project.version}</Implementation-Version>
-            </manifestEntries>
-          </archive>
-        </configuration>
+        <executions>
+          <!-- Default JAR (jexer.jar) - terminal-only, excludes Swing backend -->
+          <execution>
+            <id>default-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <excludes>
+                <exclude>**/backend/SwingBackend.class</exclude>
+                <exclude>**/backend/SwingBackend$*.class</exclude>
+                <exclude>**/backend/SwingTerminal.class</exclude>
+                <exclude>**/backend/SwingTerminal$*.class</exclude>
+                <exclude>**/backend/SwingComponent.class</exclude>
+                <exclude>**/backend/SwingComponent$*.class</exclude>
+                <exclude>**/backend/SwingSessionInfo.class</exclude>
+                <exclude>**/backend/SwingSessionInfo$*.class</exclude>
+              </excludes>
+              <archive>
+                <manifest>
+                </manifest>
+                <manifestEntries>
+                  <Implementation-Version>${project.version}</Implementation-Version>
+                </manifestEntries>
+              </archive>
+            </configuration>
+          </execution>
+          <!-- Swing addon JAR (jexer-swing.jar) - contains only Swing backend classes -->
+          <execution>
+            <id>swing-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <classifier>swing</classifier>
+              <includes>
+                <include>**/backend/SwingBackend.class</include>
+                <include>**/backend/SwingBackend$*.class</include>
+                <include>**/backend/SwingTerminal.class</include>
+                <include>**/backend/SwingTerminal$*.class</include>
+                <include>**/backend/SwingComponent.class</include>
+                <include>**/backend/SwingComponent$*.class</include>
+                <include>**/backend/SwingSessionInfo.class</include>
+                <include>**/backend/SwingSessionInfo$*.class</include>
+              </includes>
+              <archive>
+                <manifest>
+                </manifest>
+                <manifestEntries>
+                  <Implementation-Version>${project.version}</Implementation-Version>
+                </manifestEntries>
+              </archive>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>

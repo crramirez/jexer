@@ -614,22 +614,22 @@ public class TWindowBackend extends TWindow implements Backend {
     }
 
     /**
-     * Convert a CellAttributes foreground color to an AWT Color.
+     * Convert a CellAttributes foreground color to a ColorRGB.
      *
      * @param attr the text attributes
-     * @return the AWT Color
+     * @return the ColorRGB
      */
-    public java.awt.Color attrToForegroundColor(final CellAttributes attr) {
+    public jexer.bits.ColorRGB attrToForegroundColor(final CellAttributes attr) {
         return getApplication().getBackend().attrToForegroundColor(attr);
     }
 
     /**
-     * Convert a CellAttributes background color to an AWT Color.
+     * Convert a CellAttributes background color to a ColorRGB.
      *
      * @param attr the text attributes
-     * @return the AWT Color
+     * @return the ColorRGB
      */
-    public java.awt.Color attrToBackgroundColor(final CellAttributes attr) {
+    public jexer.bits.ColorRGB attrToBackgroundColor(final CellAttributes attr) {
         return getApplication().getBackend().attrToBackgroundColor(attr);
     }
 
