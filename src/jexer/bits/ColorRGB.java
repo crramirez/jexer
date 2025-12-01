@@ -204,9 +204,9 @@ public final class ColorRGB {
     }
 
     /**
-     * Get the color as a packed RGB integer (0x00RRGGBB).
+     * Get the color as a packed ARGB integer (0xAARRGGBB).
      *
-     * @return the packed RGB value
+     * @return the packed ARGB value
      */
     public int getRGB() {
         return ((alpha & 0xFF) << 24)
