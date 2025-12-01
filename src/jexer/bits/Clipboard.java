@@ -28,18 +28,14 @@
  */
 package jexer.bits;
 
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 
 /**
  * Clipboard provides convenience methods to copy text and images to and from
- * a shared clipboard.  When the system clipboard is available it is used.
+ * a shared clipboard. This base class provides a local-only clipboard
+ * implementation. The system clipboard integration is available via
+ * ClipboardImpl which is loaded via reflection if available (requires
+ * java.desktop module).
  */
 public class Clipboard {
 
@@ -58,65 +54,14 @@ public class Clipboard {
     private String text = null;
 
     /**
-     * The system clipboard, or null if it is not available.
+     * If true, we have already tried to load ClipboardImpl.
      */
-    private java.awt.datatransfer.Clipboard systemClipboard = null;
+    private static boolean triedImpl = false;
 
     /**
-     * The image selection class.
+     * If true, ClipboardImpl is available.
      */
-    private ImageSelection imageSelection;
-
-    /**
-     * ImageSelection is used to hold an image while on the clipboard.
-     */
-    private class ImageSelection implements Transferable {
-
-        /**
-         * Returns an array of DataFlavor objects indicating the flavors the
-         * data can be provided in. The array should be ordered according to
-         * preference for providing the data (from most richly descriptive to
-         * least descriptive).
-         *
-         * @return an array of data flavors in which this data can be
-         * transferred
-         */
-        public DataFlavor[] getTransferDataFlavors() {
-            return new DataFlavor[] { DataFlavor.imageFlavor };
-        }
-
-        /**
-         * Returns whether or not the specified data flavor is supported for
-         * this object.
-         *
-         * @param flavor the requested flavor for the data
-         * @return boolean indicating whether or not the data flavor is
-         * supported
-         */
-        public boolean isDataFlavorSupported(DataFlavor flavor) {
-            return DataFlavor.imageFlavor.equals(flavor);
-        }
-
-        /**
-         * Returns an object which represents the data to be transferred. The
-         * class of the object returned is defined by the representation
-         * class of the flavor.
-         *
-         * @param flavor the requested flavor for the data
-         * @throws IOException if the data is no longer available in the
-         * requested flavor.
-         * @throws UnsupportedFlavorException if the requested data flavor is
-         * not supported.
-         */
-        public Object getTransferData(DataFlavor flavor)
-                throws UnsupportedFlavorException, IOException {
-
-            if (!DataFlavor.imageFlavor.equals(flavor)) {
-                throw new UnsupportedFlavorException(flavor);
-            }
-            return image;
-        }
-    }
+    private static boolean implAvailable = false;
 
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
@@ -126,10 +71,44 @@ public class Clipboard {
      * Public constructor.
      */
     public Clipboard() {
-        try {
-            systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-        } catch (java.awt.HeadlessException e) {
-            // SQUASH
+        // NOP - local-only clipboard
+    }
+
+    // ------------------------------------------------------------------------
+    // Factory ----------------------------------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * Create a new Clipboard instance. This will attempt to load ClipboardImpl
+     * (AWT-based system clipboard) via reflection. If not available, returns
+     * a local-only clipboard implementation.
+     *
+     * @return a Clipboard instance
+     */
+    public static Clipboard getClipboard() {
+        // Try to load ClipboardImpl via reflection
+        if (!triedImpl) {
+            triedImpl = true;
+            try {
+                Class.forName("jexer.backend.ClipboardImpl");
+                implAvailable = true;
+            } catch (ClassNotFoundException e) {
+                implAvailable = false;
+            }
+        }
+
+        if (implAvailable) {
+            try {
+                return (Clipboard) Class.forName("jexer.backend.ClipboardImpl")
+                    .getDeclaredConstructor()
+                    .newInstance();
+            } catch (Exception e) {
+                // Fall back to local clipboard
+                return new Clipboard();
+            }
+        } else {
+            // Use local-only implementation
+            return new Clipboard();
         }
     }
 
@@ -144,10 +123,6 @@ public class Clipboard {
      */
     public void copyImage(final BufferedImage image) {
         this.image = image;
-        if (systemClipboard != null) {
-            ImageSelection imageSelection = new ImageSelection();
-            systemClipboard.setContents(imageSelection, null);
-        }
     }
 
     /**
@@ -157,10 +132,6 @@ public class Clipboard {
      */
     public void copyText(final String text) {
         this.text = text;
-        if (systemClipboard != null) {
-            StringSelection stringSelection = new StringSelection(text);
-            systemClipboard.setContents(stringSelection, null);
-        }
     }
 
     /**
@@ -169,9 +140,6 @@ public class Clipboard {
      * @return image from the clipboard, or null if no image is available
      */
     public BufferedImage pasteImage() {
-        if (systemClipboard != null) {
-            getClipboardImage();
-        }
         return image;
     }
 
@@ -182,9 +150,6 @@ public class Clipboard {
      * available
      */
     public String pasteText() {
-        if (systemClipboard != null) {
-            getClipboardText();
-        }
         return text;
     }
 
@@ -194,9 +159,6 @@ public class Clipboard {
      * @return true if an image is available from the clipboard
      */
     public boolean isImage() {
-        if (image == null) {
-            getClipboardImage();
-        }
         return (image != null);
     }
 
@@ -206,9 +168,6 @@ public class Clipboard {
      * @return true if a text string is available from the clipboard
      */
     public boolean isText() {
-        if (text == null) {
-            getClipboardText();
-        }
         return (text != null);
     }
 
@@ -222,55 +181,52 @@ public class Clipboard {
     }
 
     /**
-     * Copy image from the clipboard to this.image.
-     */
-    private void getClipboardImage() {
-        if (systemClipboard != null) {
-            Transferable contents = systemClipboard.getContents(null);
-            if (contents != null) {
-                if (contents.isDataFlavorSupported(DataFlavor.imageFlavor)) {
-                    try {
-                        Image img = (Image) contents.getTransferData(DataFlavor.imageFlavor);
-                        image = new BufferedImage(img.getWidth(null),
-                            img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-                        image.getGraphics().drawImage(img, 0, 0, null);
-                    } catch (IOException e) {
-                        // SQUASH
-                    } catch (UnsupportedFlavorException e) {
-                        // SQUASH
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Copy text string from the clipboard to this.text.
-     */
-    private void getClipboardText() {
-        if (systemClipboard != null) {
-            Transferable contents = systemClipboard.getContents(null);
-            if (contents != null) {
-                if (contents.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-                    try {
-                        text = (String) contents.getTransferData(DataFlavor.stringFlavor);
-                    } catch (IOException e) {
-                        // SQUASH
-                    } catch (UnsupportedFlavorException e) {
-                        // SQUASH
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Clear whatever is on the local clipboard.  Note that this will not
+     * Clear whatever is on the local clipboard. Note that this will not
      * clear the system clipboard.
      */
     public void clear() {
         image = null;
         text = null;
+    }
+
+    // ------------------------------------------------------------------------
+    // Protected methods for subclasses ---------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * Get the local image.
+     *
+     * @return the local image
+     */
+    protected BufferedImage getLocalImage() {
+        return image;
+    }
+
+    /**
+     * Set the local image.
+     *
+     * @param image the image to set
+     */
+    protected void setLocalImage(final BufferedImage image) {
+        this.image = image;
+    }
+
+    /**
+     * Get the local text.
+     *
+     * @return the local text
+     */
+    protected String getLocalText() {
+        return text;
+    }
+
+    /**
+     * Set the local text.
+     *
+     * @param text the text to set
+     */
+    protected void setLocalText(final String text) {
+        this.text = text;
     }
 
 }

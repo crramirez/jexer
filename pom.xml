@@ -84,7 +84,7 @@
         <artifactId>maven-jar-plugin</artifactId>
         <version>3.4.2</version>
         <executions>
-          <!-- Default JAR (jexer.jar) - terminal-only, excludes Swing backend and AWT-based GlyphMaker -->
+          <!-- Default JAR (jexer.jar) - terminal-only, excludes Swing backend, java.desktop classes -->
           <execution>
             <id>default-jar</id>
             <phase>package</phase>
@@ -105,6 +105,8 @@
                 <exclude>**/backend/GlyphMakerImpl$*.class</exclude>
                 <exclude>**/backend/GlyphMakerFontImpl.class</exclude>
                 <exclude>**/backend/GlyphMakerFontImpl$*.class</exclude>
+                <exclude>**/backend/ClipboardImpl.class</exclude>
+                <exclude>**/backend/ClipboardImpl$*.class</exclude>
               </excludes>
               <archive>
                 <manifest>
@@ -119,7 +121,33 @@
               </archive>
             </configuration>
           </execution>
-          <!-- Swing addon JAR (jexer-swing.jar) - contains Swing backend and AWT-based GlyphMaker -->
+          <!-- Java Desktop addon JAR (jexer-java-desktop.jar) - contains AWT-based GlyphMaker and Clipboard -->
+          <execution>
+            <id>java-desktop-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <classifier>java-desktop</classifier>
+              <includes>
+                <include>**/backend/GlyphMakerImpl.class</include>
+                <include>**/backend/GlyphMakerImpl$*.class</include>
+                <include>**/backend/GlyphMakerFontImpl.class</include>
+                <include>**/backend/GlyphMakerFontImpl$*.class</include>
+                <include>**/backend/ClipboardImpl.class</include>
+                <include>**/backend/ClipboardImpl$*.class</include>
+              </includes>
+              <archive>
+                <manifest>
+                </manifest>
+                <manifestEntries>
+                  <Implementation-Version>${project.version}</Implementation-Version>
+                </manifestEntries>
+              </archive>
+            </configuration>
+          </execution>
+          <!-- Swing addon JAR (jexer-swing.jar) - contains Swing backend classes only -->
           <execution>
             <id>swing-jar</id>
             <phase>package</phase>
@@ -137,10 +165,6 @@
                 <include>**/backend/SwingComponent$*.class</include>
                 <include>**/backend/SwingSessionInfo.class</include>
                 <include>**/backend/SwingSessionInfo$*.class</include>
-                <include>**/backend/GlyphMakerImpl.class</include>
-                <include>**/backend/GlyphMakerImpl$*.class</include>
-                <include>**/backend/GlyphMakerFontImpl.class</include>
-                <include>**/backend/GlyphMakerFontImpl$*.class</include>
               </includes>
               <archive>
                 <manifest>

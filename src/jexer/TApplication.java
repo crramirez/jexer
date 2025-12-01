@@ -174,7 +174,7 @@ public class TApplication implements Runnable {
     /**
      * The clipboard for copy and paste.
      */
-    private Clipboard clipboard = new Clipboard();
+    private Clipboard clipboard = Clipboard.getClipboard();
 
     /**
      * Actual mouse coordinate X.
