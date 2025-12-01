@@ -30,7 +30,6 @@ package jexer;
 
 import java.lang.reflect.Method;
 
-import jexer.bits.BorderStyle;
 import jexer.bits.Cell;
 import jexer.bits.CellAttributes;
 import jexer.bits.Color;
