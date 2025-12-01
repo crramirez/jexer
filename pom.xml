@@ -107,6 +107,8 @@
                 <exclude>**/backend/GlyphMakerFontImpl$*.class</exclude>
                 <exclude>**/backend/ClipboardImpl.class</exclude>
                 <exclude>**/backend/ClipboardImpl$*.class</exclude>
+                <exclude>**/backend/TButtonDrawHelper.class</exclude>
+                <exclude>**/backend/TButtonDrawHelper$*.class</exclude>
               </excludes>
               <archive>
                 <manifest>
@@ -121,7 +123,7 @@
               </archive>
             </configuration>
           </execution>
-          <!-- Java Desktop addon JAR (jexer-java-desktop.jar) - contains AWT-based GlyphMaker and Clipboard -->
+          <!-- Java Desktop addon JAR (jexer-java-desktop.jar) - contains AWT-based classes -->
           <execution>
             <id>java-desktop-jar</id>
             <phase>package</phase>
@@ -137,6 +139,8 @@
                 <include>**/backend/GlyphMakerFontImpl$*.class</include>
                 <include>**/backend/ClipboardImpl.class</include>
                 <include>**/backend/ClipboardImpl$*.class</include>
+                <include>**/backend/TButtonDrawHelper.class</include>
+                <include>**/backend/TButtonDrawHelper$*.class</include>
               </includes>
               <archive>
                 <manifest>
