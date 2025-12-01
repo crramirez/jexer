@@ -34,6 +34,7 @@ import java.awt.image.BufferedImage;
 import jexer.TButton;
 import jexer.bits.Cell;
 import jexer.bits.CellAttributes;
+import jexer.bits.ImageRGB;
 
 /**
  * TButtonDrawHelper provides AWT-based drawing for TButton styles that
@@ -47,6 +48,22 @@ public class TButtonDrawHelper {
      */
     private TButtonDrawHelper() {
         // NOP
+    }
+
+    /**
+     * Convert a BufferedImage to ImageRGB.
+     *
+     * @param bufferedImage the BufferedImage to convert
+     * @return the ImageRGB
+     */
+    private static ImageRGB toImageRGB(final BufferedImage bufferedImage) {
+        if (bufferedImage == null) {
+            return null;
+        }
+        int width = bufferedImage.getWidth();
+        int height = bufferedImage.getHeight();
+        int[] pixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
+        return new ImageRGB(width, height, pixels);
     }
 
     /**
@@ -235,7 +252,7 @@ public class TButtonDrawHelper {
             0, 0, null);
         gr2.dispose();
         imageId++;
-        leftEdgeChar.setImage(cellImage, imageId & 0x7FFFFFFF);
+        leftEdgeChar.setImage(toImageRGB(cellImage), imageId & 0x7FFFFFFF);
         leftEdgeChar.setOpaqueImage();
 
         // Right edge: right half of image
@@ -246,7 +263,7 @@ public class TButtonDrawHelper {
             0, 0, null);
         gr2.dispose();
         imageId++;
-        rightEdgeChar.setImage(cellImage, imageId & 0x7FFFFFFF);
+        rightEdgeChar.setImage(toImageRGB(cellImage), imageId & 0x7FFFFFFF);
         rightEdgeChar.setOpaqueImage();
 
         // Left shadow edge: bottom-left half of shadowImage
@@ -257,7 +274,7 @@ public class TButtonDrawHelper {
                 cellWidth, cellHeight), 0, 0, null);
         gr2s.dispose();
         imageId++;
-        leftEdgeShadowChar.setImage(cellImage, imageId & 0x7FFFFFFF);
+        leftEdgeShadowChar.setImage(toImageRGB(cellImage), imageId & 0x7FFFFFFF);
         leftEdgeShadowChar.setOpaqueImage();
 
         // Right shadow edge top: top-right half of shadowImage
@@ -268,7 +285,7 @@ public class TButtonDrawHelper {
                 cellWidth, cellHeight), 0, 0, null);
         gr2s.dispose();
         imageId++;
-        rightEdgeShadowCharTop.setImage(cellImage, imageId & 0x7FFFFFFF);
+        rightEdgeShadowCharTop.setImage(toImageRGB(cellImage), imageId & 0x7FFFFFFF);
         rightEdgeShadowCharTop.setOpaqueImage();
 
         // Right shadow edge bottom: bottom-right half of shadowImage
@@ -279,7 +296,7 @@ public class TButtonDrawHelper {
                 cellWidth, cellHeight), 0, 0, null);
         gr2s.dispose();
         imageId++;
-        rightEdgeShadowCharBottom.setImage(cellImage, imageId & 0x7FFFFFFF);
+        rightEdgeShadowCharBottom.setImage(toImageRGB(cellImage), imageId & 0x7FFFFFFF);
         rightEdgeShadowCharBottom.setOpaqueImage();
 
         cellImage = new BufferedImage(cellWidth, cellHeight,
@@ -291,7 +308,7 @@ public class TButtonDrawHelper {
         gr2s.fillRect(0, 0, cellWidth, cellHeight / 2);
         gr2s.dispose();
         imageId++;
-        shadowCharBottom.setImage(cellImage, imageId & 0x7FFFFFFF);
+        shadowCharBottom.setImage(toImageRGB(cellImage), imageId & 0x7FFFFFFF);
         shadowCharBottom.setOpaqueImage();
 
         return new Cell[] {

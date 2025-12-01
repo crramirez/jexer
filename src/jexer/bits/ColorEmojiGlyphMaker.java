@@ -179,17 +179,6 @@ public class ColorEmojiGlyphMaker {
     }
 
     /**
-     * Convert a ColorRGB to java.awt.Color.
-     *
-     * @param colorRGB the ColorRGB to convert
-     * @return the java.awt.Color
-     */
-    private static java.awt.Color toAwtColor(final ColorRGB colorRGB) {
-        return new java.awt.Color(colorRGB.getRed(), colorRGB.getGreen(),
-            colorRGB.getBlue(), colorRGB.getAlpha());
-    }
-
-    /**
      * Get an emoji image for a complex cell.
      *
      * @param complexCell the emoji to draw
