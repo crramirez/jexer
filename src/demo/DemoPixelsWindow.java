@@ -168,7 +168,7 @@ public class DemoPixelsWindow extends TWindow {
                         }
                         floatingText = new Text(30, 21, 2,
                             i18n.getString("heatFromFire"), font, fontSize,
-                            new java.awt.Color(0xF7, 0xA8, 0xB8));
+                            new jexer.bits.ColorRGB(0xF7, 0xA8, 0xB8));
                         addOverlay(floatingText);
                     } else {
                         floatingText.remove();

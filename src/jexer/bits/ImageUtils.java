@@ -169,7 +169,7 @@ public class ImageUtils {
      */
     public static BufferedImage scaleImage(final BufferedImage image,
         final int width, final int height,
-        final Scale scale, final java.awt.Color backColor) {
+        final Scale scale, final ColorRGB backColor) {
 
         BufferedImage newImage = new BufferedImage(width, height,
             BufferedImage.TYPE_INT_ARGB);
@@ -207,7 +207,9 @@ public class ImageUtils {
 
         java.awt.Graphics gr = newImage.createGraphics();
         if (scale == Scale.SCALE) {
-            gr.setColor(backColor);
+            gr.setColor(new java.awt.Color(backColor.getRed(),
+                backColor.getGreen(), backColor.getBlue(),
+                backColor.getAlpha()));
             gr.fillRect(0, 0, newImage.getWidth(), newImage.getHeight());
         }
         gr.drawImage(image, x, y, destWidth, destHeight, null);

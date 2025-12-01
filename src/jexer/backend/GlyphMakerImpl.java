@@ -40,6 +40,7 @@ import java.util.HashMap;
 
 import jexer.bits.Cell;
 import jexer.bits.ColorEmojiGlyphMaker;
+import jexer.bits.ColorRGB;
 import jexer.bits.ComplexCell;
 import jexer.bits.GlyphMaker;
 import jexer.bits.StringUtils;
@@ -53,6 +54,17 @@ class GlyphMakerFontImpl {
     // ------------------------------------------------------------------------
     // Constants --------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Convert a ColorRGB to java.awt.Color.
+     *
+     * @param colorRGB the ColorRGB to convert
+     * @return the java.awt.Color
+     */
+    private static java.awt.Color toAwtColor(final ColorRGB colorRGB) {
+        return new java.awt.Color(colorRGB.getRed(), colorRGB.getGreen(),
+            colorRGB.getBlue(), colorRGB.getAlpha());
+    }
 
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
@@ -258,14 +270,14 @@ class GlyphMakerFontImpl {
         }
 
         // Draw the background rectangle, then the foreground character.
-        gr2.setColor(backend.attrToBackgroundColor(cellColor));
+        gr2.setColor(toAwtColor(backend.attrToBackgroundColor(cellColor)));
         gr2.fillRect(0, 0, cellWidth, cellHeight);
 
         // Handle blink and underline
         if (!cell.isBlink()
             || (cell.isBlink() && blinkVisible)
         ) {
-            gr2.setColor(backend.attrToForegroundColor(cellColor));
+            gr2.setColor(toAwtColor(backend.attrToForegroundColor(cellColor)));
             char [] chars = Character.toChars(cell.getChar());
             gr2.drawChars(chars, 0, chars.length, textAdjustX,
                 cellHeight - maxDescent + textAdjustY);

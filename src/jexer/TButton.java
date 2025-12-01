@@ -577,23 +577,29 @@ public class TButton extends TWidget {
 
             java.awt.Color shadowRgb = null;
             if (shadowColor.getForeColorRGB() < 0) {
-                shadowRgb = getApplication().getBackend().
+                jexer.bits.ColorRGB colorRGB = getApplication().getBackend().
                     attrToForegroundColor(shadowColor);
+                shadowRgb = new java.awt.Color(colorRGB.getRed(),
+                    colorRGB.getGreen(), colorRGB.getBlue());
             } else {
                 shadowRgb = new java.awt.Color(shadowColor.getForeColorRGB());
             }
             java.awt.Color rectangleRgb = null;
             if (rectangleColor.getBackColorRGB() < 0) {
-                rectangleRgb = getApplication().getBackend().
+                jexer.bits.ColorRGB colorRGB = getApplication().getBackend().
                     attrToBackgroundColor(rectangleColor);
+                rectangleRgb = new java.awt.Color(colorRGB.getRed(),
+                    colorRGB.getGreen(), colorRGB.getBlue());
             } else {
                 rectangleRgb = new java.awt.Color(rectangleColor.getBackColorRGB());
             }
 
             java.awt.Color buttonRgb = null;
             if (buttonColor.getBackColorRGB() < 0) {
-                buttonRgb = getApplication().getBackend().
+                jexer.bits.ColorRGB colorRGB = getApplication().getBackend().
                     attrToBackgroundColor(buttonColor);
+                buttonRgb = new java.awt.Color(colorRGB.getRed(),
+                    colorRGB.getGreen(), colorRGB.getBlue());
             } else {
                 buttonRgb = new java.awt.Color(buttonColor.getBackColorRGB());
             }

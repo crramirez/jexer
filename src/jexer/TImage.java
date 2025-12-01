@@ -135,7 +135,7 @@ public class TImage extends TWidget implements EditMenuUser {
     /**
      * Scaling strategy to use.
      */
-    private java.awt.Color scaleBackColor = java.awt.Color.BLACK;
+    private jexer.bits.ColorRGB scaleBackColor = jexer.bits.ColorRGB.BLACK;
 
     /**
      * The action to perform when the user clicks on the image.
@@ -1088,7 +1088,8 @@ public class TImage extends TWidget implements EditMenuUser {
             }
         }
         if (scale == Scale.SCALE) {
-            gr.setColor(scaleBackColor);
+            gr.setColor(new java.awt.Color(scaleBackColor.getRed(),
+                scaleBackColor.getGreen(), scaleBackColor.getBlue()));
             gr.fillRect(0, 0, width * textWidth, height * textHeight);
         }
         gr.drawImage(image, x, y, destWidth, destHeight, null);

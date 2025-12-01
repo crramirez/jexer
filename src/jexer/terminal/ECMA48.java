@@ -54,6 +54,7 @@ import jexer.TKeypress;
 import jexer.backend.Backend;
 import jexer.bits.Color;
 import jexer.bits.ColorEmojiGlyphMaker;
+import jexer.bits.ColorRGB;
 import jexer.bits.Cell;
 import jexer.bits.CellAttributes;
 import jexer.bits.ComplexCell;
@@ -559,7 +560,7 @@ public class ECMA48 implements Runnable {
     /**
      * Sixel shared palette.
      */
-    private HashMap<Integer, java.awt.Color> sixelPalette;
+    private HashMap<Integer, ColorRGB> sixelPalette;
 
     /**
      * Sixel scrolling option.
@@ -3893,7 +3894,7 @@ public class ECMA48 implements Runnable {
                         } else {
                             // Use shared color registers for each sixel
                             // graphic.
-                            sixelPalette = new HashMap<Integer, java.awt.Color>();
+                            sixelPalette = new HashMap<Integer, ColorRGB>();
                         }
                     }
                 }
@@ -5562,7 +5563,7 @@ public class ECMA48 implements Runnable {
                 if (p[0].equals("10")) {
                     if (p[1].equals("?")) {
                         // Respond with foreground color.
-                        java.awt.Color color = backend.attrToForegroundColor(currentState.attr);
+                        ColorRGB color = backend.attrToForegroundColor(currentState.attr);
                         writeRemote(String.format(
                             "%s10;rgb:%04x/%04x/%04x%s", OSC,
                                 color.getRed() << 8,
@@ -5574,7 +5575,7 @@ public class ECMA48 implements Runnable {
                 if (p[0].equals("11")) {
                     if (p[1].equals("?")) {
                         // Respond with background color.
-                        java.awt.Color color = backend.attrToBackgroundColor(currentState.attr);
+                        ColorRGB color = backend.attrToBackgroundColor(currentState.attr);
                         writeRemote(String.format(
                             "%s11;rgb:%04x/%04x/%04x%s", OSC,
                                 color.getRed() << 8,
