@@ -43,6 +43,7 @@ import jexer.bits.ColorEmojiGlyphMaker;
 import jexer.bits.ColorRGB;
 import jexer.bits.ComplexCell;
 import jexer.bits.GlyphMaker;
+import jexer.bits.ImageRGB;
 import jexer.bits.StringUtils;
 
 /**
@@ -198,7 +199,7 @@ class GlyphMakerFontImpl {
      * color
      * @return the glyph as an image
      */
-    public BufferedImage getImage(final Cell cell, final int cellWidth,
+    public ImageRGB getImage(final Cell cell, final int cellWidth,
         final int cellHeight, final Backend backend) {
 
         return getImage(cell, cellWidth, cellHeight, backend, true);
@@ -215,7 +216,7 @@ class GlyphMakerFontImpl {
      * @param blinkVisible if true, the cell is visible if it is blinking
      * @return the glyph as an image
      */
-    public BufferedImage getImage(final Cell cell, final int cellWidth,
+    public ImageRGB getImage(final Cell cell, final int cellWidth,
         final int cellHeight, final Backend backend,
         final boolean blinkVisible) {
 
@@ -239,7 +240,7 @@ class GlyphMakerFontImpl {
             && (image.getWidth() == cellWidth)
             && (image.getHeight() == cellHeight)
         ) {
-            return image;
+            return ImageRGBUtils.toImageRGB(image);
         }
 
         // Generate glyph and draw it.
@@ -303,7 +304,7 @@ class GlyphMakerFontImpl {
             " cellHeight " + cellHeight + " image " + image);
          */
 
-        return image;
+        return ImageRGBUtils.toImageRGB(image);
     }
 
     /**
@@ -490,7 +491,8 @@ public class GlyphMakerImpl extends GlyphMaker {
      * color
      * @return the glyph as an image
      */
-    public BufferedImage getImage(final Cell cell, final int cellWidth,
+    @Override
+    public ImageRGB getImage(final Cell cell, final int cellWidth,
         final int cellHeight, final Backend backend) {
 
         return getImage(cell, cellWidth, cellHeight, backend, true);
@@ -507,7 +509,8 @@ public class GlyphMakerImpl extends GlyphMaker {
      * @param blinkVisible if true, the cell is visible if it is blinking
      * @return the glyph as an image
      */
-    public BufferedImage getImage(final Cell cell, final int cellWidth,
+    @Override
+    public ImageRGB getImage(final Cell cell, final int cellWidth,
         final int cellHeight, final Backend backend,
         final boolean blinkVisible) {
 
