@@ -46,6 +46,33 @@ public class ColorEmojiGlyphMaker {
     // Constants --------------------------------------------------------------
     // ------------------------------------------------------------------------
 
+    /**
+     * Convert a ColorRGB to java.awt.Color.
+     *
+     * @param colorRGB the ColorRGB to convert
+     * @return the java.awt.Color
+     */
+    private static java.awt.Color toAwtColor(final ColorRGB colorRGB) {
+        return new java.awt.Color(colorRGB.getRed(), colorRGB.getGreen(),
+            colorRGB.getBlue(), colorRGB.getAlpha());
+    }
+
+    /**
+     * Convert a BufferedImage to ImageRGB.
+     *
+     * @param bufferedImage the BufferedImage to convert
+     * @return the ImageRGB
+     */
+    private static ImageRGB toImageRGB(final BufferedImage bufferedImage) {
+        if (bufferedImage == null) {
+            return null;
+        }
+        int width = bufferedImage.getWidth();
+        int height = bufferedImage.getHeight();
+        int[] pixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
+        return new ImageRGB(width, height, pixels);
+    }
+
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
     // ------------------------------------------------------------------------
@@ -173,7 +200,7 @@ public class ColorEmojiGlyphMaker {
      * @param blinkVisible if true, the cell is visible if it is blinking
      * @return the glyph as an image
      */
-    public static BufferedImage getImage(final ComplexCell complexCell,
+    public static ImageRGB getImage(final ComplexCell complexCell,
         final int cellWidth, final int cellHeight, final Backend backend,
         final boolean blinkVisible) {
 
@@ -232,7 +259,7 @@ public class ColorEmojiGlyphMaker {
         }
         gr2.dispose();
 
-        return image;
+        return toImageRGB(image);
     }
 
 }
