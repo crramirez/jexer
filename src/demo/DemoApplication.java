@@ -158,7 +158,7 @@ public class DemoApplication extends TApplication {
         getBackend().setTitle(i18n.getString("applicationTitle"));
 
         // Use custom theme by default.
-        onMenu(new TMenuEvent(getBackend(), 10003));
+        onMenu(new TMenuEvent(getBackend(), 10002));
     }
 
     /**
@@ -179,7 +179,7 @@ public class DemoApplication extends TApplication {
         getBackend().setTitle(i18n.getString("applicationTitle"));
 
         // Use custom theme by default.
-        onMenu(new TMenuEvent(getBackend(), 10003));
+        onMenu(new TMenuEvent(getBackend(), 10002));
     }
 
     // ------------------------------------------------------------------------
@@ -198,14 +198,14 @@ public class DemoApplication extends TApplication {
 
         if (menu.getId() == 3000) {
             // Bigger +2
-            assert (getScreen() instanceof SwingTerminal);
+            assert (isSwingTerminal(getScreen()));
             SwingTerminal terminal = (SwingTerminal) getScreen();
             terminal.setFontSize(terminal.getFontSize() + 2);
             return true;
         }
         if (menu.getId() == 3001) {
             // Smaller -2
-            assert (getScreen() instanceof SwingTerminal);
+            assert (isSwingTerminal(getScreen()));
             SwingTerminal terminal = (SwingTerminal) getScreen();
             terminal.setFontSize(terminal.getFontSize() - 2);
             return true;
