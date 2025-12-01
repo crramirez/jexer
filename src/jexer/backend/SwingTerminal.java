@@ -65,6 +65,7 @@ import jexer.TKeypress;
 import jexer.bits.Cell;
 import jexer.bits.CellAttributes;
 import jexer.bits.GlyphMaker;
+import jexer.bits.ImageRGB;
 import jexer.bits.StringUtils;
 import jexer.event.TCommandEvent;
 import jexer.event.TInputEvent;
@@ -179,6 +180,29 @@ public class SwingTerminal extends LogicalScreen
      * When true, all the MYBLACK, MYRED, etc. colors are set.
      */
     private static boolean dosColors = false;
+
+    // ------------------------------------------------------------------------
+    // Conversion helpers -----------------------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * Convert an ImageRGB to a BufferedImage.
+     *
+     * @param imageRGB the ImageRGB to convert
+     * @return the BufferedImage
+     */
+    private static BufferedImage toBufferedImage(final ImageRGB imageRGB) {
+        if (imageRGB == null) {
+            return null;
+        }
+        int width = imageRGB.getWidth();
+        int height = imageRGB.getHeight();
+        BufferedImage result = new BufferedImage(width, height,
+            BufferedImage.TYPE_INT_ARGB);
+        int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
+        result.setRGB(0, 0, width, height, pixels, 0, width);
+        return result;
+    }
 
     /**
      * The minimum number of milliseconds between a triple-buffer frame sync
@@ -1380,7 +1404,7 @@ public class SwingTerminal extends LogicalScreen
 
         assert (cell.isImage());
 
-        BufferedImage image = cell.getImage();
+        BufferedImage image = toBufferedImage(cell.getImage());
         assert (image != null);
 
         if (swing.getFrame() != null) {
@@ -1436,8 +1460,9 @@ public class SwingTerminal extends LogicalScreen
             || !swing.getFont().canDisplay(ch)
         ) {
             // The main font cannot display this glyph.  Try a fallback font.
-            BufferedImage newImage = glyphMaker.getImage(cell, textWidth,
+            ImageRGB glyphImageRGB = glyphMaker.getImage(cell, textWidth,
                 textHeight, getBackend(), cursorBlinkVisible);
+            BufferedImage newImage = toBufferedImage(glyphImageRGB);
 
             if (swing.getFrame() != null) {
                 gr.drawImage(newImage, xPixel, yPixel, swing.getFrame());
