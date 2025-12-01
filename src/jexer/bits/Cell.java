@@ -43,6 +43,17 @@ public class Cell extends CellAttributes {
     // ------------------------------------------------------------------------
 
     /**
+     * Convert a ColorRGB to java.awt.Color.
+     *
+     * @param colorRGB the ColorRGB to convert
+     * @return the java.awt.Color
+     */
+    private static java.awt.Color toAwtColor(final ColorRGB colorRGB) {
+        return new java.awt.Color(colorRGB.getRed(), colorRGB.getGreen(),
+            colorRGB.getBlue(), colorRGB.getAlpha());
+    }
+
+    /**
      * How this cell needs to be displayed if it is part of a larger glyph.
      */
     public enum Width {
@@ -324,9 +335,9 @@ public class Cell extends CellAttributes {
             textWidth, textHeight);
         java.awt.Graphics gr = newImage.getGraphics();
         if (backend != null) {
-            gr.setColor(backend.attrToBackgroundColor(this));
+            gr.setColor(toAwtColor(backend.attrToBackgroundColor(this)));
         } else {
-            gr.setColor(ColorUtils.attrToBackgroundColor(this));
+            gr.setColor(toAwtColor(ColorUtils.attrToBackgroundColor(this)));
         }
 
         if (overGlyph) {

@@ -28,12 +28,11 @@
  */
 package jexer.backend;
 
-import java.awt.Color;
-
 import jexer.bits.CellAttributes;
+import jexer.bits.ColorRGB;
 
 /**
- * Utility class for converting Cell attributes to AWT colors.
+ * Utility class for converting Cell attributes to ColorRGB colors.
  */
 public class ColorUtils {
 
@@ -41,22 +40,22 @@ public class ColorUtils {
     // Constants --------------------------------------------------------------
     // ------------------------------------------------------------------------
 
-    private static Color MYBLACK;
-    private static Color MYRED;
-    private static Color MYGREEN;
-    private static Color MYYELLOW;
-    private static Color MYBLUE;
-    private static Color MYMAGENTA;
-    private static Color MYCYAN;
-    private static Color MYWHITE;
-    private static Color MYBOLD_BLACK;
-    private static Color MYBOLD_RED;
-    private static Color MYBOLD_GREEN;
-    private static Color MYBOLD_YELLOW;
-    private static Color MYBOLD_BLUE;
-    private static Color MYBOLD_MAGENTA;
-    private static Color MYBOLD_CYAN;
-    private static Color MYBOLD_WHITE;
+    private static ColorRGB MYBLACK;
+    private static ColorRGB MYRED;
+    private static ColorRGB MYGREEN;
+    private static ColorRGB MYYELLOW;
+    private static ColorRGB MYBLUE;
+    private static ColorRGB MYMAGENTA;
+    private static ColorRGB MYCYAN;
+    private static ColorRGB MYWHITE;
+    private static ColorRGB MYBOLD_BLACK;
+    private static ColorRGB MYBOLD_RED;
+    private static ColorRGB MYBOLD_GREEN;
+    private static ColorRGB MYBOLD_YELLOW;
+    private static ColorRGB MYBOLD_BLUE;
+    private static ColorRGB MYBOLD_MAGENTA;
+    private static ColorRGB MYBOLD_CYAN;
+    private static ColorRGB MYBOLD_WHITE;
 
     /**
      * When true, all the MYBLACK, MYRED, etc. colors are set.
@@ -88,22 +87,22 @@ public class ColorUtils {
             if (colorsInitialized) {
                 return;
             }
-            MYBLACK         = new Color(0x00, 0x00, 0x00);
-            MYRED           = new Color(0xa8, 0x00, 0x00);
-            MYGREEN         = new Color(0x00, 0xa8, 0x00);
-            MYYELLOW        = new Color(0xa8, 0x54, 0x00);
-            MYBLUE          = new Color(0x00, 0x00, 0xa8);
-            MYMAGENTA       = new Color(0xa8, 0x00, 0xa8);
-            MYCYAN          = new Color(0x00, 0xa8, 0xa8);
-            MYWHITE         = new Color(0xa8, 0xa8, 0xa8);
-            MYBOLD_BLACK    = new Color(0x54, 0x54, 0x54);
-            MYBOLD_RED      = new Color(0xfc, 0x54, 0x54);
-            MYBOLD_GREEN    = new Color(0x54, 0xfc, 0x54);
-            MYBOLD_YELLOW   = new Color(0xfc, 0xfc, 0x54);
-            MYBOLD_BLUE     = new Color(0x54, 0x54, 0xfc);
-            MYBOLD_MAGENTA  = new Color(0xfc, 0x54, 0xfc);
-            MYBOLD_CYAN     = new Color(0x54, 0xfc, 0xfc);
-            MYBOLD_WHITE    = new Color(0xfc, 0xfc, 0xfc);
+            MYBLACK         = new ColorRGB(0x00, 0x00, 0x00);
+            MYRED           = new ColorRGB(0xa8, 0x00, 0x00);
+            MYGREEN         = new ColorRGB(0x00, 0xa8, 0x00);
+            MYYELLOW        = new ColorRGB(0xa8, 0x54, 0x00);
+            MYBLUE          = new ColorRGB(0x00, 0x00, 0xa8);
+            MYMAGENTA       = new ColorRGB(0xa8, 0x00, 0xa8);
+            MYCYAN          = new ColorRGB(0x00, 0xa8, 0xa8);
+            MYWHITE         = new ColorRGB(0xa8, 0xa8, 0xa8);
+            MYBOLD_BLACK    = new ColorRGB(0x54, 0x54, 0x54);
+            MYBOLD_RED      = new ColorRGB(0xfc, 0x54, 0x54);
+            MYBOLD_GREEN    = new ColorRGB(0x54, 0xfc, 0x54);
+            MYBOLD_YELLOW   = new ColorRGB(0xfc, 0xfc, 0x54);
+            MYBOLD_BLUE     = new ColorRGB(0x54, 0x54, 0xfc);
+            MYBOLD_MAGENTA  = new ColorRGB(0xfc, 0x54, 0xfc);
+            MYBOLD_CYAN     = new ColorRGB(0x54, 0xfc, 0xfc);
+            MYBOLD_WHITE    = new ColorRGB(0xfc, 0xfc, 0xfc);
 
             // Apply custom colors from system properties if present
             setCustomSystemColors();
@@ -142,8 +141,8 @@ public class ColorUtils {
      * incorrect
      * @return a color from the RGB string, or defaultColor
      */
-    private static Color getCustomColor(final String key,
-        final Color defaultColor) {
+    private static ColorRGB getCustomColor(final String key,
+        final ColorRGB defaultColor) {
 
         String rgb = System.getProperty(key);
         if (rgb == null) {
@@ -158,7 +157,7 @@ public class ColorUtils {
         } catch (NumberFormatException e) {
             return defaultColor;
         }
-        Color color = new Color((rgbInt & 0xFF0000) >>> 16,
+        ColorRGB color = new ColorRGB((rgbInt & 0xFF0000) >>> 16,
             (rgbInt & 0x00FF00) >>> 8,
             (rgbInt & 0x0000FF));
 
@@ -166,12 +165,12 @@ public class ColorUtils {
     }
 
     /**
-     * Convert a CellAttributes foreground color to an AWT Color.
+     * Convert a CellAttributes foreground color to a ColorRGB.
      *
      * @param attr the text attributes
-     * @return the AWT Color
+     * @return the ColorRGB
      */
-    public static Color attrToForegroundColor(final CellAttributes attr) {
+    public static ColorRGB attrToForegroundColor(final CellAttributes attr) {
         if (!colorsInitialized) {
             initializeColors();
         }
@@ -182,7 +181,7 @@ public class ColorUtils {
             int green   = (rgb >>>  8) & 0xFF;
             int blue    =  rgb         & 0xFF;
 
-            return new Color(red, green, blue);
+            return new ColorRGB(red, green, blue);
         }
 
         if (attr.isBold()) {
@@ -227,12 +226,12 @@ public class ColorUtils {
     }
 
     /**
-     * Convert a CellAttributes background color to an AWT Color.
+     * Convert a CellAttributes background color to a ColorRGB.
      *
      * @param attr the text attributes
-     * @return the AWT Color
+     * @return the ColorRGB
      */
-    public static Color attrToBackgroundColor(final CellAttributes attr) {
+    public static ColorRGB attrToBackgroundColor(final CellAttributes attr) {
         if (!colorsInitialized) {
             initializeColors();
         }
@@ -243,7 +242,7 @@ public class ColorUtils {
             int green   = (rgb >>>  8) & 0xFF;
             int blue    =  rgb         & 0xFF;
 
-            return new Color(red, green, blue);
+            return new ColorRGB(red, green, blue);
         }
 
         if (attr.getBackColor().equals(jexer.bits.Color.BLACK)) {
@@ -265,5 +264,57 @@ public class ColorUtils {
         }
         throw new IllegalArgumentException("Invalid color: " +
             attr.getBackColor().getValue());
+    }
+
+    /**
+     * Convert a ColorRGB to java.awt.Color.
+     * This method uses reflection to avoid compile-time dependency on
+     * java.desktop module.
+     *
+     * @param colorRGB the ColorRGB to convert
+     * @return the java.awt.Color, or null if java.desktop is not available
+     */
+    public static Object toAwtColor(final ColorRGB colorRGB) {
+        if (colorRGB == null) {
+            return null;
+        }
+        try {
+            Class<?> awtColorClass = Class.forName("java.awt.Color");
+            return awtColorClass.getConstructor(int.class, int.class, int.class)
+                .newInstance(colorRGB.getRed(), colorRGB.getGreen(),
+                    colorRGB.getBlue());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Convert a java.awt.Color to ColorRGB.
+     *
+     * @param awtColor the java.awt.Color to convert (as Object to avoid
+     * compile-time dependency)
+     * @return the ColorRGB, or null if conversion fails
+     */
+    public static ColorRGB fromAwtColor(final Object awtColor) {
+        if (awtColor == null) {
+            return null;
+        }
+        try {
+            Class<?> awtColorClass = Class.forName("java.awt.Color");
+            if (!awtColorClass.isInstance(awtColor)) {
+                return null;
+            }
+            int red = (Integer) awtColorClass.getMethod("getRed")
+                .invoke(awtColor);
+            int green = (Integer) awtColorClass.getMethod("getGreen")
+                .invoke(awtColor);
+            int blue = (Integer) awtColorClass.getMethod("getBlue")
+                .invoke(awtColor);
+            int alpha = (Integer) awtColorClass.getMethod("getAlpha")
+                .invoke(awtColor);
+            return new ColorRGB(red, green, blue, alpha);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

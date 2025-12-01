@@ -28,10 +28,11 @@
  */
 package jexer.terminal;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
+
+import jexer.bits.ColorRGB;
 
 /**
  * SixelDecoder parses a buffer of sixel image data into a BufferedImage.
@@ -103,7 +104,7 @@ public class SixelDecoder {
     /**
      * The sixel palette colors specified.
      */
-    private HashMap<Integer, Color> palette;
+    private HashMap<Integer, ColorRGB> palette;
 
     /**
      * The buffer to parse.
@@ -153,12 +154,12 @@ public class SixelDecoder {
     /**
      * The current drawing color.
      */
-    private Color color = Color.BLACK;
+    private ColorRGB color = ColorRGB.BLACK;
 
     /**
      * The background color.
      */
-    private Color background = Color.BLACK;
+    private ColorRGB background = ColorRGB.BLACK;
 
     /**
      * If set, abort processing this image.
@@ -189,12 +190,12 @@ public class SixelDecoder {
      * honored
      */
     public SixelDecoder(final String buffer,
-        final HashMap<Integer, Color> palette, final Color background,
+        final HashMap<Integer, ColorRGB> palette, final ColorRGB background,
         final boolean maybeTransparent) {
 
         this.buffer = buffer;
         if (palette == null) {
-            this.palette = new HashMap<Integer, Color>();
+            this.palette = new HashMap<Integer, ColorRGB>();
         } else {
             this.palette = palette;
         }
@@ -275,7 +276,7 @@ public class SixelDecoder {
 
         Graphics2D gr = newImage.createGraphics();
         if (!transparent) {
-            gr.setColor(background);
+            gr.setColor(toAwtColor(background));
             gr.fillRect(0, 0, newWidth, newHeight);
         }
         if (image != null) {
@@ -284,6 +285,17 @@ public class SixelDecoder {
         }
         gr.dispose();
         image = newImage;
+    }
+
+    /**
+     * Convert a ColorRGB to java.awt.Color.
+     *
+     * @param colorRGB the ColorRGB to convert
+     * @return the java.awt.Color
+     */
+    private java.awt.Color toAwtColor(final ColorRGB colorRGB) {
+        return new java.awt.Color(colorRGB.getRed(), colorRGB.getGreen(),
+            colorRGB.getBlue(), colorRGB.getAlpha());
     }
 
     /**
@@ -439,14 +451,14 @@ public class SixelDecoder {
         int idx = getParam(0, 0);
 
         if (paramsI == 0) {
-            Color newColor = palette.get(idx);
+            ColorRGB newColor = palette.get(idx);
             if (newColor != null) {
                 color = newColor;
             } else {
                 if (DEBUG) {
                     System.err.println("COLOR " + idx + " NOT FOUND");
                 }
-                color = Color.BLACK;
+                color = ColorRGB.BLACK;
             }
 
             if (DEBUG) {
@@ -461,7 +473,8 @@ public class SixelDecoder {
         float blue  = (float) (getParam(4, 0, 0, 100) / 100.0);
 
         if (type == 2) {
-            Color newColor = new Color(red, green, blue);
+            ColorRGB newColor = new ColorRGB((int) (red * 255),
+                (int) (green * 255), (int) (blue * 255));
             palette.put(idx, newColor);
             if (DEBUG) {
                 System.err.println("Palette color " + idx + " --> " + newColor);

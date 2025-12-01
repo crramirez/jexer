@@ -35,6 +35,7 @@ import java.util.List;
 
 import jexer.backend.Screen;
 import jexer.bits.Cell;
+import jexer.bits.ColorRGB;
 import jexer.bits.GlyphMaker;
 import jexer.bits.ImageUtils;
 
@@ -63,6 +64,17 @@ public class Tackboard {
     // ------------------------------------------------------------------------
     // Constants --------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Convert a ColorRGB to java.awt.Color.
+     *
+     * @param colorRGB the ColorRGB to convert
+     * @return the java.awt.Color
+     */
+    private static java.awt.Color toAwtColor(final ColorRGB colorRGB) {
+        return new java.awt.Color(colorRGB.getRed(), colorRGB.getGreen(),
+            colorRGB.getBlue(), colorRGB.getAlpha());
+    }
 
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
@@ -273,8 +285,8 @@ public class Tackboard {
                         // Blit this image over that one.
                         BufferedImage oldImage = oldCell.getImage(true);
                         java.awt.Graphics gr = oldImage.getGraphics();
-                        gr.setColor(screen.getBackend().
-                            attrToBackgroundColor(oldCell));
+                        gr.setColor(toAwtColor(screen.getBackend().
+                            attrToBackgroundColor(oldCell)));
                         gr.drawImage(newImage, 0, 0, null, null);
                         gr.dispose();
                         imageId++;
@@ -287,8 +299,8 @@ public class Tackboard {
                                 cellHeight, BufferedImage.TYPE_INT_ARGB);
                             java.awt.Graphics gr = backImage.getGraphics();
 
-                            java.awt.Color oldColor = screen.getBackend().
-                                    attrToBackgroundColor(oldCell);
+                            java.awt.Color oldColor = toAwtColor(screen.getBackend().
+                                    attrToBackgroundColor(oldCell));
                             gr.setColor(oldColor);
                             gr.fillRect(0, 0, backImage.getWidth(),
                                 backImage.getHeight());

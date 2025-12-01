@@ -28,14 +28,13 @@
  */
 package jexer.tackboard;
 
-import java.awt.Color;
 import java.awt.Font;
-import java.awt.FontFormatException;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 
+import jexer.bits.ColorRGB;
 import jexer.bits.StringUtils;
 
 /**
@@ -69,7 +68,7 @@ public class Text extends Bitmap {
     /**
      * The color.
      */
-    private Color color;
+    private ColorRGB color;
 
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
@@ -88,7 +87,7 @@ public class Text extends Bitmap {
      */
     public Text(final int x, final int y, final int z,
         final String text, final String fontName, final int fontSize,
-        final Color color) {
+        final ColorRGB color) {
 
         super(x, y, z, null);
 
@@ -111,7 +110,7 @@ public class Text extends Bitmap {
      */
     public Text(final int x, final int y, final int z,
         final String text, final Font font, final int fontSize,
-        final Color color) {
+        final ColorRGB color) {
 
         super(x, y, z, null);
 
@@ -172,6 +171,17 @@ public class Text extends Bitmap {
     }
 
     /**
+     * Convert a ColorRGB to java.awt.Color.
+     *
+     * @param colorRGB the ColorRGB to convert
+     * @return the java.awt.Color
+     */
+    private java.awt.Color toAwtColor(final ColorRGB colorRGB) {
+        return new java.awt.Color(colorRGB.getRed(), colorRGB.getGreen(),
+            colorRGB.getBlue(), colorRGB.getAlpha());
+    }
+
+    /**
      * Get this item rendered to a bitmap, offset to align on a grid of
      * cells with pixel dimensions (textWidth, textHeight).
      *
@@ -198,7 +208,7 @@ public class Text extends Bitmap {
                 BufferedImage.TYPE_INT_ARGB);
             Graphics2D gr = newImage.createGraphics();
             gr.setFont(font);
-            gr.setColor(color);
+            gr.setColor(toAwtColor(color));
 
             // Because this is text, let's enable anti-aliasing.
             gr.setRenderingHint(RenderingHints.KEY_ANTIALIASING,

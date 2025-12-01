@@ -152,6 +152,17 @@ public class ColorEmojiGlyphMaker {
     }
 
     /**
+     * Convert a ColorRGB to java.awt.Color.
+     *
+     * @param colorRGB the ColorRGB to convert
+     * @return the java.awt.Color
+     */
+    private static java.awt.Color toAwtColor(final ColorRGB colorRGB) {
+        return new java.awt.Color(colorRGB.getRed(), colorRGB.getGreen(),
+            colorRGB.getBlue(), colorRGB.getAlpha());
+    }
+
+    /**
      * Get an emoji image for a complex cell.
      *
      * @param complexCell the emoji to draw
@@ -188,7 +199,7 @@ public class ColorEmojiGlyphMaker {
         }
 
         // Draw the background rectangle.
-        gr2.setColor(backend.attrToBackgroundColor(cellColor));
+        gr2.setColor(toAwtColor(backend.attrToBackgroundColor(cellColor)));
         gr2.fillRect(0, 0, cellWidth, cellHeight);
 
         BufferedImage emojiImage = getEmoji(complexCell.getCodePoints());
@@ -216,7 +227,7 @@ public class ColorEmojiGlyphMaker {
             && (!complexCell.isBlink()
                 || (complexCell.isBlink() && blinkVisible))
         ) {
-            gr2.setColor(backend.attrToForegroundColor(cellColor));
+            gr2.setColor(toAwtColor(backend.attrToForegroundColor(cellColor)));
             gr2.fillRect(0, cellHeight - 2, cellWidth, 2);
         }
         gr2.dispose();
