@@ -56,11 +56,6 @@ public class ClipboardImpl extends Clipboard {
     private java.awt.datatransfer.Clipboard systemClipboard = null;
 
     /**
-     * The image selection class.
-     */
-    private ImageSelection imageSelection;
-
-    /**
      * ImageSelection is used to hold an image while on the clipboard.
      */
     private class ImageSelection implements Transferable {
@@ -223,7 +218,9 @@ public class ClipboardImpl extends Clipboard {
                         Image img = (Image) contents.getTransferData(DataFlavor.imageFlavor);
                         BufferedImage image = new BufferedImage(img.getWidth(null),
                             img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-                        image.getGraphics().drawImage(img, 0, 0, null);
+                        java.awt.Graphics gr = image.getGraphics();
+                        gr.drawImage(img, 0, 0, null);
+                        gr.dispose();
                         setLocalImage(image);
                     } catch (IOException e) {
                         // SQUASH
