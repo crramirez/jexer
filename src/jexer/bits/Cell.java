@@ -333,8 +333,13 @@ public class Cell extends CellAttributes {
             // Render this cell to a flat image.  The bad news is that we
             // won't get to use the actual terminal's font.
             GlyphMaker glyphMaker = GlyphMaker.getInstance(textHeight);
-            gr.drawImage(glyphMaker.getImage(this, textWidth, textHeight,
-                    backend), 0, 0, null, null);
+            BufferedImage glyphImage = glyphMaker.getImage(this, textWidth, textHeight, backend);
+            if (glyphImage != null) {
+                gr.drawImage(glyphImage, 0, 0, null, null);
+            } else {
+                // No glyph available, just fill with background
+                gr.fillRect(0, 0, newImage.getWidth(), newImage.getHeight());
+            }
         } else {
             // Put the background color behind the pixels.
             gr.fillRect(0, 0, newImage.getWidth(),

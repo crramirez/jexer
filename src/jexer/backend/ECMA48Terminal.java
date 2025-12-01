@@ -1792,8 +1792,10 @@ public class ECMA48Terminal extends LogicalScreen
                     // Symbols for Legacy Computing, always use it.
                     BufferedImage newImage = glyphMaker.getImage(lCell,
                         getTextWidth(), getTextHeight(), getBackend());
-                    lCell.setImage(newImage);
-                    unsetRow = true;
+                    if (newImage != null) {
+                        lCell.setImage(newImage);
+                        unsetRow = true;
+                    }
                 }
             }
 

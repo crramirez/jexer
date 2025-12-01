@@ -1080,6 +1080,20 @@ public class LogicalScreen implements Screen {
         }
         BufferedImage image = glyphMaker.getImage(cell, cellWidth * 2,
             cellHeight, backend);
+        
+        // If GlyphMaker returns null (no font support), fall back to
+        // character-only rendering without images
+        if (image == null) {
+            Cell left = new Cell(cell);
+            left.setWidth(Cell.Width.LEFT);
+            putCharXY(x, y, left);
+
+            Cell right = new Cell(cell);
+            right.setWidth(Cell.Width.RIGHT);
+            putCharXY(x + 1, y, right);
+            return;
+        }
+        
         BufferedImage leftImage = image.getSubimage(0, 0, cellWidth,
             cellHeight);
         BufferedImage rightImage = image.getSubimage(cellWidth, 0, cellWidth,

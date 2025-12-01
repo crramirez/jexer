@@ -84,7 +84,7 @@
         <artifactId>maven-jar-plugin</artifactId>
         <version>3.4.2</version>
         <executions>
-          <!-- Default JAR (jexer.jar) - terminal-only, excludes Swing backend -->
+          <!-- Default JAR (jexer.jar) - terminal-only, excludes Swing backend and AWT-based GlyphMaker -->
           <execution>
             <id>default-jar</id>
             <phase>package</phase>
@@ -101,6 +101,10 @@
                 <exclude>**/backend/SwingComponent$*.class</exclude>
                 <exclude>**/backend/SwingSessionInfo.class</exclude>
                 <exclude>**/backend/SwingSessionInfo$*.class</exclude>
+                <exclude>**/backend/GlyphMakerImpl.class</exclude>
+                <exclude>**/backend/GlyphMakerImpl$*.class</exclude>
+                <exclude>**/backend/GlyphMakerFontImpl.class</exclude>
+                <exclude>**/backend/GlyphMakerFontImpl$*.class</exclude>
               </excludes>
               <archive>
                 <manifest>
@@ -115,7 +119,7 @@
               </archive>
             </configuration>
           </execution>
-          <!-- Swing addon JAR (jexer-swing.jar) - contains only Swing backend classes -->
+          <!-- Swing addon JAR (jexer-swing.jar) - contains Swing backend and AWT-based GlyphMaker -->
           <execution>
             <id>swing-jar</id>
             <phase>package</phase>
@@ -133,6 +137,10 @@
                 <include>**/backend/SwingComponent$*.class</include>
                 <include>**/backend/SwingSessionInfo.class</include>
                 <include>**/backend/SwingSessionInfo$*.class</include>
+                <include>**/backend/GlyphMakerImpl.class</include>
+                <include>**/backend/GlyphMakerImpl$*.class</include>
+                <include>**/backend/GlyphMakerFontImpl.class</include>
+                <include>**/backend/GlyphMakerFontImpl$*.class</include>
               </includes>
               <archive>
                 <manifest>

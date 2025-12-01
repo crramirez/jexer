@@ -2015,6 +2015,19 @@ public class ECMA48 implements Runnable {
             image = glyphMaker.getImage(cell,
                 textWidth * 2, textHeight, backend, true);
         }
+        
+        // If no image available (no font support), fall back to text-only
+        if (image == null) {
+            ComplexCell left = new ComplexCell(cell);
+            left.setWidth(Cell.Width.LEFT);
+            display.get(y).replace(x, left);
+
+            ComplexCell right = new ComplexCell(cell);
+            right.setWidth(Cell.Width.RIGHT);
+            display.get(y).replace(x + 1, right);
+            return;
+        }
+        
         BufferedImage leftImage = image.getSubimage(0, 0, textWidth,
             textHeight);
         BufferedImage rightImage = image.getSubimage(textWidth, 0, textWidth,
@@ -8136,6 +8149,19 @@ public class ECMA48 implements Runnable {
             image = glyphMaker.getImage(cell,
                 textWidth * 2, textHeight, backend, true);
         }
+        
+        // If no image available (no font support), fall back to text-only
+        if (image == null) {
+            ComplexCell left = new ComplexCell(cell);
+            left.setWidth(Cell.Width.LEFT);
+            display.get(leftY).replace(leftX, left);
+
+            ComplexCell right = new ComplexCell(cell);
+            right.setWidth(Cell.Width.RIGHT);
+            display.get(rightY).replace(rightX, right);
+            return;
+        }
+        
         BufferedImage leftImage = image.getSubimage(0, 0, textWidth,
             textHeight);
         BufferedImage rightImage = image.getSubimage(textWidth, 0, textWidth,
