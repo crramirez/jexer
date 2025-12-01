@@ -104,6 +104,10 @@
               </excludes>
               <archive>
                 <manifest>
+            <mainClass>
+                demo.Demo1
+              </mainClass>
+
                 </manifest>
                 <manifestEntries>
                   <Implementation-Version>${project.version}</Implementation-Version>

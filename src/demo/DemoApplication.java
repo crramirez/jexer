@@ -466,7 +466,7 @@ public class DemoApplication extends TApplication {
         item.setEnabled(false);
         item = subMenu.addItem(2002, i18n.getString("normalSub"));
 
-        if (getScreen() instanceof SwingTerminal) {
+        if (isSwingTerminal(getScreen())) {
             TMenu swingMenu = addMenu(i18n.getString("swing"));
             item = swingMenu.addItem(3000, i18n.getString("bigger"));
             item.setIcon(0x1f5da);

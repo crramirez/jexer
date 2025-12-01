@@ -737,7 +737,7 @@ public class TApplication implements Runnable {
      */
     private static Backend createSwingBackend(final TApplication app,
         final int windowWidth, final int windowHeight, final int fontSize) {
-        
+
         try {
             Class<?> swingBackendClass = Class.forName("jexer.backend.SwingBackend");
             if (windowWidth > 0 && windowHeight > 0 && fontSize > 0) {
@@ -797,7 +797,7 @@ public class TApplication implements Runnable {
      * @param screen the screen to check
      * @return true if screen is a SwingTerminal
      */
-    private static boolean isSwingTerminal(final Screen screen) {
+    protected static boolean isSwingTerminal(final Screen screen) {
         try {
             Class<?> swingTerminalClass = Class.forName("jexer.backend.SwingTerminal");
             return swingTerminalClass.isInstance(screen);
