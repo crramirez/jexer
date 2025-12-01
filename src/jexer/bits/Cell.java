@@ -28,8 +28,6 @@
  */
 package jexer.bits;
 
-import java.awt.image.BufferedImage;
-import java.awt.image.IndexColorModel;
 import jexer.backend.Backend;
 import jexer.backend.ColorUtils;
 
@@ -51,6 +49,41 @@ public class Cell extends CellAttributes {
     private static java.awt.Color toAwtColor(final ColorRGB colorRGB) {
         return new java.awt.Color(colorRGB.getRed(), colorRGB.getGreen(),
             colorRGB.getBlue(), colorRGB.getAlpha());
+    }
+
+    /**
+     * Convert an ImageRGB to java.awt.image.BufferedImage.
+     *
+     * @param imageRGB the ImageRGB to convert
+     * @return the BufferedImage
+     */
+    private static java.awt.image.BufferedImage toBufferedImage(final ImageRGB imageRGB) {
+        if (imageRGB == null) {
+            return null;
+        }
+        int width = imageRGB.getWidth();
+        int height = imageRGB.getHeight();
+        java.awt.image.BufferedImage result = new java.awt.image.BufferedImage(width, height,
+            java.awt.image.BufferedImage.TYPE_INT_ARGB);
+        int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
+        result.setRGB(0, 0, width, height, pixels, 0, width);
+        return result;
+    }
+
+    /**
+     * Convert a java.awt.image.BufferedImage to ImageRGB.
+     *
+     * @param bufferedImage the BufferedImage to convert
+     * @return the ImageRGB
+     */
+    private static ImageRGB fromBufferedImage(final java.awt.image.BufferedImage bufferedImage) {
+        if (bufferedImage == null) {
+            return null;
+        }
+        int width = bufferedImage.getWidth();
+        int height = bufferedImage.getHeight();
+        int[] pixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
+        return new ImageRGB(width, height, pixels);
     }
 
     /**
@@ -96,12 +129,12 @@ public class Cell extends CellAttributes {
     /**
      * The image at this cell.
      */
-    private BufferedImage image = null;
+    private ImageRGB image = null;
 
     /**
      * The image at this cell, inverted.
      */
-    private BufferedImage invertedImage = null;
+    private ImageRGB invertedImage = null;
 
     /**
      * hashCode() needs to call makeImageHashCode(), which can get quite
@@ -191,7 +224,7 @@ public class Cell extends CellAttributes {
      *
      * @param image the image for this cell
      */
-    public void setImage(final BufferedImage image) {
+    public void setImage(final ImageRGB image) {
         this.image = image;
         imageHashCode = 0;
         hasTransparentPixels = 0;
@@ -205,7 +238,7 @@ public class Cell extends CellAttributes {
      * @param image the image for this cell
      * @param imageId the ID for this image
      */
-    public void setImage(final BufferedImage image, final int imageId) {
+    public void setImage(final ImageRGB image, final int imageId) {
         setImage(image);
         assert (imageId > 0);
         this.imageId = imageId;
@@ -216,7 +249,7 @@ public class Cell extends CellAttributes {
      *
      * @return the image for this cell
      */
-    public BufferedImage getImage() {
+    public ImageRGB getImage() {
         if (invertedImage != null) {
             return invertedImage;
         }
@@ -229,7 +262,7 @@ public class Cell extends CellAttributes {
      * @param copy if true, return a copy of the image
      * @return the image for this cell
      */
-    public BufferedImage getImage(final boolean copy) {
+    public ImageRGB getImage(final boolean copy) {
         if (!copy) {
             return getImage();
         }
@@ -237,19 +270,12 @@ public class Cell extends CellAttributes {
             return null;
         }
 
-        int textWidth = image.getWidth();
-        int textHeight = image.getHeight();
-        BufferedImage newImage = ImageUtils.createImage(image, textWidth,
-            textHeight);
-        java.awt.Graphics gr = newImage.getGraphics();
         if (invertedImage != null) {
             assert (image != null);
-            gr.drawImage(invertedImage, 0, 0, null, null);
+            return invertedImage.copy();
         } else {
-            gr.drawImage(image, 0, 0, null, null);
+            return image.copy();
         }
-        gr.dispose();
-        return newImage;
     }
 
     /**
@@ -327,37 +353,33 @@ public class Cell extends CellAttributes {
 
         int textWidth = image.getWidth();
         int textHeight = image.getHeight();
-        /*
-        BufferedImage newImage = new BufferedImage(textWidth,
-            textHeight, BufferedImage.TYPE_INT_ARGB);
-         */
-        BufferedImage newImage = ImageUtils.createImage(image,
-            textWidth, textHeight);
-        java.awt.Graphics gr = newImage.getGraphics();
+        ImageRGB newImage = new ImageRGB(textWidth, textHeight);
+
+        ColorRGB bgColor;
         if (backend != null) {
-            gr.setColor(toAwtColor(backend.attrToBackgroundColor(this)));
+            bgColor = backend.attrToBackgroundColor(this);
         } else {
-            gr.setColor(toAwtColor(ColorUtils.attrToBackgroundColor(this)));
+            bgColor = ColorUtils.attrToBackgroundColor(this);
         }
+        int bgRgb = (bgColor.getAlpha() << 24) | (bgColor.getRed() << 16)
+            | (bgColor.getGreen() << 8) | bgColor.getBlue();
 
         if (overGlyph) {
             // Render this cell to a flat image.  The bad news is that we
             // won't get to use the actual terminal's font.
             GlyphMaker glyphMaker = GlyphMaker.getInstance(textHeight);
-            BufferedImage glyphImage = glyphMaker.getImage(this, textWidth, textHeight, backend);
+            ImageRGB glyphImage = glyphMaker.getImage(this, textWidth, textHeight, backend);
             if (glyphImage != null) {
-                gr.drawImage(glyphImage, 0, 0, null, null);
+                newImage.drawImage(glyphImage, 0, 0);
             } else {
                 // No glyph available, just fill with background
-                gr.fillRect(0, 0, newImage.getWidth(), newImage.getHeight());
+                newImage.fillRect(0, 0, textWidth, textHeight, bgRgb);
             }
         } else {
             // Put the background color behind the pixels.
-            gr.fillRect(0, 0, newImage.getWidth(),
-                newImage.getHeight());
+            newImage.fillRect(0, 0, textWidth, textHeight, bgRgb);
         }
-        gr.drawImage(image, 0, 0, null, null);
-        gr.dispose();
+        newImage.drawImage(image, 0, 0);
         setImage(newImage);
     }
 
@@ -367,7 +389,7 @@ public class Cell extends CellAttributes {
      *
      * @param background the background color to draw on
      */
-    private void flattenImage(final java.awt.Color background) {
+    private void flattenImage(final ColorRGB background) {
         assert (isImage());
 
         if (hasTransparentPixels == 2) {
@@ -377,19 +399,14 @@ public class Cell extends CellAttributes {
 
         int textWidth = image.getWidth();
         int textHeight = image.getHeight();
-        /*
-        BufferedImage newImage = new BufferedImage(textWidth,
-            textHeight, BufferedImage.TYPE_INT_ARGB);
-         */
-        BufferedImage newImage = ImageUtils.createImage(image,
-            textWidth, textHeight);
-        java.awt.Graphics gr = newImage.getGraphics();
-        gr.setColor(background);
+        ImageRGB newImage = new ImageRGB(textWidth, textHeight);
+
+        int bgRgb = (background.getAlpha() << 24) | (background.getRed() << 16)
+            | (background.getGreen() << 8) | background.getBlue();
 
         // Put the background color behind the pixels.
-        gr.fillRect(0, 0, newImage.getWidth(), newImage.getHeight());
-        gr.drawImage(image, 0, 0, null, null);
-        gr.dispose();
+        newImage.fillRect(0, 0, textWidth, textHeight, bgRgb);
+        newImage.drawImage(image, 0, 0);
 
         setImage(newImage);
 
@@ -537,11 +554,11 @@ public class Cell extends CellAttributes {
             return;
         }
         if (invertedImage == null) {
-            invertedImage = new BufferedImage(image.getWidth(),
-                image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+            int w = image.getWidth();
+            int h = image.getHeight();
+            invertedImage = new ImageRGB(w, h);
 
-            int [] rgbArray = image.getRGB(0, 0,
-                image.getWidth(), image.getHeight(), null, 0, image.getWidth());
+            int [] rgbArray = image.getRGB(0, 0, w, h, null, 0, w);
 
             for (int i = 0; i < rgbArray.length; i++) {
                 // Set the colors to fully inverted.
@@ -549,8 +566,7 @@ public class Cell extends CellAttributes {
                     rgbArray[i] ^= 0x00FFFFFF;
                 }
             }
-            invertedImage.setRGB(0, 0, image.getWidth(), image.getHeight(),
-                rgbArray, 0, image.getWidth());
+            invertedImage.setRGB(0, 0, w, h, rgbArray, 0, w);
         }
     }
 
@@ -773,15 +789,6 @@ public class Cell extends CellAttributes {
                 return false;
             }
             if ((invertedImage != null) && (that.invertedImage == null)) {
-                return false;
-            }
-            if (image.getType() != that.image.getType()) {
-                return false;
-            }
-            if ((image.getColorModel() instanceof IndexColorModel)
-                && (that.image.getColorModel() instanceof IndexColorModel)
-                && image.getColorModel() != that.image.getColorModel()
-            ) {
                 return false;
             }
             // Either both objects have their image inverted, or neither do.

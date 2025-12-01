@@ -28,7 +28,6 @@
  */
 package jexer.bits;
 
-import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
 import jexer.backend.Backend;
@@ -127,7 +126,7 @@ public class GlyphMaker {
      * color
      * @return the glyph as an image, or null if not available
      */
-    public BufferedImage getImage(final Cell cell, final int cellWidth,
+    public ImageRGB getImage(final Cell cell, final int cellWidth,
         final int cellHeight, final Backend backend) {
 
         return getImage(cell, cellWidth, cellHeight, backend, true);
@@ -144,7 +143,7 @@ public class GlyphMaker {
      * @param blinkVisible if true, the cell is visible if it is blinking
      * @return the glyph as an image, or null if not available
      */
-    public BufferedImage getImage(final Cell cell, final int cellWidth,
+    public ImageRGB getImage(final Cell cell, final int cellWidth,
         final int cellHeight, final Backend backend,
         final boolean blinkVisible) {
 

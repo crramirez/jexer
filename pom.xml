@@ -109,6 +109,8 @@
                 <exclude>**/backend/ClipboardImpl$*.class</exclude>
                 <exclude>**/backend/TButtonDrawHelper.class</exclude>
                 <exclude>**/backend/TButtonDrawHelper$*.class</exclude>
+                <exclude>**/backend/ImageRGBUtils.class</exclude>
+                <exclude>**/backend/ImageRGBUtils$*.class</exclude>
               </excludes>
               <archive>
                 <manifest>
@@ -141,6 +143,8 @@
                 <include>**/backend/ClipboardImpl$*.class</include>
                 <include>**/backend/TButtonDrawHelper.class</include>
                 <include>**/backend/TButtonDrawHelper$*.class</include>
+                <include>**/backend/ImageRGBUtils.class</include>
+                <include>**/backend/ImageRGBUtils$*.class</include>
               </includes>
               <archive>
                 <manifest>
