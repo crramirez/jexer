@@ -532,6 +532,20 @@ public class TButton extends TWidget {
     }
 
     /**
+     * Set button cells to SQUARE style (text-based, no AWT).
+     *
+     * @param buttonColor the button foreground color
+     */
+    private void setSquareStyle(final CellAttributes buttonColor) {
+        leftEdgeChar = new Cell(buttonColor);
+        rightEdgeChar = new Cell(buttonColor);
+        leftEdgeShadowChar = new Cell(GraphicsChars.CP437[0xDF], shadowColor);
+        rightEdgeShadowCharTop = new Cell(GraphicsChars.CP437[0xDC], shadowColor);
+        rightEdgeShadowCharBottom = new Cell(GraphicsChars.CP437[0xDF], shadowColor);
+        shadowCharBottom = new Cell(GraphicsChars.CP437[0xDF], shadowColor);
+    }
+
+    /**
      * Draw the button ends and populate leftEdgeChar, rightEdgeChar,
      * leftEdgeShadowChar, and rightEdgeShadowChar.
      *
@@ -543,34 +557,16 @@ public class TButton extends TWidget {
 
         // SQUARE style doesn't need AWT, handle it directly
         if (style == Style.SQUARE) {
-            leftEdgeChar = new Cell(buttonColor);
-            rightEdgeChar = new Cell(buttonColor);
-            leftEdgeShadowChar = new Cell(GraphicsChars.CP437[0xDF],
-                shadowColor);
-            rightEdgeShadowCharTop = new Cell(GraphicsChars.CP437[0xDC],
-                shadowColor);
-            rightEdgeShadowCharBottom = new Cell(GraphicsChars.CP437[0xDF],
-                shadowColor);
-            shadowCharBottom = new Cell(GraphicsChars.CP437[0xDF],
-                shadowColor);
+            setSquareStyle(buttonColor);
             return;
         }
 
         // For non-SQUARE styles, try to use TButtonDrawHelper via reflection
         checkDrawHelper();
-        
+
         if (!drawHelperAvailable) {
             // Fall back to SQUARE style if helper is not available
-            leftEdgeChar = new Cell(buttonColor);
-            rightEdgeChar = new Cell(buttonColor);
-            leftEdgeShadowChar = new Cell(GraphicsChars.CP437[0xDF],
-                shadowColor);
-            rightEdgeShadowCharTop = new Cell(GraphicsChars.CP437[0xDC],
-                shadowColor);
-            rightEdgeShadowCharBottom = new Cell(GraphicsChars.CP437[0xDF],
-                shadowColor);
-            shadowCharBottom = new Cell(GraphicsChars.CP437[0xDF],
-                shadowColor);
+            setSquareStyle(buttonColor);
             return;
         }
 
@@ -627,29 +623,11 @@ public class TButton extends TWidget {
                 shadowCharBottom = cells[5];
             } else {
                 // Fall back to SQUARE
-                leftEdgeChar = new Cell(buttonColor);
-                rightEdgeChar = new Cell(buttonColor);
-                leftEdgeShadowChar = new Cell(GraphicsChars.CP437[0xDF],
-                    shadowColor);
-                rightEdgeShadowCharTop = new Cell(GraphicsChars.CP437[0xDC],
-                    shadowColor);
-                rightEdgeShadowCharBottom = new Cell(GraphicsChars.CP437[0xDF],
-                    shadowColor);
-                shadowCharBottom = new Cell(GraphicsChars.CP437[0xDF],
-                    shadowColor);
+                setSquareStyle(buttonColor);
             }
         } catch (Exception e) {
             // Fall back to SQUARE on any error
-            leftEdgeChar = new Cell(buttonColor);
-            rightEdgeChar = new Cell(buttonColor);
-            leftEdgeShadowChar = new Cell(GraphicsChars.CP437[0xDF],
-                shadowColor);
-            rightEdgeShadowCharTop = new Cell(GraphicsChars.CP437[0xDC],
-                shadowColor);
-            rightEdgeShadowCharBottom = new Cell(GraphicsChars.CP437[0xDF],
-                shadowColor);
-            shadowCharBottom = new Cell(GraphicsChars.CP437[0xDF],
-                shadowColor);
+            setSquareStyle(buttonColor);
         }
     }
 

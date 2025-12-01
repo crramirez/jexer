@@ -238,7 +238,7 @@ public class TButtonDrawHelper {
         leftEdgeChar.setImage(cellImage, imageId & 0x7FFFFFFF);
         leftEdgeChar.setOpaqueImage();
 
-        // Right edge: left half of image
+        // Right edge: right half of image
         cellImage = new BufferedImage(cellWidth, cellHeight,
             BufferedImage.TYPE_INT_ARGB);
         gr2 = cellImage.createGraphics();
