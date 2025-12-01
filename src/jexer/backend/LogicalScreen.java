@@ -36,8 +36,10 @@ import jexer.bits.BorderStyle;
 import jexer.bits.Cell;
 import jexer.bits.CellAttributes;
 import jexer.bits.Clipboard;
+import jexer.bits.ColorRGB;
 import jexer.bits.GlyphMaker;
 import jexer.bits.GraphicsChars;
+import jexer.bits.ImageRGB;
 import jexer.bits.ImageUtils;
 import jexer.bits.StringUtils;
 
@@ -141,6 +143,52 @@ public class LogicalScreen implements Screen {
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Convert an ImageRGB to a BufferedImage.
+     *
+     * @param imageRGB the ImageRGB to convert
+     * @return the BufferedImage
+     */
+    private static BufferedImage toBufferedImage(final ImageRGB imageRGB) {
+        if (imageRGB == null) {
+            return null;
+        }
+        int width = imageRGB.getWidth();
+        int height = imageRGB.getHeight();
+        BufferedImage result = new BufferedImage(width, height,
+            BufferedImage.TYPE_INT_ARGB);
+        int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
+        result.setRGB(0, 0, width, height, pixels, 0, width);
+        return result;
+    }
+
+    /**
+     * Convert a BufferedImage to an ImageRGB.
+     *
+     * @param bufferedImage the BufferedImage to convert
+     * @return the ImageRGB
+     */
+    private static ImageRGB toImageRGB(final BufferedImage bufferedImage) {
+        if (bufferedImage == null) {
+            return null;
+        }
+        int width = bufferedImage.getWidth();
+        int height = bufferedImage.getHeight();
+        int[] pixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
+        return new ImageRGB(width, height, pixels);
+    }
+
+    /**
+     * Convert a ColorRGB to java.awt.Color.
+     *
+     * @param colorRGB the ColorRGB to convert
+     * @return the java.awt.Color
+     */
+    private static java.awt.Color toAwtColor(final ColorRGB colorRGB) {
+        return new java.awt.Color(colorRGB.getRed(), colorRGB.getGreen(),
+            colorRGB.getBlue(), colorRGB.getAlpha());
+    }
 
     /**
      * Public constructor.  Sets everything to not-bold, white-on-black.
@@ -1078,7 +1126,7 @@ public class LogicalScreen implements Screen {
             glyphMaker = GlyphMaker.getInstance(cellHeight);
             lastTextHeight = cellHeight;
         }
-        BufferedImage image = glyphMaker.getImage(cell, cellWidth * 2,
+        ImageRGB image = glyphMaker.getImage(cell, cellWidth * 2,
             cellHeight, backend);
 
         // If GlyphMaker returns null (no font support), fall back to
@@ -1087,10 +1135,16 @@ public class LogicalScreen implements Screen {
             return;
         }
 
-        BufferedImage leftImage = image.getSubimage(0, 0, cellWidth,
-            cellHeight);
-        BufferedImage rightImage = image.getSubimage(cellWidth, 0, cellWidth,
-            cellHeight);
+        // Extract left and right halves
+        ImageRGB leftImage = new ImageRGB(cellWidth, cellHeight);
+        leftImage.setRGB(0, 0, cellWidth, cellHeight,
+            image.getRGB(0, 0, cellWidth, cellHeight, null, 0, cellWidth),
+            0, cellWidth);
+
+        ImageRGB rightImage = new ImageRGB(cellWidth, cellHeight);
+        rightImage.setRGB(0, 0, cellWidth, cellHeight,
+            image.getRGB(cellWidth, 0, cellWidth, cellHeight, null, 0, cellWidth),
+            0, cellWidth);
 
         Cell left = new Cell(cell);
         left.setImage(leftImage);
@@ -1646,27 +1700,29 @@ public class LogicalScreen implements Screen {
                             // otherBg at alpha < 255 over this image.
                             Cell thisCopy = new Cell(thisCell);
                             thisCopy.flattenImage(false, backend);
-                            BufferedImage image = thisCopy.getImage();
+                            ImageRGB image = thisCopy.getImage();
+                            // Convert to BufferedImage for alpha compositing
+                            BufferedImage biImage = toBufferedImage(image);
                             BufferedImage newImage;
-                            newImage = new BufferedImage(image.getWidth(),
-                                image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+                            newImage = new BufferedImage(biImage.getWidth(),
+                                biImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
                             g2d = newImage.createGraphics();
-                            g2d.drawImage(image, 0, 0, null);
+                            g2d.drawImage(biImage, 0, 0, null);
 
                             g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
                                     fAlpha));
                             g2d.setColor(new java.awt.Color(overBg));
-                            g2d.fillRect(0, 0, image.getWidth(),
-                                image.getHeight());
+                            g2d.fillRect(0, 0, biImage.getWidth(),
+                                biImage.getHeight());
                             g2d.dispose();
                             // Retain imageId mixed with overBg
                             int imageId = thisCell.getImageId();
                             if (imageId > 0) {
-                                thisCell.setImage(newImage, imageId);
+                                thisCell.setImage(toImageRGB(newImage), imageId);
                                 thisCell.mixImageId(overBg);
                                 thisCell.mixImageId(alpha);
                             } else {
-                                thisCell.setImage(newImage);
+                                thisCell.setImage(toImageRGB(newImage));
                             }
                             thisCell.setOpaqueImage();
                         } else {
@@ -1729,25 +1785,26 @@ public class LogicalScreen implements Screen {
                         // alpha < 255.
                         Cell overCopy = new Cell(overCell);
                         overCopy.flattenImage(false, backend);
-                        BufferedImage image = overCopy.getImage();
+                        ImageRGB image = overCopy.getImage();
+                        BufferedImage biImage = toBufferedImage(image);
                         BufferedImage newImage;
-                        newImage = new BufferedImage(image.getWidth(),
-                            image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+                        newImage = new BufferedImage(biImage.getWidth(),
+                            biImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
                         g2d = newImage.createGraphics();
                         g2d.setColor(new java.awt.Color(thisOldBg));
-                        g2d.fillRect(0, 0, image.getWidth(), image.getHeight());
+                        g2d.fillRect(0, 0, biImage.getWidth(), biImage.getHeight());
                         g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
                                 fAlpha));
-                        g2d.drawImage(image, 0, 0, null);
+                        g2d.drawImage(biImage, 0, 0, null);
                         g2d.dispose();
                         // Retain overCell.imageId with thisOldBg and set
                         int imageId = overCell.getImageId();
                         if (imageId > 0) {
-                            thisCell.setImage(newImage, imageId);
+                            thisCell.setImage(toImageRGB(newImage), imageId);
                             thisCell.mixImageId(thisOldBg);
                             thisCell.mixImageId(alpha);
                         } else {
-                            thisCell.setImage(newImage);
+                            thisCell.setImage(toImageRGB(newImage));
                         }
                         thisCell.setOpaqueImage();
                         thisCell.setWidth(overCell.getWidth());
@@ -1765,26 +1822,27 @@ public class LogicalScreen implements Screen {
                         // at alpha < 255.
                         Cell overCopy = new Cell(overCell);
                         overCopy.flattenImage(false, backend);
-                        BufferedImage image = overCopy.getImage();
+                        ImageRGB image = overCopy.getImage();
+                        BufferedImage biImage = toBufferedImage(image);
                         BufferedImage newImage;
-                        newImage = new BufferedImage(image.getWidth(),
-                            image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+                        newImage = new BufferedImage(biImage.getWidth(),
+                            biImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
                         g2d = newImage.createGraphics();
                         Cell thisCopy = new Cell(thisCell);
                         thisCopy.flattenImage(false, backend);
-                        g2d.drawImage(thisCopy.getImage(), 0, 0, null);
+                        g2d.drawImage(toBufferedImage(thisCopy.getImage()), 0, 0, null);
                         g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
                                 fAlpha));
-                        g2d.drawImage(image, 0, 0, null);
+                        g2d.drawImage(biImage, 0, 0, null);
                         g2d.dispose();
                         // Retain overCell.imageId with thisCell.imageId
                         int imageId = thisCell.getImageId();
                         if (imageId > 0) {
-                            thisCell.setImage(newImage, imageId);
+                            thisCell.setImage(toImageRGB(newImage), imageId);
                             thisCell.mixImageId(overCell);
                             thisCell.mixImageId(alpha);
                         } else {
-                            thisCell.setImage(newImage);
+                            thisCell.setImage(toImageRGB(newImage));
                         }
                         thisCell.setOpaqueImage();
                         thisCell.setWidth(overCell.getWidth());
@@ -1801,26 +1859,27 @@ public class LogicalScreen implements Screen {
 
                         Cell overCopy = new Cell(overCell);
                         overCopy.flattenImage(false, backend);
-                        BufferedImage image = overCopy.getImage();
+                        ImageRGB image = overCopy.getImage();
+                        BufferedImage biImage = toBufferedImage(image);
                         BufferedImage newImage;
-                        newImage = new BufferedImage(image.getWidth(),
-                            image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+                        newImage = new BufferedImage(biImage.getWidth(),
+                            biImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
                         g2d = newImage.createGraphics();
-                        g2d.drawImage(thisCell.getImage(), 0, 0, null);
+                        g2d.drawImage(toBufferedImage(thisCell.getImage()), 0, 0, null);
                         g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
                                 fAlpha));
-                        g2d.drawImage(image, 0, 0, null);
+                        g2d.drawImage(biImage, 0, 0, null);
                         g2d.dispose();
                         // Retain overCell.imageId with overBg, then
                         // thisCell.imageId
                         int imageId = thisCell.getImageId();
                         if (imageId > 0) {
-                            thisCell.setImage(newImage, imageId);
+                            thisCell.setImage(toImageRGB(newImage), imageId);
                             thisCell.mixImageId(overCell);
                             thisCell.mixImageId(overBg);
                             thisCell.mixImageId(alpha);
                         } else {
-                            thisCell.setImage(newImage);
+                            thisCell.setImage(toImageRGB(newImage));
                         }
                         thisCell.setOpaqueImage();
                         thisCell.setWidth(overCell.getWidth());
@@ -1837,27 +1896,28 @@ public class LogicalScreen implements Screen {
 
                         Cell overCopy = new Cell(overCell);
                         overCopy.flattenImage(false, backend);
-                        BufferedImage image = overCopy.getImage();
+                        ImageRGB image = overCopy.getImage();
+                        BufferedImage biImage = toBufferedImage(image);
                         BufferedImage newImage;
-                        newImage = new BufferedImage(image.getWidth(),
-                            image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+                        newImage = new BufferedImage(biImage.getWidth(),
+                            biImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
                         g2d = newImage.createGraphics();
                         g2d.setColor(new java.awt.Color(thisOldBg));
-                        g2d.fillRect(0, 0, image.getWidth(), image.getHeight());
+                        g2d.fillRect(0, 0, biImage.getWidth(), biImage.getHeight());
                         g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
                                 fAlpha));
-                        g2d.drawImage(image, 0, 0, null);
+                        g2d.drawImage(biImage, 0, 0, null);
                         g2d.dispose();
                         // Retain overCell.imageId with overBg, then
                         // thisOldBg, then set
                         int imageId = overCell.getImageId();
                         if (imageId > 0) {
-                            thisCell.setImage(newImage, imageId);
+                            thisCell.setImage(toImageRGB(newImage), imageId);
                             thisCell.mixImageId(overBg);
                             thisCell.mixImageId(thisOldBg);
                             thisCell.mixImageId(alpha);
                         } else {
-                            thisCell.setImage(newImage);
+                            thisCell.setImage(toImageRGB(newImage));
                         }
                         thisCell.setOpaqueImage();
                         thisCell.setWidth(overCell.getWidth());
