@@ -28,9 +28,7 @@
  */
 package jexer.backend;
 
-import java.awt.AlphaComposite;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
+import java.lang.reflect.Method;
 
 import jexer.bits.BorderStyle;
 import jexer.bits.Cell;
@@ -47,6 +45,36 @@ import jexer.bits.StringUtils;
  * A logical screen composed of a 2D array of Cells.
  */
 public class LogicalScreen implements Screen {
+
+    /**
+     * Whether java.desktop (AWT) is available.
+     */
+    private static boolean awtAvailable = true;
+
+    /**
+     * Cached reflection methods for LogicalScreenHelper.
+     */
+    private static Method blendScreenColorsMethod = null;
+    private static Method blendImageOverColorMethod = null;
+    private static Method blendImagesMethod = null;
+    private static Method blendColorThenImageMethod = null;
+
+    static {
+        try {
+            Class<?> helperClass = Class.forName("jexer.backend.LogicalScreenHelper");
+            blendScreenColorsMethod = helperClass.getMethod("blendScreenColors",
+                int[].class, int[].class, int[].class, int[].class, int[].class,
+                int.class, int.class, int.class);
+            blendImageOverColorMethod = helperClass.getMethod("blendImageOverColor",
+                ImageRGB.class, int.class, float.class);
+            blendImagesMethod = helperClass.getMethod("blendImages",
+                ImageRGB.class, ImageRGB.class, float.class);
+            blendColorThenImageMethod = helperClass.getMethod("blendColorThenImage",
+                int.class, ImageRGB.class, float.class);
+        } catch (Exception e) {
+            awtAvailable = false;
+        }
+    }
 
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
@@ -145,49 +173,103 @@ public class LogicalScreen implements Screen {
     // ------------------------------------------------------------------------
 
     /**
-     * Convert an ImageRGB to a BufferedImage.
+     * Blend an image over a background color using alpha compositing.
+     * Uses reflection to call LogicalScreenHelper.
      *
-     * @param imageRGB the ImageRGB to convert
-     * @return the BufferedImage
+     * @param sourceImage the source ImageRGB
+     * @param backgroundColor the background color as ARGB
+     * @param alpha the alpha value (0.0 - 1.0)
+     * @return the blended ImageRGB, or null if AWT not available
      */
-    private static BufferedImage toBufferedImage(final ImageRGB imageRGB) {
-        if (imageRGB == null) {
-            return null;
+    private static ImageRGB blendImageOverColor(final ImageRGB sourceImage,
+        final int backgroundColor, final float alpha) {
+
+        if (!awtAvailable || blendImageOverColorMethod == null) {
+            return sourceImage;
         }
-        int width = imageRGB.getWidth();
-        int height = imageRGB.getHeight();
-        BufferedImage result = new BufferedImage(width, height,
-            BufferedImage.TYPE_INT_ARGB);
-        int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
-        result.setRGB(0, 0, width, height, pixels, 0, width);
-        return result;
+        try {
+            return (ImageRGB) blendImageOverColorMethod.invoke(null,
+                sourceImage, backgroundColor, alpha);
+        } catch (Exception e) {
+            return sourceImage;
+        }
     }
 
     /**
-     * Convert a BufferedImage to an ImageRGB.
+     * Blend one image over another using alpha compositing.
+     * Uses reflection to call LogicalScreenHelper.
      *
-     * @param bufferedImage the BufferedImage to convert
-     * @return the ImageRGB
+     * @param baseImage the base ImageRGB (drawn first)
+     * @param overlayImage the overlay ImageRGB (drawn over base)
+     * @param alpha the alpha value (0.0 - 1.0) for the overlay
+     * @return the blended ImageRGB, or overlayImage if AWT not available
      */
-    private static ImageRGB toImageRGB(final BufferedImage bufferedImage) {
-        if (bufferedImage == null) {
-            return null;
+    private static ImageRGB blendImages(final ImageRGB baseImage,
+        final ImageRGB overlayImage, final float alpha) {
+
+        if (!awtAvailable || blendImagesMethod == null) {
+            return overlayImage;
         }
-        int width = bufferedImage.getWidth();
-        int height = bufferedImage.getHeight();
-        int[] pixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
-        return new ImageRGB(width, height, pixels);
+        try {
+            return (ImageRGB) blendImagesMethod.invoke(null,
+                baseImage, overlayImage, alpha);
+        } catch (Exception e) {
+            return overlayImage;
+        }
     }
 
     /**
-     * Convert a ColorRGB to java.awt.Color.
+     * Create an image filled with a solid color, then draw an overlay image
+     * on top with alpha compositing. Uses reflection to call LogicalScreenHelper.
      *
-     * @param colorRGB the ColorRGB to convert
-     * @return the java.awt.Color
+     * @param backgroundColor the background color as ARGB
+     * @param overlayImage the overlay ImageRGB
+     * @param alpha the alpha value (0.0 - 1.0) for the overlay
+     * @return the blended ImageRGB, or overlayImage if AWT not available
      */
-    private static java.awt.Color toAwtColor(final ColorRGB colorRGB) {
-        return new java.awt.Color(colorRGB.getRed(), colorRGB.getGreen(),
-            colorRGB.getBlue(), colorRGB.getAlpha());
+    private static ImageRGB blendColorThenImage(final int backgroundColor,
+        final ImageRGB overlayImage, final float alpha) {
+
+        if (!awtAvailable || blendColorThenImageMethod == null) {
+            return overlayImage;
+        }
+        try {
+            return (ImageRGB) blendColorThenImageMethod.invoke(null,
+                backgroundColor, overlayImage, alpha);
+        } catch (Exception e) {
+            return overlayImage;
+        }
+    }
+
+    /**
+     * Perform full screen color blending using reflection.
+     *
+     * @param thisFgPixels foreground colors for this screen
+     * @param thisBgPixels background colors for this screen
+     * @param thisOldBgPixels original background colors
+     * @param overFgPixels foreground colors for overlay screen
+     * @param overBgPixels background colors for overlay screen
+     * @param width the width of the blend area
+     * @param height the height of the blend area
+     * @param alpha the alpha value (0 - 255)
+     * @return array containing blended [thisForeground, thisBackground, glyphForeground], or null if AWT unavailable
+     */
+    private static int[][] blendScreenColors(
+        final int[] thisFgPixels, final int[] thisBgPixels,
+        final int[] thisOldBgPixels, final int[] overFgPixels,
+        final int[] overBgPixels, final int width, final int height,
+        final int alpha) {
+
+        if (!awtAvailable || blendScreenColorsMethod == null) {
+            return null;
+        }
+        try {
+            return (int[][]) blendScreenColorsMethod.invoke(null,
+                thisFgPixels, thisBgPixels, thisOldBgPixels,
+                overFgPixels, overBgPixels, width, height, alpha);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -1562,26 +1644,27 @@ public class LogicalScreen implements Screen {
             return;
         }
 
+        if (!awtAvailable) {
+            // Without AWT, we cannot do alpha blending, so just copy
+            copyScreen(otherScreen, x, y, width, height);
+            return;
+        }
+
         long now = System.currentTimeMillis();
 
         /*
          * We need to blend the background colors of other's cells over the
          * cells of this screen (foreground and background), honoring our
          * alpha.  We will create a bitmap of one pixel per cell, blend that
-         * via AWT, and then set the cell RGBs and char's.
+         * via the helper, and then set the cell RGBs and char's.
          */
         synchronized (this) {
 
-            BufferedImage thisForeground = new BufferedImage(width, height,
-                BufferedImage.TYPE_INT_ARGB);
-            BufferedImage thisBackground = new BufferedImage(width, height,
-                BufferedImage.TYPE_INT_ARGB);
-            BufferedImage overForeground = new BufferedImage(width, height,
-                BufferedImage.TYPE_INT_ARGB);
-            BufferedImage overBackground = new BufferedImage(width, height,
-                BufferedImage.TYPE_INT_ARGB);
-            BufferedImage thisOldBackground = new BufferedImage(width, height,
-                BufferedImage.TYPE_INT_ARGB);
+            int[] thisForegroundPixels = new int[width * height];
+            int[] thisBackgroundPixels = new int[width * height];
+            int[] thisOldBackgroundPixels = new int[width * height];
+            int[] overForegroundPixels = new int[width * height];
+            int[] overBackgroundPixels = new int[width * height];
 
             final int OPAQUE = 0xFF000000;
 
@@ -1636,42 +1719,32 @@ public class LogicalScreen implements Screen {
                     overBg |= OPAQUE;
                     overFg |= OPAQUE;
 
-                    thisForeground.setRGB(col - x, row - y, thisFg);
-                    thisBackground.setRGB(col - x, row - y, thisBg);
-                    thisOldBackground.setRGB(col - x, row - y, thisBg);
-                    overForeground.setRGB(col - x, row - y, overFg);
-                    overBackground.setRGB(col - x, row - y, overBg);
+                    int idx = (row - y) * width + (col - x);
+                    thisForegroundPixels[idx] = thisFg;
+                    thisBackgroundPixels[idx] = thisBg;
+                    thisOldBackgroundPixels[idx] = thisBg;
+                    overForegroundPixels[idx] = overFg;
+                    overBackgroundPixels[idx] = overBg;
                 }
             }
 
-            // The four bitmaps are ready.  We have skipped over cells/pixels
-            // that cannot overlap.  Now blit overBackground over both
-            // thisForeground and thisBackground, and then assign cell colors
-            // and cell chars/images.
-            //
-            // Also blit overForeground over thisBackground to handle the new
-            // layer's glyph opacity.
+            // Use reflection to blend the screen colors
+            int[][] blendedColors = blendScreenColors(
+                thisForegroundPixels, thisBackgroundPixels,
+                thisOldBackgroundPixels, overForegroundPixels,
+                overBackgroundPixels, width, height, alpha);
+
+            if (blendedColors == null) {
+                // Fallback to raw copy if blending failed
+                copyScreen(otherScreen, x, y, width, height);
+                return;
+            }
+
+            int[] resultThisFg = blendedColors[0];
+            int[] resultThisBg = blendedColors[1];
+            int[] resultGlyphFg = blendedColors[2];
+
             float fAlpha = (float) (alpha / 255.0);
-            Graphics2D g2d = thisForeground.createGraphics();
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-                    fAlpha));
-            g2d.drawImage(overBackground, 0, 0, null);
-            g2d.dispose();
-
-            g2d = thisBackground.createGraphics();
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-                    fAlpha));
-            g2d.drawImage(overBackground, 0, 0, null);
-            g2d.dispose();
-
-            BufferedImage glyphForeground = new BufferedImage(width, height,
-                BufferedImage.TYPE_INT_ARGB);
-            g2d = glyphForeground.createGraphics();
-            g2d.drawImage(thisBackground, 0, 0, null);
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-                    fAlpha));
-            g2d.drawImage(overForeground, 0, 0, null);
-            g2d.dispose();
 
             for (int row = y; (row < y + height) && (row < this.height); row++) {
                 if (row < 0) {
@@ -1683,11 +1756,12 @@ public class LogicalScreen implements Screen {
                     }
                     Cell thisCell = logical[col][row];
                     Cell overCell = otherScreen.getCharXY(col - x, row - y);
-                    int thisFg = thisForeground.getRGB(col - x, row - y);
-                    int thisBg = thisBackground.getRGB(col - x, row - y);
-                    int thisOldBg = thisOldBackground.getRGB(col - x, row - y);
-                    int overBg = overBackground.getRGB(col - x, row - y);
-                    int overFg = glyphForeground.getRGB(col - x, row - y);
+                    int idx = (row - y) * width + (col - x);
+                    int thisFg = resultThisFg[idx];
+                    int thisBg = resultThisBg[idx];
+                    int thisOldBg = thisOldBackgroundPixels[idx];
+                    int overBg = overBackgroundPixels[idx];
+                    int overFg = resultGlyphFg[idx];
 
                     thisCell.setBackColorRGB(thisBg | OPAQUE);
                     thisCell.setForeColorRGB(thisFg | OPAQUE);
@@ -1701,28 +1775,15 @@ public class LogicalScreen implements Screen {
                             Cell thisCopy = new Cell(thisCell);
                             thisCopy.flattenImage(false, backend);
                             ImageRGB image = thisCopy.getImage();
-                            // Convert to BufferedImage for alpha compositing
-                            BufferedImage biImage = toBufferedImage(image);
-                            BufferedImage newImage;
-                            newImage = new BufferedImage(biImage.getWidth(),
-                                biImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
-                            g2d = newImage.createGraphics();
-                            g2d.drawImage(biImage, 0, 0, null);
-
-                            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-                                    fAlpha));
-                            g2d.setColor(new java.awt.Color(overBg));
-                            g2d.fillRect(0, 0, biImage.getWidth(),
-                                biImage.getHeight());
-                            g2d.dispose();
+                            ImageRGB newImage = blendImageOverColor(image, overBg, fAlpha);
                             // Retain imageId mixed with overBg
                             int imageId = thisCell.getImageId();
                             if (imageId > 0) {
-                                thisCell.setImage(toImageRGB(newImage), imageId);
+                                thisCell.setImage(newImage, imageId);
                                 thisCell.mixImageId(overBg);
                                 thisCell.mixImageId(alpha);
                             } else {
-                                thisCell.setImage(toImageRGB(newImage));
+                                thisCell.setImage(newImage);
                             }
                             thisCell.setOpaqueImage();
                         } else {
@@ -1786,25 +1847,15 @@ public class LogicalScreen implements Screen {
                         Cell overCopy = new Cell(overCell);
                         overCopy.flattenImage(false, backend);
                         ImageRGB image = overCopy.getImage();
-                        BufferedImage biImage = toBufferedImage(image);
-                        BufferedImage newImage;
-                        newImage = new BufferedImage(biImage.getWidth(),
-                            biImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
-                        g2d = newImage.createGraphics();
-                        g2d.setColor(new java.awt.Color(thisOldBg));
-                        g2d.fillRect(0, 0, biImage.getWidth(), biImage.getHeight());
-                        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-                                fAlpha));
-                        g2d.drawImage(biImage, 0, 0, null);
-                        g2d.dispose();
+                        ImageRGB newImage = blendColorThenImage(thisOldBg, image, fAlpha);
                         // Retain overCell.imageId with thisOldBg and set
                         int imageId = overCell.getImageId();
                         if (imageId > 0) {
-                            thisCell.setImage(toImageRGB(newImage), imageId);
+                            thisCell.setImage(newImage, imageId);
                             thisCell.mixImageId(thisOldBg);
                             thisCell.mixImageId(alpha);
                         } else {
-                            thisCell.setImage(toImageRGB(newImage));
+                            thisCell.setImage(newImage);
                         }
                         thisCell.setOpaqueImage();
                         thisCell.setWidth(overCell.getWidth());
@@ -1822,27 +1873,19 @@ public class LogicalScreen implements Screen {
                         // at alpha < 255.
                         Cell overCopy = new Cell(overCell);
                         overCopy.flattenImage(false, backend);
-                        ImageRGB image = overCopy.getImage();
-                        BufferedImage biImage = toBufferedImage(image);
-                        BufferedImage newImage;
-                        newImage = new BufferedImage(biImage.getWidth(),
-                            biImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
-                        g2d = newImage.createGraphics();
+                        ImageRGB overImage = overCopy.getImage();
                         Cell thisCopy = new Cell(thisCell);
                         thisCopy.flattenImage(false, backend);
-                        g2d.drawImage(toBufferedImage(thisCopy.getImage()), 0, 0, null);
-                        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-                                fAlpha));
-                        g2d.drawImage(biImage, 0, 0, null);
-                        g2d.dispose();
+                        ImageRGB thisImage = thisCopy.getImage();
+                        ImageRGB newImage = blendImages(thisImage, overImage, fAlpha);
                         // Retain overCell.imageId with thisCell.imageId
                         int imageId = thisCell.getImageId();
                         if (imageId > 0) {
-                            thisCell.setImage(toImageRGB(newImage), imageId);
+                            thisCell.setImage(newImage, imageId);
                             thisCell.mixImageId(overCell);
                             thisCell.mixImageId(alpha);
                         } else {
-                            thisCell.setImage(toImageRGB(newImage));
+                            thisCell.setImage(newImage);
                         }
                         thisCell.setOpaqueImage();
                         thisCell.setWidth(overCell.getWidth());
@@ -1859,27 +1902,19 @@ public class LogicalScreen implements Screen {
 
                         Cell overCopy = new Cell(overCell);
                         overCopy.flattenImage(false, backend);
-                        ImageRGB image = overCopy.getImage();
-                        BufferedImage biImage = toBufferedImage(image);
-                        BufferedImage newImage;
-                        newImage = new BufferedImage(biImage.getWidth(),
-                            biImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
-                        g2d = newImage.createGraphics();
-                        g2d.drawImage(toBufferedImage(thisCell.getImage()), 0, 0, null);
-                        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-                                fAlpha));
-                        g2d.drawImage(biImage, 0, 0, null);
-                        g2d.dispose();
+                        ImageRGB overImage = overCopy.getImage();
+                        ImageRGB thisImage = thisCell.getImage();
+                        ImageRGB newImage = blendImages(thisImage, overImage, fAlpha);
                         // Retain overCell.imageId with overBg, then
                         // thisCell.imageId
                         int imageId = thisCell.getImageId();
                         if (imageId > 0) {
-                            thisCell.setImage(toImageRGB(newImage), imageId);
+                            thisCell.setImage(newImage, imageId);
                             thisCell.mixImageId(overCell);
                             thisCell.mixImageId(overBg);
                             thisCell.mixImageId(alpha);
                         } else {
-                            thisCell.setImage(toImageRGB(newImage));
+                            thisCell.setImage(newImage);
                         }
                         thisCell.setOpaqueImage();
                         thisCell.setWidth(overCell.getWidth());
@@ -1897,27 +1932,17 @@ public class LogicalScreen implements Screen {
                         Cell overCopy = new Cell(overCell);
                         overCopy.flattenImage(false, backend);
                         ImageRGB image = overCopy.getImage();
-                        BufferedImage biImage = toBufferedImage(image);
-                        BufferedImage newImage;
-                        newImage = new BufferedImage(biImage.getWidth(),
-                            biImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
-                        g2d = newImage.createGraphics();
-                        g2d.setColor(new java.awt.Color(thisOldBg));
-                        g2d.fillRect(0, 0, biImage.getWidth(), biImage.getHeight());
-                        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-                                fAlpha));
-                        g2d.drawImage(biImage, 0, 0, null);
-                        g2d.dispose();
+                        ImageRGB newImage = blendColorThenImage(thisOldBg, image, fAlpha);
                         // Retain overCell.imageId with overBg, then
                         // thisOldBg, then set
                         int imageId = overCell.getImageId();
                         if (imageId > 0) {
-                            thisCell.setImage(toImageRGB(newImage), imageId);
+                            thisCell.setImage(newImage, imageId);
                             thisCell.mixImageId(overBg);
                             thisCell.mixImageId(thisOldBg);
                             thisCell.mixImageId(alpha);
                         } else {
-                            thisCell.setImage(toImageRGB(newImage));
+                            thisCell.setImage(newImage);
                         }
                         thisCell.setOpaqueImage();
                         thisCell.setWidth(overCell.getWidth());

@@ -117,6 +117,8 @@
                 <exclude>**/backend/ImageUtilsImpl.class</exclude>
                 <exclude>**/backend/LegacySixelEncoder$*.class</exclude>
                 <exclude>**/backend/LegacySixelEncoder.class</exclude>
+                <exclude>**/backend/LogicalScreenHelper$*.class</exclude>
+                <exclude>**/backend/LogicalScreenHelper.class</exclude>
                 <exclude>**/backend/SixelDecoderImpl$*.class</exclude>
                 <exclude>**/backend/SixelDecoderImpl.class</exclude>
                 <exclude>**/backend/SixelEncoder$*.class</exclude>
@@ -214,6 +216,8 @@
                 <include>**/backend/BitmapImpl$*.class</include>
                 <include>**/backend/ECMA48TerminalHelper.class</include>
                 <include>**/backend/ECMA48TerminalHelper$*.class</include>
+                <include>**/backend/LogicalScreenHelper.class</include>
+                <include>**/backend/LogicalScreenHelper$*.class</include>
                 <include>**/backend/SixelEncoder.class</include>
                 <include>**/backend/SixelEncoder$*.class</include>
                 <include>**/backend/HQSixelEncoder.class</include>
