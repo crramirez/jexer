@@ -153,6 +153,27 @@ public class Tackboard {
     }
 
     /**
+     * Check if a BufferedImage is fully transparent.
+     *
+     * @param image the image to check
+     * @return true if the image is fully transparent
+     */
+    private static boolean isFullyTransparent(final BufferedImage image) {
+        if (image == null) {
+            return true;
+        }
+        int[] rgbArray = image.getRGB(0, 0, image.getWidth(), image.getHeight(),
+            null, 0, image.getWidth());
+        for (int i = 0; i < rgbArray.length; i++) {
+            int alpha = (rgbArray[i] >>> 24) & 0xFF;
+            if (alpha != 0x00) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Set dirty flag.
      */
     public final void setDirty() {
@@ -309,7 +330,7 @@ public class Tackboard {
                     BufferedImage newImage = image.getSubimage(sx * cellWidth,
                         sy * cellHeight, cellWidth, cellHeight);
 
-                    if (ImageUtils.isFullyTransparent(newImage)) {
+                    if (isFullyTransparent(newImage)) {
                         // Skip this cell.
                         continue;
                     }

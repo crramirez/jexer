@@ -32,6 +32,7 @@ import java.awt.image.BufferedImage;
 
 import jexer.TApplication;
 import jexer.bits.Animation;
+import jexer.bits.ImageRGB;
 
 /**
  * Bitmap is a raw bitmap image.
@@ -60,6 +61,29 @@ public class Bitmap extends TackboardItem {
      * Animation to display.
      */
     private Animation animation;
+
+    // ------------------------------------------------------------------------
+    // Helper methods ---------------------------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * Convert ImageRGB to BufferedImage.
+     *
+     * @param imageRGB the ImageRGB to convert
+     * @return the BufferedImage
+     */
+    private static BufferedImage toBufferedImage(final ImageRGB imageRGB) {
+        if (imageRGB == null) {
+            return null;
+        }
+        int width = imageRGB.getWidth();
+        int height = imageRGB.getHeight();
+        BufferedImage result = new BufferedImage(width, height,
+            BufferedImage.TYPE_INT_ARGB);
+        int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
+        result.setRGB(0, 0, width, height, pixels, 0, width);
+        return result;
+    }
 
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
@@ -95,7 +119,7 @@ public class Bitmap extends TackboardItem {
 
         super(x, y, z);
         this.animation = animation;
-        image = animation.getFrame();
+        image = toBufferedImage(animation.getFrame());
         animation.start(application);
     }
 
@@ -190,7 +214,7 @@ public class Bitmap extends TackboardItem {
      */
     private void render(final int textWidth, final int textHeight) {
         if (animation != null) {
-            BufferedImage newFrame = animation.getFrame();
+            BufferedImage newFrame = toBufferedImage(animation.getFrame());
             if (newFrame != image) {
                 image = newFrame;
                 renderedImage = null;

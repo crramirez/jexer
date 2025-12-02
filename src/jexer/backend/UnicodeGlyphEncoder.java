@@ -257,7 +257,7 @@ public class UnicodeGlyphEncoder {
                 unicode = new UnicodeGlyphImage(toBufferedImage(cell.getImage()));
                 switch (glyphSet) {
                 case BLOCKS:
-                    int rgb = ImageUtils.rgbAverage(toBufferedImage(cell.getImage()));
+                    int rgb = ImageUtils.rgbAverage(cell.getImage());
                     cell.setChar(' ');
                     cell.setForeColorRGB(rgb);
                     cell.setBackColorRGB(rgb);

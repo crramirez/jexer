@@ -315,7 +315,7 @@ public class TImage extends TWidget implements EditMenuUser {
         setCursorVisible(false);
         animation.start(getApplication());
         this.animation = animation;
-        this.originalImage = animation.getFrame();
+        this.originalImage = toBufferedImage(animation.getFrame());
         this.left = left;
         this.top = top;
         this.clickAction = clickAction;
@@ -528,7 +528,7 @@ public class TImage extends TWidget implements EditMenuUser {
     @Override
     public void draw() {
         if (animation != null) {
-            BufferedImage newFrame = animation.getFrame();
+            BufferedImage newFrame = toBufferedImage(animation.getFrame());
             if (newFrame != originalImage) {
                 originalImage = newFrame;
                 image = null;
@@ -596,6 +596,43 @@ public class TImage extends TWidget implements EditMenuUser {
         int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
         result.setRGB(0, 0, width, height, pixels, 0, width);
         return result;
+    }
+
+    /**
+     * Create a BufferedImage using the same color model as another image.
+     * For simplicity, this always creates TYPE_INT_ARGB images.
+     *
+     * @param image the original image (used as a hint but ignored for ARGB)
+     * @param width the width of the new image
+     * @param height the height of the new image
+     * @return the new image
+     */
+    private static BufferedImage createImage(final BufferedImage image,
+        final int width, final int height) {
+
+        // Always use ARGB for simplicity
+        return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    }
+
+    /**
+     * Check if a BufferedImage is fully transparent.
+     *
+     * @param image the image to check
+     * @return true if the image is fully transparent
+     */
+    private static boolean isBufferedImageFullyTransparent(final BufferedImage image) {
+        if (image == null) {
+            return true;
+        }
+        int[] rgbArray = image.getRGB(0, 0, image.getWidth(), image.getHeight(),
+            null, 0, image.getWidth());
+        for (int i = 0; i < rgbArray.length; i++) {
+            int alpha = (rgbArray[i] >>> 24) & 0xFF;
+            if (alpha != 0x00) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -667,7 +704,7 @@ public class TImage extends TWidget implements EditMenuUser {
                     cell.setTo(getWindow().getBackground());
 
                     // Render over a full-cell-size image.
-                    BufferedImage newImage = ImageUtils.createImage(image,
+                    BufferedImage newImage = createImage(image,
                         textWidth, textHeight);
                     Graphics gr = newImage.getGraphics();
                     BufferedImage subImage = image.getSubimage(x * textWidth,
@@ -678,7 +715,7 @@ public class TImage extends TWidget implements EditMenuUser {
                     cell.setImage(toImageRGB(newImage));
                     if (!maybeTransparent) {
                         cell.setOpaqueImage();
-                    } else if (!ImageUtils.isFullyTransparent(newImage)) {
+                    } else if (!isBufferedImageFullyTransparent(newImage)) {
                         cell.flattenImage(false,
                             getApplication().getBackend());
                     } else {
@@ -697,7 +734,7 @@ public class TImage extends TWidget implements EditMenuUser {
                         break;
                     case BLOCKS:
                         if (cell.isImage()) {
-                            int rgb = ImageUtils.rgbAverage(toBufferedImage(cell.getImage()));
+                            int rgb = ImageUtils.rgbAverage(cell.getImage());
                             Cell newCell = new Cell(' ');
                             newCell.setForeColorRGB(rgb);
                             newCell.setBackColorRGB(rgb);
@@ -903,7 +940,7 @@ public class TImage extends TWidget implements EditMenuUser {
             this.animation = null;
         }
         this.animation = animation;
-        originalImage = animation.getFrame();
+        originalImage = toBufferedImage(animation.getFrame());
         image = null;
         sizeToImage(true);
     }
@@ -1060,13 +1097,13 @@ public class TImage extends TWidget implements EditMenuUser {
         case NONE:
             destWidth = (int) (image.getWidth() * factor);
             destHeight = (int) (image.getHeight() * factor);
-            newImage = ImageUtils.createImage(image,
+            newImage = createImage(image,
                 Math.max(1, destWidth), Math.max(1, destHeight));
             break;
         case STRETCH:
             destWidth = Math.max(1, width) * textWidth;
             destHeight = Math.max(1, height) * textHeight;
-            newImage = ImageUtils.createImage(image, destWidth, destHeight);
+            newImage = createImage(image, destWidth, destHeight);
             break;
         case SCALE:
             double a = (double) image.getWidth() / image.getHeight();
@@ -1103,7 +1140,7 @@ public class TImage extends TWidget implements EditMenuUser {
                     "x" + destHeight + ", X offset " + x);
                  */
             }
-            newImage = ImageUtils.createImage(image,
+            newImage = createImage(image,
                 Math.max(1, width) * textWidth,
                 Math.max(1, height) * textHeight);
             break;
@@ -1150,7 +1187,7 @@ public class TImage extends TWidget implements EditMenuUser {
 
         if (clockwise % 4 == 1) {
             // 90 degrees clockwise
-            newImage = ImageUtils.createImage(image,
+            newImage = createImage(image,
                 image.getHeight(), image.getWidth());
             for (int x = 0; x < image.getWidth(); x++) {
                 for (int y = 0; y < image.getHeight(); y++) {
@@ -1160,7 +1197,7 @@ public class TImage extends TWidget implements EditMenuUser {
             }
         } else if (clockwise % 4 == 2) {
             // 180 degrees clockwise
-            newImage = ImageUtils.createImage(image,
+            newImage = createImage(image,
                 image.getWidth(), image.getHeight());
             for (int x = 0; x < image.getWidth(); x++) {
                 for (int y = 0; y < image.getHeight(); y++) {
@@ -1171,7 +1208,7 @@ public class TImage extends TWidget implements EditMenuUser {
             }
         } else if (clockwise % 4 == 3) {
             // 270 degrees clockwise
-            newImage = ImageUtils.createImage(image,
+            newImage = createImage(image,
                 image.getHeight(), image.getWidth());
             for (int x = 0; x < image.getWidth(); x++) {
                 for (int y = 0; y < image.getHeight(); y++) {

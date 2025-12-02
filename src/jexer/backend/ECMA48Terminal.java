@@ -1401,6 +1401,21 @@ public class ECMA48Terminal extends LogicalScreen
     }
 
     /**
+     * Create a BufferedImage with specified dimensions.
+     * Always creates TYPE_INT_ARGB images.
+     *
+     * @param image the original image (ignored, for API compatibility)
+     * @param width the width of the new image
+     * @param height the height of the new image
+     * @return the new image
+     */
+    private static BufferedImage createImage(final BufferedImage image,
+        final int width, final int height) {
+
+        return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    }
+
+    /**
      * Get the bytes per second from the last second.
      *
      * @return the bytes per second
@@ -3806,7 +3821,7 @@ public class ECMA48Terminal extends LogicalScreen
 
         // The final image will be 1000 x 1000 or less.
         BufferedImage cellsImage = cellsToImage(cells);
-        BufferedImage fullImage = ImageUtils.createImage(cellsImage,
+        BufferedImage fullImage = createImage(cellsImage,
             maxPixelX, maxPixelY);
         Graphics gr = fullImage.getGraphics();
         gr.drawImage(cellsImage, pixelX, pixelY, null);
@@ -3850,7 +3865,7 @@ public class ECMA48Terminal extends LogicalScreen
             totalWidth += cells.get(i).getImage().getWidth();
         }
 
-        BufferedImage image = ImageUtils.createImage(toBufferedImage(cells.get(0).getImage()),
+        BufferedImage image = createImage(toBufferedImage(cells.get(0).getImage()),
             fullWidth, fullHeight);
 
         int [] rgbArray;
@@ -3957,7 +3972,7 @@ public class ECMA48Terminal extends LogicalScreen
         ) {
             // Rescale the image to fit the text cells it is going into.
             BufferedImage newImage;
-            newImage = ImageUtils.createImage(image,
+            newImage = createImage(image,
                 cells.size() * getTextWidth(), getTextHeight());
 
             Graphics gr = newImage.getGraphics();

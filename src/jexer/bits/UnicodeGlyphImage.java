@@ -648,6 +648,87 @@ public class UnicodeGlyphImage {
     }
 
     /**
+     * Compute the average RGB value of a BufferedImage.
+     *
+     * @param image the image to check
+     * @return the average color
+     */
+    private static int rgbAverage(final BufferedImage image) {
+        if (image == null) {
+            return 0xFF000000;
+        }
+        int[] rgbArray = image.getRGB(0, 0, image.getWidth(), image.getHeight(),
+            null, 0, image.getWidth());
+        if (rgbArray.length == 0) {
+            return 0xFF000000;
+        }
+        long totalRed = 0;
+        long totalGreen = 0;
+        long totalBlue = 0;
+        for (int i = 0; i < rgbArray.length; i++) {
+            int argb = rgbArray[i];
+            int red   = (argb >>> 16) & 0xFF;
+            int green = (argb >>>  8) & 0xFF;
+            int blue  =  argb         & 0xFF;
+            totalRed   += red;
+            totalGreen += green;
+            totalBlue  += blue;
+        }
+        totalRed   = totalRed   / rgbArray.length;
+        totalGreen = totalGreen / rgbArray.length;
+        totalBlue  = totalBlue  / rgbArray.length;
+        return (int) ((0xFF << 24) | (totalRed << 16) | (totalGreen << 8) | totalBlue);
+    }
+
+    /**
+     * Report the absolute distance in RGB space between two RGB colors.
+     *
+     * @param first the first color
+     * @param second the second color
+     * @return the distance
+     */
+    private static int rgbDistance(final int first, final int second) {
+        int red   = (first >>> 16) & 0xFF;
+        int green = (first >>>  8) & 0xFF;
+        int blue  =  first         & 0xFF;
+        int red2   = (second >>> 16) & 0xFF;
+        int green2 = (second >>>  8) & 0xFF;
+        int blue2  =  second         & 0xFF;
+        double diff = Math.pow(red2 - red, 2);
+        diff += Math.pow(green2 - green, 2);
+        diff += Math.pow(blue2 - blue, 2);
+        return (int) Math.sqrt(diff);
+    }
+
+    /**
+     * Compute the standard deviation of RGB values of two BufferedImages.
+     *
+     * @param image the image to check
+     * @param averageImage the image's "average" pixel values
+     * @return the standard deviation
+     */
+    private static double rgbStdDev(final BufferedImage image,
+        final BufferedImage averageImage) {
+
+        if (image == null || averageImage == null) {
+            return 0.0;
+        }
+        int[] imageRgbArray = image.getRGB(0, 0, image.getWidth(), image.getHeight(),
+            null, 0, image.getWidth());
+        int[] averageImageRgbArray = averageImage.getRGB(0, 0, image.getWidth(),
+            image.getHeight(), null, 0, image.getWidth());
+
+        double variance = 0.0;
+        for (int i = 0; i < imageRgbArray.length; i++) {
+            int rgb1 = imageRgbArray[i];
+            int rgb2 = averageImageRgbArray[i];
+            double distance = rgbDistance(rgb1, rgb2);
+            variance += distance;
+        }
+        return (variance / (double) imageRgbArray.length);
+    }
+
+    /**
      * Get the index used to map half blocks and quadrants.
      *
      * @param data the image data as a sequence of 0's and 1's
@@ -977,9 +1058,9 @@ public class UnicodeGlyphImage {
             int ch = 0x258c;
 
             // Left half.
-            int foreColorRGB = ImageUtils.rgbAverage(image.
+            int foreColorRGB = rgbAverage(image.
                 getSubimage(0, 0, width / 2, height));
-            int backColorRGB = ImageUtils.rgbAverage(image.
+            int backColorRGB = rgbAverage(image.
                 getSubimage(width / 2, 0, width / 2, height));
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width / 2; x++) {
@@ -989,12 +1070,12 @@ public class UnicodeGlyphImage {
                     averageImage.setRGB(x, y, backColorRGB);
                 }
             }
-            rgbStdDev = ImageUtils.rgbStdDev(image, averageImage);
+            rgbStdDev = rgbStdDev(image, averageImage);
 
             // Top half
-            int newForeColorRGB = ImageUtils.rgbAverage(image.
+            int newForeColorRGB = rgbAverage(image.
                 getSubimage(0, 0, width, height / 2));
-            int newBackColorRGB = ImageUtils.rgbAverage(image.
+            int newBackColorRGB = rgbAverage(image.
                 getSubimage(0, height / 2, width, height / 2));
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height / 2; y++) {
@@ -1004,7 +1085,7 @@ public class UnicodeGlyphImage {
                     averageImage.setRGB(x, y, newBackColorRGB);
                 }
             }
-            double newRgbStdDev = ImageUtils.rgbStdDev(image, averageImage);
+            double newRgbStdDev = rgbStdDev(image, averageImage);
             if (newRgbStdDev < rgbStdDev) {
                 ch = 0x2580;
                 foreColorRGB = newForeColorRGB;
@@ -1012,13 +1093,13 @@ public class UnicodeGlyphImage {
             }
 
             // Full block
-            int newColorRGB = ImageUtils.rgbAverage(image);
+            int newColorRGB = rgbAverage(image);
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
                     averageImage.setRGB(x, y, newColorRGB);
                 }
             }
-            newRgbStdDev = ImageUtils.rgbStdDev(image, averageImage);
+            newRgbStdDev = rgbStdDev(image, averageImage);
             if (newRgbStdDev < rgbStdDev) {
                 ch = 0x2588;
                 foreColorRGB = newColorRGB;
