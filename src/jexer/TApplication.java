@@ -743,13 +743,13 @@ public class TApplication implements Runnable {
             if (windowWidth > 0 && windowHeight > 0 && fontSize > 0) {
                 // Use constructor with dimensions
                 return (Backend) swingBackendClass
-                    .getConstructor(TApplication.class, int.class, int.class, int.class)
-                    .newInstance(app, windowWidth, windowHeight, fontSize);
+                    .getConstructor(int.class, int.class, int.class)
+                    .newInstance(windowWidth, windowHeight, fontSize);
             } else {
                 // Use default constructor
                 return (Backend) swingBackendClass
-                    .getConstructor(TApplication.class)
-                    .newInstance(app);
+                    .getConstructor()
+                    .newInstance();
             }
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException(

@@ -156,9 +156,9 @@
               </excludes>
               <archive>
                 <manifest>
-            <mainClass>
-                demo.DemoCore
-              </mainClass>
+                  <mainClass>
+                    demo.DemoCore
+                  </mainClass>
                 </manifest>
                 <manifestEntries>
                   <Implementation-Version>${project.version}</Implementation-Version>
@@ -226,9 +226,14 @@
                 <include>**/backend/LegacySixelEncoder$*.class</include>
                 <include>**/backend/UnicodeGlyphEncoder.class</include>
                 <include>**/backend/UnicodeGlyphEncoder$*.class</include>
+                <include>demo/Demo5.class</include>
+                <include>demo/DemoPixelsWindow.class</include>
               </includes>
               <archive>
                 <manifest>
+                    <mainClass>
+                        demo.Demo1
+                    </mainClass>
                 </manifest>
                 <manifestEntries>
                   <Implementation-Version>${project.version}</Implementation-Version>
@@ -257,6 +262,9 @@
               </includes>
               <archive>
                 <manifest>
+                    <mainClass>
+                        demo.Demo1
+                    </mainClass>
                 </manifest>
                 <manifestEntries>
                   <Implementation-Version>${project.version}</Implementation-Version>
