@@ -78,7 +78,6 @@ public class Tackboard {
     static {
         try {
             Class.forName("java.awt.image.BufferedImage");
-            awtAvailable = true;
         } catch (ClassNotFoundException e) {
             awtAvailable = false;
         }

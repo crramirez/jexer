@@ -230,7 +230,6 @@ public class TImage extends TWidget implements EditMenuUser {
     static {
         try {
             Class.forName("java.awt.image.BufferedImage");
-            awtAvailable = true;
         } catch (ClassNotFoundException e) {
             awtAvailable = false;
         }
