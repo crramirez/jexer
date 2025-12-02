@@ -28,12 +28,11 @@
  */
 package jexer;
 
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import jexer.backend.ECMA48Terminal;
@@ -329,38 +328,39 @@ public class TTextPicture extends TScrollable implements DisplayListener {
     // ------------------------------------------------------------------------
 
     /**
-     * Convert ImageRGB to BufferedImage.
-     *
-     * @param imageRGB the ImageRGB to convert
-     * @return the BufferedImage
+     * The TTerminalHelper class for image operations, loaded via reflection.
      */
-    private static BufferedImage toBufferedImage(final ImageRGB imageRGB) {
-        if (imageRGB == null) {
-            return null;
-        }
-        int width = imageRGB.getWidth();
-        int height = imageRGB.getHeight();
-        BufferedImage result = new BufferedImage(width, height,
-            BufferedImage.TYPE_INT_ARGB);
-        int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
-        result.setRGB(0, 0, width, height, pixels, 0, width);
-        return result;
-    }
+    private static Class<?> terminalHelperClass = null;
+    
+    /**
+     * The splitDoubleWidthImage method from TTerminalHelper.
+     */
+    private static Method splitDoubleWidthImageMethod = null;
+    
+    /**
+     * Whether we have tried to load the helper class.
+     */
+    private static boolean helperClassLoaded = false;
 
     /**
-     * Convert BufferedImage to ImageRGB.
-     *
-     * @param bufferedImage the BufferedImage to convert
-     * @return the ImageRGB
+     * Load the TTerminalHelper class via reflection.
      */
-    private static ImageRGB toImageRGB(final BufferedImage bufferedImage) {
-        if (bufferedImage == null) {
-            return null;
+    private static void loadTerminalHelper() {
+        if (helperClassLoaded) {
+            return;
         }
-        int width = bufferedImage.getWidth();
-        int height = bufferedImage.getHeight();
-        int[] pixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
-        return new ImageRGB(width, height, pixels);
+        helperClassLoaded = true;
+        try {
+            terminalHelperClass = Class.forName("jexer.backend.TTerminalHelper");
+            splitDoubleWidthImageMethod = terminalHelperClass.getMethod(
+                "splitDoubleWidthImage", ImageRGB.class, int.class, int.class, int.class);
+        } catch (ClassNotFoundException e) {
+            // java-desktop JAR not available, that's OK
+            terminalHelperClass = null;
+        } catch (NoSuchMethodException e) {
+            // Method not found, shouldn't happen
+            terminalHelperClass = null;
+        }
     }
 
     /**
@@ -451,6 +451,15 @@ public class TTextPicture extends TScrollable implements DisplayListener {
     private void putDoubleWidthCharXY(final DisplayLine line, final int x,
         final int y, final Cell cell) {
 
+        // Load helper if needed
+        loadTerminalHelper();
+        if (splitDoubleWidthImageMethod == null) {
+            // java-desktop JAR not available, fall back to regular character
+            putCharXY(x, y, cell);
+            putCharXY(x + 1, y, ' ', cell);
+            return;
+        }
+
         int textWidth = getScreen().getTextWidth();
         int textHeight = getScreen().getTextHeight();
         boolean cursorBlinkVisible = true;
@@ -486,7 +495,12 @@ public class TTextPicture extends TScrollable implements DisplayListener {
             lastTextWidth = textWidth;
             lastTextHeight = textHeight;
         }
-        assert (doubleFont != null);
+        if (doubleFont == null) {
+            // GlyphMaker not available, fall back to regular character
+            putCharXY(x, y, cell);
+            putCharXY(x + 1, y, ' ', cell);
+            return;
+        }
 
         ImageRGB imageRGB;
         if (line.getDoubleHeight() == 1) {
@@ -500,55 +514,47 @@ public class TTextPicture extends TScrollable implements DisplayListener {
                 getApplication().getBackend(), cursorBlinkVisible);
         }
         
-        // Convert to BufferedImage for Graphics operations
-        BufferedImage image = toBufferedImage(imageRGB);
-
-        // Now that we have the double-wide glyph drawn, copy the right
-        // pieces of it to the cells.
-        Cell left = new Cell(cell);
-        Cell right = new Cell(cell);
-        right.setChar(' ');
-        BufferedImage leftImage = null;
-        BufferedImage rightImage = null;
-        /*
-        System.err.println("image " + image + " textWidth " + textWidth +
-            " textHeight " + textHeight);
-         */
-
-        switch (line.getDoubleHeight()) {
-        case 1:
-            // Top half double height
-            leftImage = image.getSubimage(0, 0, textWidth, textHeight);
-            rightImage = image.getSubimage(textWidth, 0, textWidth, textHeight);
-            break;
-        case 2:
-            // Bottom half double height
-            leftImage = image.getSubimage(0, textHeight, textWidth, textHeight);
-            rightImage = image.getSubimage(textWidth, textHeight,
-                textWidth, textHeight);
-            break;
-        default:
-            // Either single height double-width, or error fallback
-            BufferedImage wideImage = new BufferedImage(textWidth * 2,
-                textHeight, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D grWide = wideImage.createGraphics();
-            grWide.drawImage(image, 0, 0, wideImage.getWidth(),
-                wideImage.getHeight(), null);
-            grWide.dispose();
-            leftImage = wideImage.getSubimage(0, 0, textWidth, textHeight);
-            rightImage = wideImage.getSubimage(textWidth, 0, textWidth,
-                textHeight);
-            break;
+        if (imageRGB == null) {
+            // Image not available, fall back to regular character
+            putCharXY(x, y, cell);
+            putCharXY(x + 1, y, ' ', cell);
+            return;
         }
-        left.setImage(toImageRGB(leftImage));
-        right.setImage(toImageRGB(rightImage));
-        // Since we have image data, ditch the character here.  Otherwise, a
-        // drawBoxShadow() over the terminal window will show the characters
-        // which looks wrong.
-        left.setChar(' ');
-        right.setChar(' ');
-        putCharXY(x, y, left);
-        putCharXY(x + 1, y, right);
+
+        // Use reflection to split the image
+        try {
+            ImageRGB[] splitImages = (ImageRGB[]) splitDoubleWidthImageMethod.invoke(
+                null, imageRGB, textWidth, textHeight, line.getDoubleHeight());
+            
+            ImageRGB leftImageRGB = splitImages[0];
+            ImageRGB rightImageRGB = splitImages[1];
+
+            if (leftImageRGB == null || rightImageRGB == null) {
+                // Fall back to regular character
+                putCharXY(x, y, cell);
+                putCharXY(x + 1, y, ' ', cell);
+                return;
+            }
+
+            // Now that we have the double-wide glyph drawn, copy the right
+            // pieces of it to the cells.
+            Cell left = new Cell(cell);
+            Cell right = new Cell(cell);
+
+            // Since we have image data, ditch the character here.  Otherwise, a
+            // drawBoxShadow() over the terminal window will show the characters
+            // which looks wrong.
+            left.setChar(' ');
+            right.setChar(' ');
+            left.setImage(leftImageRGB);
+            right.setImage(rightImageRGB);
+            putCharXY(x, y, left);
+            putCharXY(x + 1, y, right);
+        } catch (Exception e) {
+            // Reflection failed, fall back to regular character
+            putCharXY(x, y, cell);
+            putCharXY(x + 1, y, ' ', cell);
+        }
     }
 
     /**

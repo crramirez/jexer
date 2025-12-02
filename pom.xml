@@ -173,6 +173,12 @@
                 <include>**/backend/TImageHelper$*.class</include>
                 <include>**/backend/TackboardHelper.class</include>
                 <include>**/backend/TackboardHelper$*.class</include>
+                <include>**/backend/TTerminalHelper.class</include>
+                <include>**/backend/TTerminalHelper$*.class</include>
+                <include>**/backend/TImageImpl.class</include>
+                <include>**/backend/TImageImpl$*.class</include>
+                <include>**/backend/TTextPictureImpl.class</include>
+                <include>**/backend/TTextPictureImpl$*.class</include>
               </includes>
               <archive>
                 <manifest>
