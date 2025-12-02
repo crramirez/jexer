@@ -121,6 +121,8 @@
                 <exclude>**/backend/ColorEmojiGlyphMakerImpl$*.class</exclude>
                 <exclude>**/backend/FontHelper.class</exclude>
                 <exclude>**/backend/FontHelper$*.class</exclude>
+                <exclude>**/backend/TImageHelper.class</exclude>
+                <exclude>**/backend/TImageHelper$*.class</exclude>
               </excludes>
               <archive>
                 <manifest>
@@ -165,6 +167,8 @@
                 <include>**/backend/ColorEmojiGlyphMakerImpl$*.class</include>
                 <include>**/backend/FontHelper.class</include>
                 <include>**/backend/FontHelper$*.class</include>
+                <include>**/backend/TImageHelper.class</include>
+                <include>**/backend/TImageHelper$*.class</include>
               </includes>
               <archive>
                 <manifest>

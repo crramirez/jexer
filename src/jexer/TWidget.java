@@ -28,7 +28,6 @@
  */
 package jexer;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -3039,42 +3038,54 @@ public abstract class TWidget implements Comparable<TWidget> {
 
     /**
      * Convenience function to add an image to this container/window.
+     * This method accepts a BufferedImage (as Object) for backwards
+     * compatibility.  New code should use the ImageRGB overload.
      *
      * @param x column relative to parent
      * @param y row relative to parent
      * @param width number of text cells for width of the image
      * @param height number of text cells for height of the image
-     * @param image the image to display
+     * @param image the image to display (BufferedImage)
      * @param left left column of the image.  0 is the left-most column.
      * @param top top row of the image.  0 is the top-most row.
      * @return the new image
      */
     public final TImage addImage(final int x, final int y,
-        final int width, final int height, final BufferedImage image,
+        final int width, final int height, final Object image,
         final int left, final int top) {
 
-        return new TImage(this, x, y, width, height, image, left, top);
+        ImageRGB imageRGB = convertToImageRGB(image);
+        if (imageRGB != null) {
+            return new TImage(this, x, y, width, height, imageRGB, left, top);
+        }
+        return null;
     }
 
     /**
      * Convenience function to add an image to this container/window.
+     * This method accepts a BufferedImage (as Object) for backwards
+     * compatibility.  New code should use the ImageRGB overload.
      *
      * @param x column relative to parent
      * @param y row relative to parent
      * @param width number of text cells for width of the image
      * @param height number of text cells for height of the image
-     * @param image the image to display
+     * @param image the image to display (BufferedImage)
      * @param left left column of the image.  0 is the left-most column.
      * @param top top row of the image.  0 is the top-most row.
      * @param clickAction function to call when mouse is pressed
      * @return the new image
      */
     public final TImage addImage(final int x, final int y,
-        final int width, final int height, final BufferedImage image,
+        final int width, final int height, final Object image,
         final int left, final int top, final TAction clickAction) {
 
-        return new TImage(this, x, y, width, height, image, left, top,
-            clickAction);
+        ImageRGB imageRGB = convertToImageRGB(image);
+        if (imageRGB != null) {
+            return new TImage(this, x, y, width, height, imageRGB, left, top,
+                clickAction);
+        }
+        return null;
     }
 
     /**
@@ -3181,6 +3192,65 @@ public abstract class TWidget implements Comparable<TWidget> {
         final int width, final int height, final boolean vertical) {
 
         return new TSplitPane(this, x, y, width, height, vertical);
+    }
+
+    // ------------------------------------------------------------------------
+    // Image conversion helpers -----------------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * TImageHelper class reference, loaded via reflection.
+     */
+    private static Class<?> imageHelperClass;
+
+    /**
+     * Whether TImageHelper is available.
+     */
+    private static boolean imageHelperAvailable = true;
+
+    static {
+        try {
+            imageHelperClass = Class.forName("jexer.backend.TImageHelper");
+        } catch (ClassNotFoundException e) {
+            imageHelperAvailable = false;
+        }
+    }
+
+    /**
+     * Convert a BufferedImage (as Object) to ImageRGB via reflection.
+     *
+     * @param image the BufferedImage object
+     * @return the ImageRGB, or null if conversion fails
+     */
+    private static ImageRGB convertToImageRGB(final Object image) {
+        if (image == null) {
+            return null;
+        }
+        if (image instanceof ImageRGB) {
+            return (ImageRGB) image;
+        }
+        if (!imageHelperAvailable) {
+            return null;
+        }
+        try {
+            return (ImageRGB) imageHelperClass.getMethod("toImageRGB",
+                image.getClass()).invoke(null, image);
+        } catch (Exception e) {
+            // Try with Object parameter
+            try {
+                // Get the method that accepts BufferedImage
+                java.lang.reflect.Method[] methods = imageHelperClass.getMethods();
+                for (java.lang.reflect.Method method : methods) {
+                    if (method.getName().equals("toImageRGB")
+                        && method.getParameterCount() == 1) {
+                        return (ImageRGB) method.invoke(null, image);
+                    }
+                }
+            } catch (Exception e2) {
+                // Ignore
+            }
+            return null;
+        }
     }
 
 }

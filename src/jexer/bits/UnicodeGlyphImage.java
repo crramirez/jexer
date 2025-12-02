@@ -28,7 +28,6 @@
  */
 package jexer.bits;
 
-import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -361,9 +360,9 @@ public class UnicodeGlyphImage {
         /**
          * Public constructor.
          *
-         * @param image a bitmap image
+         * @param image a bitmap image (ImageRGB)
          */
-        public Palette(final BufferedImage image) {
+        public Palette(final ImageRGB image) {
 
             assert (image.getWidth() > 0);
             assert (image.getHeight() > 0);
@@ -565,7 +564,7 @@ public class UnicodeGlyphImage {
     /**
      * The bitmap image this glyph is supposed to represent.
      */
-    private BufferedImage image = null;
+    private ImageRGB image = null;
 
     /**
      * The reduced palette for the bitmap image.
@@ -591,11 +590,11 @@ public class UnicodeGlyphImage {
         if (!cell.isImage()) {
             throw new IllegalArgumentException("cell does not have an image");
         }
-        this.image = toBufferedImage(cell.getImage());
+        this.image = cell.getImage();
 
         palette = new Palette(image);
 
-        // Dither the image.  We don't bother wrapping it in a BufferedImage.
+        // Dither the image.
         rgbArray = palette.ditherImage();
 
         /*
@@ -610,11 +609,11 @@ public class UnicodeGlyphImage {
      *
      * @param image the bitmap image
      */
-    public UnicodeGlyphImage(final BufferedImage image) {
+    public UnicodeGlyphImage(final ImageRGB image) {
         this.image = image;
         palette = new Palette(image);
 
-        // Dither the image.  We don't bother wrapping it in a BufferedImage.
+        // Dither the image.
         rgbArray = palette.ditherImage();
 
         /*
@@ -629,31 +628,12 @@ public class UnicodeGlyphImage {
     // ------------------------------------------------------------------------
 
     /**
-     * Convert ImageRGB to BufferedImage.
-     *
-     * @param imageRGB the ImageRGB to convert
-     * @return the BufferedImage
-     */
-    private static BufferedImage toBufferedImage(final ImageRGB imageRGB) {
-        if (imageRGB == null) {
-            return null;
-        }
-        int width = imageRGB.getWidth();
-        int height = imageRGB.getHeight();
-        BufferedImage result = new BufferedImage(width, height,
-            BufferedImage.TYPE_INT_ARGB);
-        int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
-        result.setRGB(0, 0, width, height, pixels, 0, width);
-        return result;
-    }
-
-    /**
-     * Compute the average RGB value of a BufferedImage.
+     * Compute the average RGB value of an ImageRGB.
      *
      * @param image the image to check
      * @return the average color
      */
-    private static int rgbAverage(final BufferedImage image) {
+    private static int rgbAverage(final ImageRGB image) {
         if (image == null) {
             return 0xFF000000;
         }
@@ -701,14 +681,14 @@ public class UnicodeGlyphImage {
     }
 
     /**
-     * Compute the standard deviation of RGB values of two BufferedImages.
+     * Compute the standard deviation of RGB values of two ImageRGBs.
      *
      * @param image the image to check
      * @param averageImage the image's "average" pixel values
      * @return the standard deviation
      */
-    private static double rgbStdDev(final BufferedImage image,
-        final BufferedImage averageImage) {
+    private static double rgbStdDev(final ImageRGB image,
+        final ImageRGB averageImage) {
 
         if (image == null || averageImage == null) {
             return 0.0;
@@ -1052,9 +1032,9 @@ public class UnicodeGlyphImage {
              */
             int width = image.getWidth();
             int height = image.getHeight();
-            BufferedImage averageImage = new BufferedImage(width, height,
-                BufferedImage.TYPE_INT_ARGB);
-            double rgbStdDev = 0.0;
+            int[] averagePixels = new int[width * height];
+            ImageRGB averageImage = new ImageRGB(width, height, averagePixels);
+            double localRgbStdDev = 0.0;
             int ch = 0x258c;
 
             // Left half.
@@ -1064,13 +1044,13 @@ public class UnicodeGlyphImage {
                 getSubimage(width / 2, 0, width / 2, height));
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width / 2; x++) {
-                    averageImage.setRGB(x, y, foreColorRGB);
+                    averagePixels[x + y * width] = foreColorRGB;
                 }
                 for (int x = width / 2; x < width; x++) {
-                    averageImage.setRGB(x, y, backColorRGB);
+                    averagePixels[x + y * width] = backColorRGB;
                 }
             }
-            rgbStdDev = rgbStdDev(image, averageImage);
+            localRgbStdDev = rgbStdDev(image, averageImage);
 
             // Top half
             int newForeColorRGB = rgbAverage(image.
@@ -1079,14 +1059,14 @@ public class UnicodeGlyphImage {
                 getSubimage(0, height / 2, width, height / 2));
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height / 2; y++) {
-                    averageImage.setRGB(x, y, newForeColorRGB);
+                    averagePixels[x + y * width] = newForeColorRGB;
                 }
                 for (int y = height / 2; y < height; y++) {
-                    averageImage.setRGB(x, y, newBackColorRGB);
+                    averagePixels[x + y * width] = newBackColorRGB;
                 }
             }
             double newRgbStdDev = rgbStdDev(image, averageImage);
-            if (newRgbStdDev < rgbStdDev) {
+            if (newRgbStdDev < localRgbStdDev) {
                 ch = 0x2580;
                 foreColorRGB = newForeColorRGB;
                 backColorRGB = newBackColorRGB;
@@ -1096,11 +1076,11 @@ public class UnicodeGlyphImage {
             int newColorRGB = rgbAverage(image);
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    averageImage.setRGB(x, y, newColorRGB);
+                    averagePixels[x + y * width] = newColorRGB;
                 }
             }
             newRgbStdDev = rgbStdDev(image, averageImage);
-            if (newRgbStdDev < rgbStdDev) {
+            if (newRgbStdDev < localRgbStdDev) {
                 ch = 0x2588;
                 foreColorRGB = newColorRGB;
                 backColorRGB = newColorRGB;

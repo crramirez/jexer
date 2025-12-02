@@ -254,7 +254,7 @@ public class UnicodeGlyphEncoder {
             for (int x = 0; x < cellColumns; x++) {
                 Cell cell = cells[x][y];
                 UnicodeGlyphImage unicode = null;
-                unicode = new UnicodeGlyphImage(toBufferedImage(cell.getImage()));
+                unicode = new UnicodeGlyphImage(cell.getImage());
                 switch (glyphSet) {
                 case BLOCKS:
                     int rgb = ImageUtils.rgbAverage(cell.getImage());
