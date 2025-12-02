@@ -636,7 +636,7 @@ public class ImageUtilsImpl {
      *
      * @param image the image to check
      * @param averageImage the image's "average" pixel values
-     * @return the average color
+     * @return the standard deviation
      * @throws IllegalArgumentException if the two images are of different
      * dimensions
      */
