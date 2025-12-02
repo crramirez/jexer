@@ -28,8 +28,6 @@
  */
 package jexer.bits;
 
-import java.awt.image.BufferedImage;
-
 /**
  * Clipboard provides convenience methods to copy text and images to and from
  * a shared clipboard. This base class provides a local-only clipboard
@@ -46,7 +44,7 @@ public class Clipboard {
     /**
      * The image last copied to the clipboard.
      */
-    private BufferedImage image = null;
+    private ImageRGB image = null;
 
     /**
      * The text string last copied to the clipboard.
@@ -121,7 +119,7 @@ public class Clipboard {
      *
      * @param image image to copy
      */
-    public void copyImage(final BufferedImage image) {
+    public void copyImage(final ImageRGB image) {
         this.image = image;
     }
 
@@ -139,7 +137,7 @@ public class Clipboard {
      *
      * @return image from the clipboard, or null if no image is available
      */
-    public BufferedImage pasteImage() {
+    public ImageRGB pasteImage() {
         return image;
     }
 
@@ -198,7 +196,7 @@ public class Clipboard {
      *
      * @return the local image
      */
-    protected BufferedImage getLocalImage() {
+    protected ImageRGB getLocalImage() {
         return image;
     }
 
@@ -207,7 +205,7 @@ public class Clipboard {
      *
      * @param image the image to set
      */
-    protected void setLocalImage(final BufferedImage image) {
+    protected void setLocalImage(final ImageRGB image) {
         this.image = image;
     }
 

@@ -261,6 +261,36 @@ public class ImageUtilsImpl {
     }
 
     /**
+     * Read an image from a file.
+     *
+     * @param file the file to read
+     * @return the image, or null on error
+     */
+    public static ImageRGB readImage(final File file) {
+        try {
+            BufferedImage image = ImageIO.read(file);
+            return toImageRGB(image);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Read an image from an input stream.
+     *
+     * @param inputStream the input stream to read
+     * @return the image, or null on error
+     */
+    public static ImageRGB readImage(final InputStream inputStream) {
+        try {
+            BufferedImage image = ImageIO.read(inputStream);
+            return toImageRGB(image);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    /**
      * Open an image as an Animation.
      *
      * @param filename the name of the file that contains an animation

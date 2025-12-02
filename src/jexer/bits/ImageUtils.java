@@ -188,6 +188,42 @@ public class ImageUtils {
     }
 
     /**
+     * Read an image from a file.
+     *
+     * @param file the file to read
+     * @return the image, or null on error or if java.desktop is not available
+     */
+    public static ImageRGB readImage(final File file) {
+        if (!isImplAvailable()) {
+            return null;
+        }
+        try {
+            Method method = implClass.getMethod("readImage", File.class);
+            return (ImageRGB) method.invoke(null, file);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Read an image from an input stream.
+     *
+     * @param inputStream the input stream to read
+     * @return the image, or null on error or if java.desktop is not available
+     */
+    public static ImageRGB readImage(final InputStream inputStream) {
+        if (!isImplAvailable()) {
+            return null;
+        }
+        try {
+            Method method = implClass.getMethod("readImage", InputStream.class);
+            return (ImageRGB) method.invoke(null, inputStream);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
      * Open an image as an Animation.
      *
      * @param filename the name of the file that contains an animation

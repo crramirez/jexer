@@ -38,6 +38,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import jexer.bits.Clipboard;
+import jexer.bits.ImageRGB;
 
 /**
  * ClipboardImpl provides AWT-based clipboard access that integrates with
@@ -54,6 +55,41 @@ public class ClipboardImpl extends Clipboard {
      * The system clipboard, or null if it is not available.
      */
     private java.awt.datatransfer.Clipboard systemClipboard = null;
+
+    /**
+     * Convert ImageRGB to BufferedImage.
+     *
+     * @param imageRGB the ImageRGB to convert
+     * @return the BufferedImage
+     */
+    private static BufferedImage toBufferedImage(final ImageRGB imageRGB) {
+        if (imageRGB == null) {
+            return null;
+        }
+        BufferedImage image = new BufferedImage(imageRGB.getWidth(),
+            imageRGB.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        int[] pixels = imageRGB.getPixels();
+        image.setRGB(0, 0, imageRGB.getWidth(), imageRGB.getHeight(),
+            pixels, 0, imageRGB.getWidth());
+        return image;
+    }
+
+    /**
+     * Convert BufferedImage to ImageRGB.
+     *
+     * @param image the BufferedImage to convert
+     * @return the ImageRGB
+     */
+    private static ImageRGB toImageRGB(final BufferedImage image) {
+        if (image == null) {
+            return null;
+        }
+        int width = image.getWidth();
+        int height = image.getHeight();
+        int[] pixels = new int[width * height];
+        image.getRGB(0, 0, width, height, pixels, 0, width);
+        return new ImageRGB(width, height, pixels);
+    }
 
     /**
      * ImageSelection is used to hold an image while on the clipboard.
@@ -102,7 +138,7 @@ public class ClipboardImpl extends Clipboard {
             if (!DataFlavor.imageFlavor.equals(flavor)) {
                 throw new UnsupportedFlavorException(flavor);
             }
-            return getLocalImage();
+            return toBufferedImage(getLocalImage());
         }
     }
 
@@ -131,7 +167,7 @@ public class ClipboardImpl extends Clipboard {
      * @param image image to copy
      */
     @Override
-    public void copyImage(final BufferedImage image) {
+    public void copyImage(final ImageRGB image) {
         super.copyImage(image);
         if (systemClipboard != null) {
             ImageSelection imageSelection = new ImageSelection();
@@ -159,7 +195,7 @@ public class ClipboardImpl extends Clipboard {
      * @return image from the clipboard, or null if no image is available
      */
     @Override
-    public BufferedImage pasteImage() {
+    public ImageRGB pasteImage() {
         if (systemClipboard != null) {
             getClipboardImage();
         }
@@ -221,7 +257,7 @@ public class ClipboardImpl extends Clipboard {
                         java.awt.Graphics gr = image.getGraphics();
                         gr.drawImage(img, 0, 0, null);
                         gr.dispose();
-                        setLocalImage(image);
+                        setLocalImage(toImageRGB(image));
                     } catch (IOException e) {
                         // SQUASH
                     } catch (UnsupportedFlavorException e) {
