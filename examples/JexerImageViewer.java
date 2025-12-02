@@ -125,7 +125,7 @@ class ImageViewerDesktop extends TDesktop {
                     } catch (IOException e) {
                         // If the backend is Swing, we can emit the stack
                         // trace to stderr.  Otherwise, just squash it.
-                        if (getScreen() instanceof SwingTerminal) {
+                        if (TApplication.isSwingTerminal(getScreen())) {
                             e.printStackTrace();
                         }
                     }
@@ -241,7 +241,7 @@ class ImageViewerDesktop extends TDesktop {
                 } catch (IOException e) {
                     // If the backend is Swing, we can emit the stack trace
                     // to stderr.  Otherwise, just squash it.
-                    if (getScreen() instanceof SwingTerminal) {
+                    if (TApplication.isSwingTerminal(getScreen())) {
                         e.printStackTrace();
                     }
                 }
@@ -290,7 +290,7 @@ class ImageViewerDesktop extends TDesktop {
         } catch (IOException e) {
             // If the backend is Swing, we can emit the stack trace to
             // stderr.  Otherwise, just squash it.
-            if (getScreen() instanceof SwingTerminal) {
+            if (TApplication.isSwingTerminal(getScreen())) {
                 e.printStackTrace();
             }
             return;

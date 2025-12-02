@@ -234,12 +234,16 @@ public class ECMA48Terminal extends LogicalScreen
      * Static initialization block to check for AWT availability.
      */
     static {
-        try {
-            Class.forName("java.awt.image.BufferedImage");
-            Class.forName("jexer.backend.HQSixelEncoder");
-            awtAvailable = true;
-        } catch (ClassNotFoundException e) {
+        if (System.getProperty("org.graalvm.nativeimage.imagecode") != null) {
             awtAvailable = false;
+        } else {
+            try {
+                Class.forName("java.awt.image.BufferedImage");
+                Class.forName("jexer.backend.HQSixelEncoder");
+                awtAvailable = true;
+            } catch (Throwable e) {
+                awtAvailable = false;
+            }
         }
     }
 
@@ -4069,7 +4073,7 @@ public class ECMA48Terminal extends LogicalScreen
      */
     private String emitSixelOnBottomRowHelper(final ArrayList<Cell> cells,
         final int pixelX, final int pixelY, final int maxPixelX, final int maxPixelY) {
-        
+
         if (!awtAvailable || sixelEncoder == null) {
             return "";
         }
@@ -4204,7 +4208,7 @@ public class ECMA48Terminal extends LogicalScreen
         // Get image dimensions and encode to PNG using reflection
         try {
             Class<?> helperClass = Class.forName("jexer.backend.ECMA48TerminalHelper");
-            
+
             // Get image dimensions
             Method getDimsMethod = helperClass.getMethod("getImageDimensions", Object.class);
             int[] dims = (int[]) getDimsMethod.invoke(null, image);
@@ -4315,7 +4319,7 @@ public class ECMA48Terminal extends LogicalScreen
 
         try {
             Class<?> helperClass = Class.forName("jexer.backend.ECMA48TerminalHelper");
-            
+
             // Get image dimensions
             Method getDimsMethod = helperClass.getMethod("getImageDimensions", Object.class);
             int[] dims = (int[]) getDimsMethod.invoke(null, image);

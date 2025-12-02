@@ -151,8 +151,22 @@
                 <exclude>**/backend/TTextPictureImpl.class</exclude>
                 <exclude>**/backend/UnicodeGlyphEncoder$*.class</exclude>
                 <exclude>**/backend/UnicodeGlyphEncoder.class</exclude>
+                <exclude>demo/Demo1.class</exclude>
+                <exclude>demo/Demo2.class</exclude>
+                <exclude>demo/Demo3.class</exclude>
+                <exclude>demo/Demo4.class</exclude>
                 <exclude>demo/Demo5.class</exclude>
+                <exclude>demo/Demo6.class</exclude>
+                <exclude>demo/Demo7.class</exclude>
+                <exclude>demo/Demo8.class</exclude>
                 <exclude>demo/DemoPixelsWindow.class</exclude>
+                <exclude>demo/DemoPixelsWindow$*.class</exclude>
+                <exclude>demo/DemoMainWindow.class</exclude>
+                <exclude>demo/DemoMainWindow$*.class</exclude>
+                <exclude>demo/DemoApplication.class</exclude>
+                <exclude>demo/DesktopDemoApplication.class</exclude>
+                <exclude>demo/DesktopDemoApplication$*.class</exclude>
+                <exclude>demo/DesktopDemo.class</exclude>
               </excludes>
               <archive>
                 <manifest>

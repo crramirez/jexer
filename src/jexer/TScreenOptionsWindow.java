@@ -246,7 +246,7 @@ public class TScreenOptionsWindow extends TWindow {
         // Add shortcut text
         newStatusBar(i18n.getString("statusBar"));
 
-        if (getScreen() instanceof SwingTerminal) {
+        if (TApplication.isSwingTerminal(getScreen())) {
             terminal = (SwingTerminal) getScreen();
         }
         if (getScreen() instanceof ECMA48Terminal) {

@@ -1341,7 +1341,7 @@ public class TTerminal extends TScrollable
         int textHeight = getScreen().getTextHeight();
         boolean cursorBlinkVisible = true;
 
-        if (getScreen() instanceof SwingTerminal) {
+        if (TApplication.isSwingTerminal(getScreen())) {
             SwingTerminal terminal = (SwingTerminal) getScreen();
             cursorBlinkVisible = terminal.getCursorBlinkVisible();
         } else {

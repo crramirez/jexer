@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import jexer.backend.SwingTerminal;
 import jexer.bits.GraphicsChars;
 import jexer.event.TKeypressEvent;
 import jexer.layout.StretchLayoutManager;
@@ -175,7 +174,7 @@ public class TFileOpenBox extends TWindow {
                     } catch (IOException e) {
                         // If the backend is Swing, we can emit the stack
                         // trace to stderr.  Otherwise, just squash it.
-                        if (getScreen() instanceof SwingTerminal) {
+                        if (TApplication.isSwingTerminal(getScreen())) {
                             e.printStackTrace();
                         }
                     }
@@ -199,7 +198,7 @@ public class TFileOpenBox extends TWindow {
                     } catch (IOException e) {
                         // If the backend is Swing, we can emit the stack
                         // trace to stderr.  Otherwise, just squash it.
-                        if (getScreen() instanceof SwingTerminal) {
+                        if (TApplication.isSwingTerminal(getScreen())) {
                             e.printStackTrace();
                         }
                     }
@@ -222,7 +221,7 @@ public class TFileOpenBox extends TWindow {
                     } catch (IOException e) {
                         // If the backend is Swing, we can emit the stack
                         // trace to stderr.  Otherwise, just squash it.
-                        if (getScreen() instanceof SwingTerminal) {
+                        if (TApplication.isSwingTerminal(getScreen())) {
                             e.printStackTrace();
                         }
                     }
@@ -240,7 +239,7 @@ public class TFileOpenBox extends TWindow {
                     } catch (IOException e) {
                         // If the backend is Swing, we can emit the stack
                         // trace to stderr.  Otherwise, just squash it.
-                        if (getScreen() instanceof SwingTerminal) {
+                        if (TApplication.isSwingTerminal(getScreen())) {
                             e.printStackTrace();
                         }
                     }
@@ -276,7 +275,7 @@ public class TFileOpenBox extends TWindow {
                     } catch (IOException e) {
                         // If the backend is Swing, we can emit the stack
                         // trace to stderr.  Otherwise, just squash it.
-                        if (getScreen() instanceof SwingTerminal) {
+                        if (TApplication.isSwingTerminal(getScreen())) {
                             e.printStackTrace();
                         }
                     }
@@ -389,7 +388,7 @@ public class TFileOpenBox extends TWindow {
                 } catch (IOException e) {
                     // If the backend is Swing, we can emit the stack trace
                     // to stderr.  Otherwise, just squash it.
-                    if (getScreen() instanceof SwingTerminal) {
+                    if (TApplication.isSwingTerminal(getScreen())) {
                         e.printStackTrace();
                     }
                 }

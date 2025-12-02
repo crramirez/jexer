@@ -205,7 +205,7 @@ public class DemoApplicationCore extends TApplication {
         }
 
         if (menu.getId() == 10000) {
-            new DemoMainWindow(this);
+            new DemoCoreMainWindow(this);
             return true;
         }
 
