@@ -28,7 +28,7 @@
  */
 package jexer.tackboard;
 
-import java.awt.image.BufferedImage;
+import java.lang.reflect.Method;
 
 import jexer.TApplication;
 import jexer.bits.Animation;
@@ -79,18 +79,20 @@ public class Bitmap extends TackboardItem {
     }
 
     /**
-     * Public constructor with BufferedImage.
+     * Public constructor with BufferedImage (passed as Object to avoid
+     * java.awt dependency). The image will be converted to ImageRGB via
+     * reflection.
      *
      * @param x X pixel coordinate
      * @param y Y pixel coordinate
      * @param z Z coordinate
-     * @param image the image (BufferedImage)
+     * @param bufferedImage the image (BufferedImage as Object)
      */
     public Bitmap(final int x, final int y, final int z,
-        final BufferedImage image) {
+        final Object bufferedImage) {
 
         super(x, y, z);
-        this.image = toImageRGB(image);
+        this.image = toImageRGB(bufferedImage);
     }
 
     /**
@@ -117,19 +119,31 @@ public class Bitmap extends TackboardItem {
     // ------------------------------------------------------------------------
 
     /**
-     * Convert BufferedImage to ImageRGB.
+     * Convert BufferedImage (passed as Object) to ImageRGB via reflection.
      *
-     * @param bufferedImage the BufferedImage
+     * @param bufferedImage the BufferedImage as Object
      * @return the ImageRGB
      */
-    private static ImageRGB toImageRGB(final BufferedImage bufferedImage) {
+    private static ImageRGB toImageRGB(final Object bufferedImage) {
         if (bufferedImage == null) {
             return null;
         }
-        int width = bufferedImage.getWidth();
-        int height = bufferedImage.getHeight();
-        int[] pixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
-        return new ImageRGB(width, height, pixels);
+        try {
+            // Use reflection to call getWidth(), getHeight(), getRGB()
+            Class<?> clazz = bufferedImage.getClass();
+            Method getWidth = clazz.getMethod("getWidth");
+            Method getHeight = clazz.getMethod("getHeight");
+            Method getRGB = clazz.getMethod("getRGB", int.class, int.class,
+                int.class, int.class, int[].class, int.class, int.class);
+            
+            int width = (Integer) getWidth.invoke(bufferedImage);
+            int height = (Integer) getHeight.invoke(bufferedImage);
+            int[] pixels = (int[]) getRGB.invoke(bufferedImage, 0, 0,
+                width, height, null, 0, width);
+            return new ImageRGB(width, height, pixels);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -283,12 +297,13 @@ public class Bitmap extends TackboardItem {
     }
 
     /**
-     * Set the image with BufferedImage.
+     * Set the image with BufferedImage (passed as Object to avoid java.awt
+     * dependency).
      *
-     * @param image the new image (BufferedImage)
+     * @param bufferedImage the new image (BufferedImage as Object)
      */
-    public void setImage(final BufferedImage image) {
-        setImage(toImageRGB(image));
+    public void setImage(final Object bufferedImage) {
+        setImage(toImageRGB(bufferedImage));
     }
 
 }

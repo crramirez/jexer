@@ -28,7 +28,6 @@
  */
 package jexer.tackboard;
 
-import java.awt.Font;
 import java.lang.reflect.Method;
 
 import jexer.bits.ColorRGB;
@@ -56,9 +55,10 @@ public class Text extends Bitmap {
     private String fontName;
 
     /**
-     * The font object (may be null if fontName is used).
+     * The font object (may be null if fontName is used). Stored as Object
+     * to avoid java.awt dependency.
      */
-    private Font font;
+    private Object font;
 
     /**
      * The font size in points.
@@ -114,27 +114,50 @@ public class Text extends Bitmap {
     }
 
     /**
-     * Public constructor with Font object.
+     * Public constructor with Font object (passed as Object to avoid
+     * java.awt dependency).
      *
      * @param x X pixel coordinate
      * @param y Y pixel coordinate
      * @param z Z coordinate
      * @param text the text string
-     * @param font the font
+     * @param font the font (as Object)
      * @param fontSize the font size in points
      * @param color the color of the text
      */
     public Text(final int x, final int y, final int z,
-        final String text, final Font font, final int fontSize,
+        final String text, final Object font, final int fontSize,
         final ColorRGB color) {
 
         super(x, y, z, (ImageRGB) null);
 
         this.text = text;
         this.font = font;
-        this.fontName = (font != null) ? font.getFamily() : null;
+        this.fontName = getFontFamily(font);
         this.fontSize = fontSize;
         this.color = color;
+    }
+
+    // ------------------------------------------------------------------------
+    // Helper methods ---------------------------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * Get the font family name from a Font object via reflection.
+     *
+     * @param font the Font object
+     * @return the font family name, or null if not available
+     */
+    private static String getFontFamily(final Object font) {
+        if (font == null) {
+            return null;
+        }
+        try {
+            Method getFamily = font.getClass().getMethod("getFamily");
+            return (String) getFamily.invoke(font);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -203,7 +226,7 @@ public class Text extends Bitmap {
                 try {
                     if (font != null) {
                         Method renderMethod = implClass.getMethod("renderTextWithFont",
-                            String.class, Font.class, int.class, ColorRGB.class,
+                            String.class, Object.class, int.class, ColorRGB.class,
                             int.class);
                         ImageRGB renderedImage = (ImageRGB) renderMethod.invoke(null,
                             text, font, fontSize, color, textWidth);

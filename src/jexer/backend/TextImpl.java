@@ -96,18 +96,21 @@ public final class TextImpl {
     }
 
     /**
-     * Render text to an image with a Font object.
+     * Render text to an image with a Font object (passed as Object to support
+     * reflection from Text.java).
      *
      * @param text the text to render
-     * @param font the font
+     * @param fontObj the font (as Object, expected to be java.awt.Font)
      * @param fontSize the font size in points
      * @param color the color
      * @param textWidth the width of a text cell (used for estimating width)
      * @return the rendered image
      */
-    public static ImageRGB renderTextWithFont(final String text, final Font font,
+    public static ImageRGB renderTextWithFont(final String text, final Object fontObj,
         final int fontSize, final ColorRGB color, final int textWidth) {
 
+        Font font = (Font) fontObj;
+        
         // Estimate the pixels needed to render the text.
         int width = 0;
         int height = 0;
