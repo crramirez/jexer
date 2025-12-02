@@ -33,9 +33,10 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
 import jexer.bits.ColorRGB;
+import jexer.bits.ImageRGB;
 
 /**
- * SixelDecoder parses a buffer of sixel image data into a BufferedImage.
+ * SixelDecoder parses a buffer of sixel image data into an ImageRGB.
  */
 public class SixelDecoder {
 
@@ -221,7 +222,7 @@ public class SixelDecoder {
      *
      * @return the sixel data as an image.
      */
-    public BufferedImage getImage() {
+    public ImageRGB getImage() {
 
         // DEBUG
         if (false) {
@@ -248,12 +249,30 @@ public class SixelDecoder {
             if ((rasterWidth > width) || (rasterHeight > y + 1)) {
                 resizeImage(Math.max(width, rasterWidth),
                     Math.max(y + 1, rasterHeight));
-                return image.getSubimage(0, 0, Math.max(width, rasterWidth),
+                BufferedImage subImage = image.getSubimage(0, 0, Math.max(width, rasterWidth),
                     Math.max(y + 1, rasterHeight));
+                return toImageRGB(subImage);
             }
-            return image.getSubimage(0, 0, width, y + 1);
+            BufferedImage subImage = image.getSubimage(0, 0, width, y + 1);
+            return toImageRGB(subImage);
         }
         return null;
+    }
+
+    /**
+     * Convert a BufferedImage to ImageRGB.
+     *
+     * @param bufferedImage the BufferedImage to convert
+     * @return the ImageRGB
+     */
+    private ImageRGB toImageRGB(final BufferedImage bufferedImage) {
+        if (bufferedImage == null) {
+            return null;
+        }
+        int w = bufferedImage.getWidth();
+        int h = bufferedImage.getHeight();
+        int[] pixels = bufferedImage.getRGB(0, 0, w, h, null, 0, w);
+        return new ImageRGB(w, h, pixels);
     }
 
     /**

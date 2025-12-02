@@ -59,6 +59,7 @@ import jexer.bits.Cell;
 import jexer.bits.CellAttributes;
 import jexer.bits.ComplexCell;
 import jexer.bits.GlyphMaker;
+import jexer.bits.ImageRGB;
 import jexer.bits.ImageUtils;
 import jexer.bits.StringUtils;
 import jexer.event.TInputEvent;
@@ -976,6 +977,41 @@ public class ECMA48 implements Runnable {
     // ------------------------------------------------------------------------
     // ECMA48 -----------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Convert ImageRGB to BufferedImage for AWT Graphics operations.
+     *
+     * @param imageRGB the ImageRGB to convert
+     * @return the BufferedImage, or null if imageRGB is null
+     */
+    private BufferedImage toBufferedImage(final ImageRGB imageRGB) {
+        if (imageRGB == null) {
+            return null;
+        }
+        int width = imageRGB.getWidth();
+        int height = imageRGB.getHeight();
+        BufferedImage result = new BufferedImage(width, height,
+            BufferedImage.TYPE_INT_ARGB);
+        int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
+        result.setRGB(0, 0, width, height, pixels, 0, width);
+        return result;
+    }
+
+    /**
+     * Convert BufferedImage to ImageRGB.
+     *
+     * @param bufferedImage the BufferedImage to convert
+     * @return the ImageRGB, or null if bufferedImage is null
+     */
+    private ImageRGB toImageRGB(final BufferedImage bufferedImage) {
+        if (bufferedImage == null) {
+            return null;
+        }
+        int width = bufferedImage.getWidth();
+        int height = bufferedImage.getHeight();
+        int[] pixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
+        return new ImageRGB(width, height, pixels);
+    }
 
     /**
      * Wait for a period of time to get output from the launched process.
@@ -2003,7 +2039,7 @@ public class ECMA48 implements Runnable {
             printCharacter(' ');
         }
 
-        BufferedImage image = null;
+        ImageRGB image = null;
         ComplexCell cell = new ComplexCell(codePoints, currentState.attr);
         if (ColorEmojiGlyphMaker.canDisplay(codePoints)) {
             image = ColorEmojiGlyphMaker.getImage(cell,
@@ -2029,9 +2065,9 @@ public class ECMA48 implements Runnable {
             return;
         }
         
-        BufferedImage leftImage = image.getSubimage(0, 0, textWidth,
+        ImageRGB leftImage = image.getSubimage(0, 0, textWidth,
             textHeight);
-        BufferedImage rightImage = image.getSubimage(textWidth, 0, textWidth,
+        ImageRGB rightImage = image.getSubimage(textWidth, 0, textWidth,
             textHeight);
         ComplexCell left = new ComplexCell(cell);
         left.setImage(leftImage, Math.abs(leftImage.hashCode()));
@@ -8137,7 +8173,7 @@ public class ECMA48 implements Runnable {
             lastTextHeight = textHeight;
         }
 
-        BufferedImage image = null;
+        ImageRGB image = null;
         ComplexCell cell = new ComplexCell(ch, currentState.attr);
         if (ColorEmojiGlyphMaker.canDisplay(ch)) {
             image = ColorEmojiGlyphMaker.getImage(cell,
@@ -8163,9 +8199,9 @@ public class ECMA48 implements Runnable {
             return;
         }
         
-        BufferedImage leftImage = image.getSubimage(0, 0, textWidth,
+        ImageRGB leftImage = image.getSubimage(0, 0, textWidth,
             textHeight);
-        BufferedImage rightImage = image.getSubimage(textWidth, 0, textWidth,
+        ImageRGB rightImage = image.getSubimage(textWidth, 0, textWidth,
             textHeight);
 
         ComplexCell left = new ComplexCell(cell);
@@ -8286,7 +8322,7 @@ public class ECMA48 implements Runnable {
         SixelDecoder sixel = new SixelDecoder(sixelParseBuffer.toString(),
             sixelPalette, backend.attrToBackgroundColor(currentState.attr),
             maybeTransparent);
-        BufferedImage image = sixel.getImage();
+        ImageRGB image = sixel.getImage();
 
         // System.err.println("parseSixel(): image " + image);
 
@@ -8362,8 +8398,7 @@ public class ECMA48 implements Runnable {
             return;
         }
 
-        BufferedImage image = new BufferedImage(imageWidth, imageHeight,
-            BufferedImage.TYPE_INT_ARGB);
+        ImageRGB image = new ImageRGB(imageWidth, imageHeight);
 
         for (int x = 0; x < imageWidth; x++) {
             for (int y = 0; y < imageHeight; y++) {
@@ -8401,7 +8436,7 @@ public class ECMA48 implements Runnable {
         int imageWidth = 0;
         int imageHeight = 0;
         boolean scroll = false;
-        BufferedImage image = null;
+        BufferedImage bImage = null;
         boolean maybeTransparent = false;
         try {
             byte [] bytes = StringUtils.fromBase64(data.getBytes());
@@ -8438,14 +8473,14 @@ public class ECMA48 implements Runnable {
                 return;
             }
 
-            image = ImageIO.read(new ByteArrayInputStream(bytes));
+            bImage = ImageIO.read(new ByteArrayInputStream(bytes));
         } catch (IOException e) {
             // SQUASH
             return;
         }
-        assert (image != null);
-        imageWidth = image.getWidth();
-        imageHeight = image.getHeight();
+        assert (bImage != null);
+        imageWidth = bImage.getWidth();
+        imageHeight = bImage.getHeight();
         if ((imageWidth < 1)
             || (imageWidth > 10000)
             || (imageHeight < 1)
@@ -8461,12 +8496,12 @@ public class ECMA48 implements Runnable {
             return;
         }
         if (maybeTransparent) {
-            if (image.getTransparency() == java.awt.Transparency.OPAQUE) {
+            if (bImage.getTransparency() == java.awt.Transparency.OPAQUE) {
                 maybeTransparent = false;
             }
         }
 
-        imageToCells(image, scroll, maybeTransparent);
+        imageToCells(toImageRGB(bImage), scroll, maybeTransparent);
     }
 
     /**

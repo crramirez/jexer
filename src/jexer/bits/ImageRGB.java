@@ -465,4 +465,26 @@ public class ImageRGB {
         return String.format("ImageRGB[width=%d, height=%d]", width, height);
     }
 
+    /**
+     * Get a sub-image of this image.
+     *
+     * @param x the x coordinate of the upper-left corner
+     * @param y the y coordinate of the upper-left corner
+     * @param w the width of the sub-image
+     * @param h the height of the sub-image
+     * @return a new ImageRGB containing the sub-image
+     */
+    public ImageRGB getSubimage(final int x, final int y, final int w, final int h) {
+        if (x < 0 || y < 0 || x + w > width || y + h > height) {
+            throw new ArrayIndexOutOfBoundsException("Subimage coordinates out of bounds");
+        }
+        int[] subPixels = new int[w * h];
+        for (int row = 0; row < h; row++) {
+            int srcOffset = (y + row) * width + x;
+            int dstOffset = row * w;
+            System.arraycopy(pixels, srcOffset, subPixels, dstOffset, w);
+        }
+        return new ImageRGB(w, h, subPixels);
+    }
+
 }
