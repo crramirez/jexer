@@ -95,6 +95,23 @@ public class ECMA48TerminalHelper {
     }
 
     /**
+     * Create a blank (all-black) ImageRGB of specified dimensions.
+     *
+     * @param width the width of the image
+     * @param height the height of the image
+     * @return the blank ImageRGB
+     */
+    public static ImageRGB createBlankImage(final int width, final int height) {
+        BufferedImage image = new BufferedImage(width, height,
+            BufferedImage.TYPE_INT_ARGB);
+        Graphics gr = image.getGraphics();
+        gr.setColor(new java.awt.Color(0, 0, 0));
+        gr.fillRect(0, 0, width, height);
+        gr.dispose();
+        return toImageRGB(image);
+    }
+
+    /**
      * Convert a horizontal range of cells' image data into a single
      * contiguous ImageRGB.
      *
@@ -163,6 +180,124 @@ public class ECMA48TerminalHelper {
         }
 
         return toImageRGB(image);
+    }
+
+    /**
+     * Convert a horizontal range of cell's image data into a single
+     * contiguous BufferedImage, rescaled and anti-aliased to match the 
+     * specified text cell size.
+     *
+     * @param cells the cells containing image data
+     * @param textWidth the text cell width
+     * @param textHeight the text cell height
+     * @return the BufferedImage resized to the text cell size
+     */
+    public static BufferedImage cellsToImage(final List<Cell> cells,
+        final int textWidth, final int textHeight) {
+        
+        if (cells == null || cells.isEmpty()) {
+            return null;
+        }
+        
+        int imageWidth = cells.get(0).getImage().getWidth();
+        int imageHeight = cells.get(0).getImage().getHeight();
+        int fullWidth = cells.size() * imageWidth;
+        int fullHeight = imageHeight;
+
+        BufferedImage image = new BufferedImage(fullWidth, fullHeight,
+            BufferedImage.TYPE_INT_ARGB);
+
+        int[] rgbArray;
+        for (int i = 0; i < cells.size() - 1; i++) {
+            int tileWidth = imageWidth;
+            int tileHeight = imageHeight;
+
+            try {
+                rgbArray = cells.get(i).getImage().getRGB(0, 0,
+                    tileWidth, tileHeight, null, 0, tileWidth);
+            } catch (Exception e) {
+                throw new RuntimeException("Error getting image pixels", e);
+            }
+
+            image.setRGB(i * imageWidth, 0, tileWidth, tileHeight,
+                rgbArray, 0, tileWidth);
+            if (tileHeight < fullHeight) {
+                int backgroundColor = 0;
+                for (int imageX = 0; imageX < image.getWidth(); imageX++) {
+                    for (int imageY = imageHeight; imageY < fullHeight;
+                         imageY++) {
+                        image.setRGB(imageX, imageY, backgroundColor);
+                    }
+                }
+            }
+        }
+
+        // Last cell
+        int totalWidth = 0;
+        for (int i = 0; i < cells.size(); i++) {
+            totalWidth += cells.get(i).getImage().getWidth();
+        }
+        totalWidth -= ((cells.size() - 1) * imageWidth);
+
+        try {
+            rgbArray = cells.get(cells.size() - 1).getImage().getRGB(0, 0,
+                totalWidth, imageHeight, null, 0, totalWidth);
+        } catch (Exception e) {
+            // Return what we have so far
+            return scaleImageIfNeeded(image, cells.size() * textWidth, textHeight);
+        }
+
+        try {
+            image.setRGB((cells.size() - 1) * imageWidth, 0, totalWidth,
+                imageHeight, rgbArray, 0, totalWidth);
+        } catch (Exception e) {
+            // Return what we have so far
+            return scaleImageIfNeeded(image, cells.size() * textWidth, textHeight);
+        }
+
+        if (totalWidth < imageWidth) {
+            int backgroundColor = 0;
+            for (int imageX = image.getWidth() - totalWidth;
+                 imageX < image.getWidth(); imageX++) {
+
+                for (int imageY = 0; imageY < fullHeight; imageY++) {
+                    image.setRGB(imageX, imageY, backgroundColor);
+                }
+            }
+        }
+
+        return scaleImageIfNeeded(image, cells.size() * textWidth, textHeight);
+    }
+
+    /**
+     * Scale a BufferedImage if it doesn't match the target dimensions.
+     *
+     * @param image the source image
+     * @param targetWidth the target width
+     * @param targetHeight the target height
+     * @return the scaled image if needed, or the original
+     */
+    private static BufferedImage scaleImageIfNeeded(final BufferedImage image,
+        final int targetWidth, final int targetHeight) {
+        
+        if ((image.getWidth() != targetWidth)
+            || (image.getHeight() != targetHeight)) {
+            
+            BufferedImage newImage = new BufferedImage(targetWidth, targetHeight,
+                BufferedImage.TYPE_INT_ARGB);
+
+            Graphics gr = newImage.getGraphics();
+            if (gr instanceof Graphics2D) {
+                ((Graphics2D) gr).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+                ((Graphics2D) gr).setRenderingHint(RenderingHints.KEY_RENDERING,
+                    RenderingHints.VALUE_RENDER_QUALITY);
+            }
+            gr.drawImage(image, 0, 0, targetWidth, targetHeight, null);
+            gr.dispose();
+            return newImage;
+        }
+        return image;
     }
 
     /**
@@ -276,6 +411,32 @@ public class ECMA48TerminalHelper {
     }
 
     /**
+     * Create a full BufferedImage for bottom row sixel rendering.
+     * This variant accepts and returns BufferedImage directly.
+     *
+     * @param cellsImage the cells image as BufferedImage
+     * @param pixelX the pixel X position
+     * @param pixelY the pixel Y position
+     * @param maxPixelX the maximum X pixel
+     * @param maxPixelY the maximum Y pixel
+     * @return the full BufferedImage
+     */
+    public static BufferedImage createBottomRowSixelImage(final Object cellsImage,
+        final int pixelX, final int pixelY, final int maxPixelX, final int maxPixelY) {
+        
+        if (cellsImage == null || !(cellsImage instanceof BufferedImage)) {
+            return null;
+        }
+        BufferedImage srcImage = (BufferedImage) cellsImage;
+        BufferedImage fullImage = new BufferedImage(maxPixelX, maxPixelY,
+            BufferedImage.TYPE_INT_ARGB);
+        Graphics gr = fullImage.getGraphics();
+        gr.drawImage(srcImage, pixelX, pixelY, null);
+        gr.dispose();
+        return fullImage;
+    }
+
+    /**
      * Get a subimage of an ImageRGB.
      *
      * @param source the source ImageRGB
@@ -365,6 +526,105 @@ public class ECMA48TerminalHelper {
             return null;
         }
         return jpgOutputStream.toByteArray();
+    }
+
+    /**
+     * Get image dimensions from a BufferedImage.
+     *
+     * @param image the BufferedImage as Object
+     * @return int array [width, height], or null if invalid
+     */
+    public static int[] getImageDimensions(final Object image) {
+        if (image == null || !(image instanceof BufferedImage)) {
+            return null;
+        }
+        BufferedImage bi = (BufferedImage) image;
+        return new int[] { bi.getWidth(), bi.getHeight() };
+    }
+
+    /**
+     * Encode a BufferedImage as PNG bytes.
+     *
+     * @param image the BufferedImage as Object
+     * @param maxHeight the maximum height to encode (use full height if negative)
+     * @return the PNG bytes, or null on failure
+     */
+    public static byte[] encodeBufferedImagePNG(final Object image, final int maxHeight) {
+        if (image == null || !(image instanceof BufferedImage)) {
+            return null;
+        }
+        BufferedImage bi = (BufferedImage) image;
+        int heightToEncode = maxHeight > 0 ? Math.min(bi.getHeight(), maxHeight) : bi.getHeight();
+        
+        ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream(1024);
+        try {
+            if (!ImageIO.write(bi.getSubimage(0, 0, bi.getWidth(), heightToEncode),
+                    "PNG", pngOutputStream)) {
+                return null;
+            }
+        } catch (IOException e) {
+            return null;
+        }
+        return pngOutputStream.toByteArray();
+    }
+
+    /**
+     * Encode a BufferedImage as JPG bytes.
+     *
+     * @param image the BufferedImage as Object
+     * @param maxHeight the maximum height to encode (use full height if negative)
+     * @return the JPG bytes, or null on failure
+     */
+    public static byte[] encodeBufferedImageJPG(final Object image, final int maxHeight) {
+        if (image == null || !(image instanceof BufferedImage)) {
+            return null;
+        }
+        BufferedImage bi = (BufferedImage) image;
+        int heightToEncode = maxHeight > 0 ? Math.min(bi.getHeight(), maxHeight) : bi.getHeight();
+        
+        // Convert from ARGB to RGB, otherwise the JPG encode will fail.
+        BufferedImage jpgImage = new BufferedImage(bi.getWidth(),
+            heightToEncode, BufferedImage.TYPE_INT_RGB);
+        int[] pixels = new int[bi.getWidth() * heightToEncode];
+        bi.getRGB(0, 0, bi.getWidth(), heightToEncode, pixels, 0, bi.getWidth());
+        jpgImage.setRGB(0, 0, bi.getWidth(), heightToEncode, pixels, 0, bi.getWidth());
+
+        ByteArrayOutputStream jpgOutputStream = new ByteArrayOutputStream(1024);
+        try {
+            if (!ImageIO.write(jpgImage, "JPG", jpgOutputStream)) {
+                return null;
+            }
+        } catch (IOException e) {
+            return null;
+        }
+        return jpgOutputStream.toByteArray();
+    }
+
+    /**
+     * Get RGB bytes from a BufferedImage for the Jexer RGB format.
+     *
+     * @param image the BufferedImage as Object
+     * @param maxHeight the maximum height to encode (use full height if negative)
+     * @return the RGB bytes, or null on failure
+     */
+    public static byte[] encodeBufferedImageRGB(final Object image, final int maxHeight) {
+        if (image == null || !(image instanceof BufferedImage)) {
+            return null;
+        }
+        BufferedImage bi = (BufferedImage) image;
+        int heightToEncode = maxHeight > 0 ? Math.min(bi.getHeight(), maxHeight) : bi.getHeight();
+        
+        byte[] bytes = new byte[bi.getWidth() * heightToEncode * 3];
+        int stride = bi.getWidth();
+        for (int px = 0; px < stride; px++) {
+            for (int py = 0; py < heightToEncode; py++) {
+                int rgb = bi.getRGB(px, py);
+                bytes[(py * stride * 3) + (px * 3)]     = (byte) ((rgb >>> 16) & 0xFF);
+                bytes[(py * stride * 3) + (px * 3) + 1] = (byte) ((rgb >>>  8) & 0xFF);
+                bytes[(py * stride * 3) + (px * 3) + 2] = (byte) ( rgb         & 0xFF);
+            }
+        }
+        return bytes;
     }
 
 }

@@ -28,10 +28,6 @@
  */
 package jexer.backend;
 
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
@@ -44,6 +40,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -54,7 +51,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import javax.imageio.ImageIO;
 
 import jexer.bits.Cell;
 import jexer.bits.CellAttributes;
@@ -230,9 +226,27 @@ public class ECMA48Terminal extends LogicalScreen
     private boolean sixel = true;
 
     /**
-     * The sixel encoder.
+     * If true, AWT/ImageIO classes are available for image operations.
      */
-    private SixelEncoder sixelEncoder = null;
+    private static boolean awtAvailable = false;
+
+    /**
+     * Static initialization block to check for AWT availability.
+     */
+    static {
+        try {
+            Class.forName("java.awt.image.BufferedImage");
+            Class.forName("jexer.backend.HQSixelEncoder");
+            awtAvailable = true;
+        } catch (ClassNotFoundException e) {
+            awtAvailable = false;
+        }
+    }
+
+    /**
+     * The sixel encoder (Object to avoid compile-time dependency).
+     */
+    private Object sixelEncoder = null;
 
     /**
      * If true, ask sixel to be fast and dirty.
@@ -271,9 +285,9 @@ public class ECMA48Terminal extends LogicalScreen
     private ImageCache jexerCache = null;
 
     /**
-     * The Unicode glyph encoder.
+     * The Unicode glyph encoder (Object to avoid compile-time dependency).
      */
-    private UnicodeGlyphEncoder unicodeGlyphEncoder = null;
+    private Object unicodeGlyphEncoder = null;
 
     /**
      * The Unicode glyph post-rendered string cache.
@@ -1090,30 +1104,49 @@ public class ECMA48Terminal extends LogicalScreen
             doRgbColor = false;
         }
 
-        // Default to sixel enabled.
-        if (System.getProperty("jexer.ECMA48.sixel", "true").equals("false")) {
+        // Default to sixel enabled, but only if AWT is available.
+        if (!awtAvailable) {
+            sixel = false;
+        } else if (System.getProperty("jexer.ECMA48.sixel", "true").equals("false")) {
             sixel = false;
         } else {
             sixel = true;
         }
-        // Default to HQ quantizer.
-        if (System.getProperty("jexer.ECMA48.sixelEncoder",
-                "hq").equals("legacy")) {
-            sixelEncoder = new LegacySixelEncoder();
-        } else {
-            sixelEncoder = new HQSixelEncoder();
-        }
-        if (System.getProperty("jexer.ECMA48.sixelFastAndDirty",
-                "false").equals("true")
-        ) {
-            sixelFastAndDirty = true;
-        } else {
-            sixelFastAndDirty = false;
-        }
-        sixelEncoder.reloadOptions();
+        // Initialize encoders only if AWT is available.
+        if (awtAvailable) {
+            try {
+                // Default to HQ quantizer.
+                if (System.getProperty("jexer.ECMA48.sixelEncoder",
+                        "hq").equals("legacy")) {
+                    Class<?> legacyClass = Class.forName("jexer.backend.LegacySixelEncoder");
+                    sixelEncoder = legacyClass.getDeclaredConstructor().newInstance();
+                } else {
+                    Class<?> hqClass = Class.forName("jexer.backend.HQSixelEncoder");
+                    sixelEncoder = hqClass.getDeclaredConstructor().newInstance();
+                }
+                if (System.getProperty("jexer.ECMA48.sixelFastAndDirty",
+                        "false").equals("true")
+                ) {
+                    sixelFastAndDirty = true;
+                } else {
+                    sixelFastAndDirty = false;
+                }
+                // Call reloadOptions() via reflection
+                Method reloadMethod = sixelEncoder.getClass().getMethod("reloadOptions");
+                reloadMethod.invoke(sixelEncoder);
 
-        unicodeGlyphEncoder = new UnicodeGlyphEncoder();
-        unicodeGlyphEncoder.reloadOptions();
+                Class<?> unicodeClass = Class.forName("jexer.backend.UnicodeGlyphEncoder");
+                unicodeGlyphEncoder = unicodeClass.getDeclaredConstructor().newInstance();
+                Method unicodeReloadMethod = unicodeGlyphEncoder.getClass().getMethod("reloadOptions");
+                unicodeReloadMethod.invoke(unicodeGlyphEncoder);
+            } catch (Exception e) {
+                // AWT classes not available, disable image features
+                awtAvailable = false;
+                sixel = false;
+                sixelEncoder = null;
+                unicodeGlyphEncoder = null;
+            }
+        }
 
         // Request xterm use the sixel settings we want
         this.output.printf("%s", xtermSetSixelSettings());
@@ -1178,7 +1211,7 @@ public class ECMA48Terminal extends LogicalScreen
         } catch (NumberFormatException e) {
             // SQUASH
         }
-        if (sixelEncoder instanceof LegacySixelEncoder) {
+        if (isLegacySixelEncoder()) {
             // Legacy encoder is not thread-safe.
             imageThreadCount = 1;
         }
@@ -1367,53 +1400,244 @@ public class ECMA48Terminal extends LogicalScreen
 
     /**
      * Convert ImageRGB to BufferedImage for AWT Graphics operations.
+     * Uses reflection to call ECMA48TerminalHelper.toBufferedImage().
      *
      * @param imageRGB the ImageRGB to convert
-     * @return the BufferedImage, or null if imageRGB is null
+     * @return the BufferedImage as Object, or null if unavailable
      */
-    private BufferedImage toBufferedImage(final ImageRGB imageRGB) {
-        if (imageRGB == null) {
+    private Object toBufferedImage(final ImageRGB imageRGB) {
+        if (!awtAvailable || imageRGB == null) {
             return null;
         }
-        int width = imageRGB.getWidth();
-        int height = imageRGB.getHeight();
-        BufferedImage result = new BufferedImage(width, height,
-            BufferedImage.TYPE_INT_ARGB);
-        int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
-        result.setRGB(0, 0, width, height, pixels, 0, width);
-        return result;
+        try {
+            Class<?> helperClass = Class.forName("jexer.backend.ECMA48TerminalHelper");
+            Method method = helperClass.getMethod("toBufferedImage", ImageRGB.class);
+            return method.invoke(null, imageRGB);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
-     * Convert BufferedImage to ImageRGB.
+     * Convert BufferedImage (as Object) to ImageRGB.
+     * Uses reflection to call ECMA48TerminalHelper.toImageRGB().
      *
-     * @param bufferedImage the BufferedImage to convert
-     * @return the ImageRGB, or null if bufferedImage is null
+     * @param bufferedImage the BufferedImage as Object
+     * @return the ImageRGB, or null if unavailable
      */
-    private ImageRGB toImageRGB(final BufferedImage bufferedImage) {
-        if (bufferedImage == null) {
+    private ImageRGB toImageRGB(final Object bufferedImage) {
+        if (!awtAvailable || bufferedImage == null) {
             return null;
         }
-        int width = bufferedImage.getWidth();
-        int height = bufferedImage.getHeight();
-        int[] pixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
-        return new ImageRGB(width, height, pixels);
+        try {
+            Class<?> helperClass = Class.forName("jexer.backend.ECMA48TerminalHelper");
+            Class<?> bufferedImageClass = Class.forName("java.awt.image.BufferedImage");
+            Method method = helperClass.getMethod("toImageRGB", bufferedImageClass);
+            return (ImageRGB) method.invoke(null, bufferedImage);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
      * Create a BufferedImage with specified dimensions.
-     * Always creates TYPE_INT_ARGB images.
+     * Uses reflection to call ECMA48TerminalHelper.createImage().
      *
      * @param image the original image (ignored, for API compatibility)
      * @param width the width of the new image
      * @param height the height of the new image
-     * @return the new image
+     * @return the new image as Object, or null if unavailable
      */
-    private static BufferedImage createImage(final BufferedImage image,
+    private Object createImage(final Object image,
         final int width, final int height) {
-
-        return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        if (!awtAvailable) {
+            return null;
+        }
+        try {
+            Class<?> helperClass = Class.forName("jexer.backend.ECMA48TerminalHelper");
+            Method method = helperClass.getMethod("createImage", int.class, int.class);
+            return method.invoke(null, width, height);
+        } catch (Exception e) {
+            return null;
+        }
     }
+
+    /**
+     * Create a blank (all-black) ImageRGB of specified dimensions.
+     * Uses reflection to call ECMA48TerminalHelper.createBlankImage().
+     *
+     * @param width the width of the image
+     * @param height the height of the image
+     * @return the blank ImageRGB, or null if unavailable
+     */
+    private ImageRGB createBlankImage(final int width, final int height) {
+        if (!awtAvailable) {
+            return null;
+        }
+        try {
+            Class<?> helperClass = Class.forName("jexer.backend.ECMA48TerminalHelper");
+            Method method = helperClass.getMethod("createBlankImage", int.class, int.class);
+            return (ImageRGB) method.invoke(null, width, height);
+        } catch (Exception e) {
+            // Fall back to creating a black ImageRGB directly
+            int[] pixels = new int[width * height];
+            for (int i = 0; i < pixels.length; i++) {
+                pixels[i] = 0xFF000000; // Opaque black
+            }
+            return new ImageRGB(width, height, pixels);
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // Reflection helper methods for sixel encoder
+    // ------------------------------------------------------------------------
+
+    /**
+     * Call sixelEncoderGetPaletteSize() via reflection.
+     *
+     * @return the palette size, or 256 if unavailable
+     */
+    private int sixelEncoderGetPaletteSize() {
+        if (sixelEncoder == null) {
+            return 256;
+        }
+        try {
+            Method method = sixelEncoder.getClass().getMethod("getPaletteSize");
+            return (Integer) method.invoke(sixelEncoder);
+        } catch (Exception e) {
+            return 256;
+        }
+    }
+
+    /**
+     * Call sixelEncoderSetPaletteSize() via reflection.
+     *
+     * @param size the palette size
+     */
+    private void sixelEncoderSetPaletteSize(final int size) {
+        if (sixelEncoder == null) {
+            return;
+        }
+        try {
+            Method method = sixelEncoder.getClass().getMethod("setPaletteSize", int.class);
+            method.invoke(sixelEncoder, size);
+        } catch (Exception e) {
+            // SQUASH
+        }
+    }
+
+    /**
+     * Call sixelEncoderHasSharedPalette() via reflection.
+     *
+     * @return true if shared palette is enabled
+     */
+    private boolean sixelEncoderHasSharedPalette() {
+        if (sixelEncoder == null) {
+            return false;
+        }
+        try {
+            Method method = sixelEncoder.getClass().getMethod("hasSharedPalette");
+            return (Boolean) method.invoke(sixelEncoder);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Call sixelEncoderSetSharedPalette() via reflection.
+     *
+     * @param shared true to enable shared palette
+     */
+    private void sixelEncoderSetSharedPalette(final boolean shared) {
+        if (sixelEncoder == null) {
+            return;
+        }
+        try {
+            Method method = sixelEncoder.getClass().getMethod("setSharedPalette", boolean.class);
+            method.invoke(sixelEncoder, shared);
+        } catch (Exception e) {
+            // SQUASH
+        }
+    }
+
+    /**
+     * Call sixelEncoderClearPalette() via reflection.
+     */
+    private void sixelEncoderClearPalette() {
+        if (sixelEncoder == null) {
+            return;
+        }
+        try {
+            Method method = sixelEncoder.getClass().getMethod("clearPalette");
+            method.invoke(sixelEncoder);
+        } catch (Exception e) {
+            // SQUASH
+        }
+    }
+
+    /**
+     * Call sixelEncoderEmitPalette() via reflection.
+     *
+     * @param sb the StringBuilder to emit to
+     */
+    private void sixelEncoderEmitPalette(final StringBuilder sb) {
+        if (sixelEncoder == null) {
+            return;
+        }
+        try {
+            Method method = sixelEncoder.getClass().getMethod("emitPalette", StringBuilder.class);
+            method.invoke(sixelEncoder, sb);
+        } catch (Exception e) {
+            // SQUASH
+        }
+    }
+
+    /**
+     * Call sixelEncoder.toSixel() via reflection.
+     *
+     * @param image the BufferedImage (as Object)
+     * @return the sixel string, or empty string if unavailable
+     */
+    private String sixelEncoderToSixel(final Object image) {
+        if (sixelEncoder == null || image == null) {
+            return "";
+        }
+        try {
+            Class<?> bufferedImageClass = Class.forName("java.awt.image.BufferedImage");
+            Method method = sixelEncoder.getClass().getMethod("toSixel", bufferedImageClass);
+            return (String) method.invoke(sixelEncoder, image);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    /**
+     * Check if sixelEncoder is an instance of HQSixelEncoder.
+     *
+     * @return true if sixelEncoder is HQSixelEncoder
+     */
+    private boolean isHQSixelEncoder() {
+        if (sixelEncoder == null) {
+            return false;
+        }
+        return sixelEncoder.getClass().getName().equals("jexer.backend.HQSixelEncoder");
+    }
+
+    /**
+     * Check if sixelEncoder is an instance of LegacySixelEncoder.
+     *
+     * @return true if sixelEncoder is LegacySixelEncoder
+     */
+    private boolean isLegacySixelEncoder() {
+        if (sixelEncoder == null) {
+            return false;
+        }
+        return sixelEncoder.getClass().getName().equals("jexer.backend.LegacySixelEncoder");
+    }
+
+    // ------------------------------------------------------------------------
+    // End reflection helper methods
+    // ------------------------------------------------------------------------
 
     /**
      * Get the bytes per second from the last second.
@@ -1864,14 +2088,12 @@ public class ECMA48Terminal extends LogicalScreen
                 ) {
                     blankImageRow = new ArrayList<Cell>(width);
                     Cell blank = new Cell();
-                    BufferedImage newBufImage = new BufferedImage(textWidthPixels,
-                        textHeightPixels, BufferedImage.TYPE_INT_ARGB);
-                    java.awt.Graphics gr = newBufImage.getGraphics();
-                    gr.setColor(new java.awt.Color(0, 0, 0));
-                    gr.fillRect(0, 0, newBufImage.getWidth(),
-                        newBufImage.getHeight());
-                    gr.dispose();
-                    blank.setImage(toImageRGB(newBufImage));
+                    // Create a blank image using the helper
+                    ImageRGB blankImage = createBlankImage(textWidthPixels,
+                        textHeightPixels);
+                    if (blankImage != null) {
+                        blank.setImage(blankImage);
+                    }
                     for (int x = 0; x < width; x++) {
                         blankImageRow.add(new Cell(blank));
                     }
@@ -1928,8 +2150,6 @@ public class ECMA48Terminal extends LogicalScreen
                 ArrayList<Cell> cellsToDraw = new ArrayList<Cell>();
                 for (int i = 0; i < (right - x); i++) {
                     assert (logical[x + i][y].isImage());
-                    BufferedImage newImage;
-                    BufferedImage textImage;
 
                     if (logical[x + i][y].isTransparentImage()) {
                         // We would normally only see transparent cells at
@@ -3173,23 +3393,23 @@ public class ECMA48Terminal extends LogicalScreen
                                 params.get(1), params.get(2));
                         }
                         if (params.get(0).equals("1")) {
-                            int registers = sixelEncoder.getPaletteSize();
+                            int registers = sixelEncoderGetPaletteSize();
                             try {
                                 registers = Integer.parseInt(params.get(2));
                                 if (debugToStderr) {
                                     System.err.println("Terminal reports " +
                                         registers + " sixel colors, current " +
                                         "size = " +
-                                        sixelEncoder.getPaletteSize());
+                                        sixelEncoderGetPaletteSize());
                                 }
                                 if ((registers >= 2)
-                                    && (registers < sixelEncoder.getPaletteSize())
+                                    && (registers < sixelEncoderGetPaletteSize())
                                 ) {
                                     try {
-                                        sixelEncoder.setPaletteSize(Integer.highestOneBit(registers));
+                                        sixelEncoderSetPaletteSize(Integer.highestOneBit(registers));
                                         if (debugToStderr) {
                                             System.err.println("New palette size: "
-                                                + sixelEncoder.getPaletteSize());
+                                                + sixelEncoderGetPaletteSize());
                                         }
                                     } catch (IllegalArgumentException e) {
                                         if (debugToStderr) {
@@ -3445,7 +3665,7 @@ public class ECMA48Terminal extends LogicalScreen
      * @return the string to emit to xterm
      */
     private String xtermSetSixelSettings() {
-        if (sixelEncoder.hasSharedPalette()) {
+        if (sixelEncoderHasSharedPalette()) {
             return "\033[?1070l\033[?1;1;0S";
         } else {
             return "\033[?1070h\033[?1;1;0S";
@@ -3577,7 +3797,7 @@ public class ECMA48Terminal extends LogicalScreen
         // Don't step on the screen refresh thread.
         synchronized (this) {
             this.sixel = sixel;
-            sixelEncoder.clearPalette();
+            sixelEncoderClearPalette();
             sixelCache = null;
             clearPhysical();
         }
@@ -3590,7 +3810,7 @@ public class ECMA48Terminal extends LogicalScreen
      * in one DCS sequence and used in later sequences
      */
     public boolean hasSixelSharedPalette() {
-        return sixelEncoder.hasSharedPalette();
+        return sixelEncoderHasSharedPalette();
     }
 
     /**
@@ -3602,7 +3822,7 @@ public class ECMA48Terminal extends LogicalScreen
     public void setSixelSharedPalette(final boolean sharedPalette) {
         // Don't step on the screen refresh thread.
         synchronized (this) {
-            sixelEncoder.setSharedPalette(sharedPalette);
+            sixelEncoderSetSharedPalette(sharedPalette);
             sixelCache = null;
             clearPhysical();
         }
@@ -3614,7 +3834,7 @@ public class ECMA48Terminal extends LogicalScreen
      * @return the palette size
      */
     public int getSixelPaletteSize() {
-        return sixelEncoder.getPaletteSize();
+        return sixelEncoderGetPaletteSize();
     }
 
     /**
@@ -3625,7 +3845,7 @@ public class ECMA48Terminal extends LogicalScreen
     public void setSixelPaletteSize(final int paletteSize) {
         // Don't step on the screen refresh thread.
         synchronized (this) {
-            sixelEncoder.setPaletteSize(paletteSize);
+            sixelEncoderSetPaletteSize(paletteSize);
             sixelCache = null;
             clearPhysical();
         }
@@ -3651,7 +3871,7 @@ public class ECMA48Terminal extends LogicalScreen
         sb.append("\033Pq");
 
         // We might need to emit the palette.
-        sixelEncoder.emitPalette(sb);
+        sixelEncoderEmitPalette(sb);
 
         return sb.toString();
     }
@@ -3696,7 +3916,7 @@ public class ECMA48Terminal extends LogicalScreen
         }
 
         if (y == height - 1) {
-            if (sixelEncoder instanceof HQSixelEncoder) {
+            if (isHQSixelEncoder()) {
                 // HQ can emit images with transparency.  We can use that
                 // along with DECSDM to get up to 1000 pixel width images on
                 // the bottom row.
@@ -3750,12 +3970,12 @@ public class ECMA48Terminal extends LogicalScreen
         // using the HQ encoder and will have more than some multiple of the
         // palette size in total pixels.
         int maxChunkLength = 1000;
-        if ((sixelEncoder instanceof HQSixelEncoder)
-            && (sixelEncoder.getPaletteSize() > 64)
+        if ((isHQSixelEncoder())
+            && (sixelEncoderGetPaletteSize() > 64)
         ) {
             maxChunkLength = Math.max(8 * getTextWidth(),
                 Math.min(maxChunkLength,
-                    sixelEncoder.getPaletteSize() * 10 / getTextHeight()));
+                    sixelEncoderGetPaletteSize() * 10 / getTextHeight()));
             /*
             System.err.printf("maxChunkLength: %d cache used size %d\n",
                 maxChunkLength, sixelCache.size());
@@ -3779,8 +3999,8 @@ public class ECMA48Terminal extends LogicalScreen
             return chunkSb.toString();
         }
 
-        BufferedImage image = cellsToImage(cells);
-        String sixel = sixelEncoder.toSixel(image);
+        Object image = cellsToImage(cells);
+        String sixel = sixelEncoderToSixel(image);
 
         if (saveInCache) {
             // This row is OK to save into the cache.
@@ -3803,6 +4023,15 @@ public class ECMA48Terminal extends LogicalScreen
     private void emitSixelOnBottomRow(final int x, final int y,
         final ArrayList<Cell> cells, final StringBuilder sb) {
 
+        if (!awtAvailable) {
+            sb.append(normal());
+            sb.append(gotoXY(x, y));
+            for (int i = 0; i < cells.size(); i++) {
+                sb.append(' ');
+            }
+            return;
+        }
+
         int cellWidth = getTextWidth();
         int cellHeight = getTextHeight();
         int pixelX = x * cellWidth;
@@ -3820,19 +4049,53 @@ public class ECMA48Terminal extends LogicalScreen
         }
 
         // The final image will be 1000 x 1000 or less.
-        BufferedImage cellsImage = cellsToImage(cells);
-        BufferedImage fullImage = createImage(cellsImage,
-            maxPixelX, maxPixelY);
-        Graphics gr = fullImage.getGraphics();
-        gr.drawImage(cellsImage, pixelX, pixelY, null);
-        gr.dispose();
-
-        // HQSixelEncoder.toSixel() can accept allowTransparent.
-        String sixel = ((HQSixelEncoder) sixelEncoder).toSixel(fullImage, true);
+        // Use helper via reflection for image compositing
+        String sixel = emitSixelOnBottomRowHelper(cells, pixelX, pixelY, maxPixelX, maxPixelY);
+        if (sixel == null || sixel.isEmpty()) {
+            sb.append(normal());
+            sb.append(gotoXY(x, y));
+            for (int i = 0; i < cells.size(); i++) {
+                sb.append(' ');
+            }
+            return;
+        }
         sb.append("\033[?80h\033P0;1;0q");
         sb.append(sixel);
-        // System.err.println("SIXEL: " + sixel);
         sb.append("\033\\\033[?80l");
+    }
+
+    /**
+     * Helper method to generate sixel for bottom row using reflection.
+     */
+    private String emitSixelOnBottomRowHelper(final ArrayList<Cell> cells,
+        final int pixelX, final int pixelY, final int maxPixelX, final int maxPixelY) {
+        
+        if (!awtAvailable || sixelEncoder == null) {
+            return "";
+        }
+        try {
+            Class<?> helperClass = Class.forName("jexer.backend.ECMA48TerminalHelper");
+            Method cellsToImageMethod = helperClass.getMethod("cellsToImage", List.class, int.class, int.class);
+            Object cellsImage = cellsToImageMethod.invoke(null, cells, getTextWidth(), getTextHeight());
+            if (cellsImage == null) {
+                return "";
+            }
+
+            // Create a full image and composite cellsImage onto it
+            Method createBottomRowMethod = helperClass.getMethod("createBottomRowSixelImage",
+                Object.class, int.class, int.class, int.class, int.class);
+            Object fullImage = createBottomRowMethod.invoke(null, cellsImage, pixelX, pixelY, maxPixelX, maxPixelY);
+            if (fullImage == null) {
+                return "";
+            }
+
+            // Call HQSixelEncoder.toSixel(image, allowTransparent)
+            Class<?> bufferedImageClass = Class.forName("java.awt.image.BufferedImage");
+            Method toSixelMethod = sixelEncoder.getClass().getMethod("toSixel", bufferedImageClass, boolean.class);
+            return (String) toSixelMethod.invoke(sixelEncoder, fullImage, true);
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     /**
@@ -3847,148 +4110,22 @@ public class ECMA48Terminal extends LogicalScreen
     /**
      * Convert a horizontal range of cell's image data into a single
      * contigous image, rescaled and anti-aliased to match the current text
-     * cell size.
+     * cell size.  Uses reflection to call ECMA48TerminalHelper.cellsToImage().
      *
      * @param cells the cells containing image data
-     * @return the image resized to the current text cell size
+     * @return the BufferedImage as Object, or null if unavailable
      */
-    private BufferedImage cellsToImage(final List<Cell> cells) {
-        int imageWidth = cells.get(0).getImage().getWidth();
-        int imageHeight = cells.get(0).getImage().getHeight();
-
-        // Piece cells.get(x).getImage() pieces together into one larger
-        // image for final rendering.
-        int totalWidth = 0;
-        int fullWidth = cells.size() * imageWidth;
-        int fullHeight = imageHeight;
-        for (int i = 0; i < cells.size(); i++) {
-            totalWidth += cells.get(i).getImage().getWidth();
-        }
-
-        BufferedImage image = createImage(toBufferedImage(cells.get(0).getImage()),
-            fullWidth, fullHeight);
-
-        int [] rgbArray;
-        for (int i = 0; i < cells.size() - 1; i++) {
-            int tileWidth = imageWidth;
-            int tileHeight = imageHeight;
-
-            if (false && cells.get(i).isInvertedImage()) {
-                // I used to put an all-white cell over the cursor, don't do
-                // that anymore.
-                rgbArray = new int[imageWidth * imageHeight];
-                for (int j = 0; j < rgbArray.length; j++) {
-                    rgbArray[j] = 0xFFFFFF;
-                }
-            } else {
-                try {
-                    rgbArray = cells.get(i).getImage().getRGB(0, 0,
-                        tileWidth, tileHeight, null, 0, tileWidth);
-                } catch (Exception e) {
-                    throw new RuntimeException("image " + imageWidth + "x" +
-                        imageHeight +
-                        " tile " + tileWidth + "x" +
-                        tileHeight +
-                        " cells.get(i).getImage() " +
-                        cells.get(i).getImage() +
-                        " i " + i +
-                        " fullWidth " + fullWidth +
-                        " fullHeight " + fullHeight, e);
-                }
-            }
-
-            /*
-            System.err.printf("calling image.setRGB(): %d %d %d %d %d\n",
-                i * imageWidth, 0, imageWidth, imageHeight,
-                0, imageWidth);
-            System.err.printf("   fullWidth %d fullHeight %d cells.size() %d textWidth %d\n",
-                fullWidth, fullHeight, cells.size(), getTextWidth());
-             */
-
-            image.setRGB(i * imageWidth, 0, tileWidth, tileHeight,
-                rgbArray, 0, tileWidth);
-            if (tileHeight < fullHeight) {
-                int backgroundColor = 0;
-                for (int imageX = 0; imageX < image.getWidth(); imageX++) {
-                    for (int imageY = imageHeight; imageY < fullHeight;
-                         imageY++) {
-
-                        image.setRGB(imageX, imageY, backgroundColor);
-                    }
-                }
-            }
-        }
-        totalWidth -= ((cells.size() - 1) * imageWidth);
-        if (false && cells.get(cells.size() - 1).isInvertedImage()) {
-            // I used to put an all-white cell over the cursor, don't do that
-            // anymore.
-            rgbArray = new int[totalWidth * imageHeight];
-            for (int j = 0; j < rgbArray.length; j++) {
-                rgbArray[j] = 0xFFFFFF;
-            }
-        } else {
-            try {
-                rgbArray = cells.get(cells.size() - 1).getImage().getRGB(0, 0,
-                    totalWidth, imageHeight, null, 0, totalWidth);
-            } catch (Exception e) {
-                // TODO: Both of these setRGB cases are failing sometimes in
-                // the multihead case.  Figure it out.
-                return image;
-                /*
-                throw new RuntimeException("image " + imageWidth + "x" +
-                    imageHeight + " cells.get(cells.size() - 1).getImage() " +
-                    cells.get(cells.size() - 1).getImage(), e);
-                 */
-            }
+    private Object cellsToImage(final List<Cell> cells) {
+        if (!awtAvailable || cells == null || cells.isEmpty()) {
+            return null;
         }
         try {
-            image.setRGB((cells.size() - 1) * imageWidth, 0, totalWidth,
-                imageHeight, rgbArray, 0, totalWidth);
+            Class<?> helperClass = Class.forName("jexer.backend.ECMA48TerminalHelper");
+            Method method = helperClass.getMethod("cellsToImage", List.class, int.class, int.class);
+            return method.invoke(null, cells, getTextWidth(), getTextHeight());
         } catch (Exception e) {
-            // TODO: Both of these setRGB cases are failing sometimes in the
-            // multihead case.  Figure it out.
-            return image;
-            /*
-            throw new RuntimeException("image " + imageWidth + "x" +
-                imageHeight + " cells.get(cells.size() - 1).getImage() " +
-                cells.get(cells.size() - 1).getImage(), e);
-             */
+            return null;
         }
-
-
-        if (totalWidth < imageWidth) {
-            int backgroundColor = 0;
-            for (int imageX = image.getWidth() - totalWidth;
-                 imageX < image.getWidth(); imageX++) {
-
-                for (int imageY = 0; imageY < fullHeight; imageY++) {
-                    image.setRGB(imageX, imageY, backgroundColor);
-                }
-            }
-        }
-
-        if ((image.getWidth() != cells.size() * getTextWidth())
-            || (image.getHeight() != getTextHeight())
-        ) {
-            // Rescale the image to fit the text cells it is going into.
-            BufferedImage newImage;
-            newImage = createImage(image,
-                cells.size() * getTextWidth(), getTextHeight());
-
-            Graphics gr = newImage.getGraphics();
-            if (gr instanceof Graphics2D) {
-                ((Graphics2D) gr).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                    RenderingHints.VALUE_ANTIALIAS_ON);
-                ((Graphics2D) gr).setRenderingHint(RenderingHints.KEY_RENDERING,
-                    RenderingHints.VALUE_RENDER_QUALITY);
-            }
-            gr.drawImage(image, 0, 0, newImage.getWidth(),
-                newImage.getHeight(), null, null);
-            gr.dispose();
-            image = newImage;
-        }
-
-        return image;
     }
 
     // ------------------------------------------------------------------------
@@ -4017,7 +4154,7 @@ public class ECMA48Terminal extends LogicalScreen
         assert (cells.size() > 0);
         assert (cells.get(0).getImage() != null);
 
-        if (iterm2Images == false) {
+        if (iterm2Images == false || !awtAvailable) {
             sb.append(normal());
             sb.append(gotoXY(x, y));
             for (int i = 0; i < cells.size(); i++) {
@@ -4027,9 +4164,6 @@ public class ECMA48Terminal extends LogicalScreen
         }
 
         if ((y == height - 1) && (iterm2BottomRow == false)) {
-            // We are on the bottom row.  If this terminal does not support
-            // doNotMoveCursor, then it will scroll the entire screen if we
-            // draw a picture here.  Do not draw the image, bail out instead.
             sb.append(normal());
             sb.append(gotoXY(x, y));
             for (int j = 0; j < cells.size(); j++) {
@@ -4038,138 +4172,72 @@ public class ECMA48Terminal extends LogicalScreen
             return sb.toString();
         }
 
-        // Save and get rows to/from the cache that do NOT have inverted
-        // cells.
+        // Save and get rows to/from the cache that do NOT have inverted cells.
         boolean saveInCache = true;
         for (Cell cell: cells) {
             if (cell.isInvertedImage()) {
                 saveInCache = false;
                 break;
             }
-            // Compute the hashcode so that the cell image hash is available
-            // for looking up in the image cache.
             cell.hashCode();
         }
         if (saveInCache) {
             String cachedResult = iterm2Cache.get(cells);
             if (cachedResult != null) {
-                // System.err.println("CACHE HIT");
                 sb.append(sortableGotoXY(x, y));
                 sb.append(cachedResult);
                 return sb.toString();
             }
-            // System.err.println("CACHE MISS");
         }
 
-        BufferedImage image = cellsToImage(cells);
-        int fullHeight = image.getHeight();
+        // Convert cells to BufferedImage using reflection
+        Object image = cellsToImage(cells);
+        if (image == null) {
+            sb.append(normal());
+            sb.append(gotoXY(x, y));
+            for (int i = 0; i < cells.size(); i++) {
+                sb.append(' ');
+            }
+            return sb.toString();
+        }
 
-        /*
-         * From https://iterm2.com/documentation-images.html:
-         *
-         * Protocol
-         *
-         * iTerm2 extends the xterm protocol with a set of proprietary escape
-         * sequences. In general, the pattern is:
-         *
-         * ESC ] 1337 ; key = value ^G
-         *
-         * Whitespace is shown here for ease of reading: in practice, no
-         * spaces should be used.
-         *
-         * For file transfer and inline images, the code is:
-         *
-         * ESC ] 1337 ; File = [optional arguments] : base-64 encoded file contents ^G
-         *
-         * The optional arguments are formatted as key=value with a semicolon
-         * between each key-value pair. They are described below:
-         *
-         * Key          Description of value
-         * name         base-64 encoded filename. Defaults to "Unnamed file".
-         * size         File size in bytes. Optional; this is only used by the
-         *              progress indicator.
-         * width        Width to render. See notes below.
-         * height       Height to render. See notes below.
-         * preserveAspectRatio If set to 0, then the image's inherent aspect
-         *                     ratio will not be respected; otherwise, it
-         *                     will fill the specified width and height as
-         *                     much as possible without stretching. Defaults
-         *                     to 1.
-         * inline If set to 1, the file will be displayed inline. Otherwise,
-         *        it will be downloaded with no visual representation in the
-         *        terminal session. Defaults to 0.
-         *
-         * The width and height are given as a number followed by a unit, or
-         * the word "auto".
-         *
-         * N: N character cells.
-         * Npx: N pixels.
-         * N%: N percent of the session's width or height.
-         * auto: The image's inherent size will be used to determine an
-         *       appropriate dimension.
-         *
-         */
-
-        /*
-        // Logic for PNG encode is below.  Leaving it in for reference.
-        ByteArrayOutputStream jpgOutputStream = new ByteArrayOutputStream(1024);
-
-        // Convert from ARGB to RGB, otherwise the JPG encode will fail.
-        BufferedImage jpgImage = new BufferedImage(image.getWidth(),
-            image.getHeight(), BufferedImage.TYPE_INT_RGB);
-        int [] pixels = new int[image.getWidth() * image.getHeight()];
-        image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels,
-            0, image.getWidth());
-        jpgImage.setRGB(0, 0, image.getWidth(), image.getHeight(), pixels,
-            0, image.getWidth());
-
+        // Get image dimensions and encode to PNG using reflection
         try {
-            if (!ImageIO.write(jpgImage.getSubimage(0, 0,
-                        jpgImage.getWidth(),
-                        Math.min(jpgImage.getHeight(), fullHeight)),
-                    "JPG", jpgOutputStream)
-            ) {
-                // We failed to render image, bail out.
+            Class<?> helperClass = Class.forName("jexer.backend.ECMA48TerminalHelper");
+            
+            // Get image dimensions
+            Method getDimsMethod = helperClass.getMethod("getImageDimensions", Object.class);
+            int[] dims = (int[]) getDimsMethod.invoke(null, image);
+            if (dims == null) {
                 return "";
             }
-        } catch (IOException e) {
-            // We failed to render image, bail out.
-            return "";
-        }
-         */
+            int imageWidth = dims[0];
+            int imageHeight = dims[1];
 
-        // File contents can be several image formats.  We will use PNG.
-        ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream(1024);
-        try {
-            if (!ImageIO.write(image.getSubimage(0, 0, image.getWidth(),
-                        Math.min(image.getHeight(), fullHeight)),
-                    "PNG", pngOutputStream)
-            ) {
-                // We failed to render image, bail out.
+            // Encode to PNG
+            Method encodePNGMethod = helperClass.getMethod("encodeBufferedImagePNG", Object.class, int.class);
+            byte[] pngBytes = (byte[]) encodePNGMethod.invoke(null, image, imageHeight);
+            if (pngBytes == null) {
                 return "";
             }
-        } catch (IOException e) {
-            // We failed to render image, bail out.
+
+            sb.append("\033]1337;File=name=");
+            sb.append(StringUtils.toBase64("jexer".getBytes()));
+            sb.append(";inline=1;doNotMoveCursor=1;");
+            sb.append(String.format("width=%dpx;height=%dpx;preserveAspectRatio=1:",
+                    imageWidth, Math.min(imageHeight, getTextHeight())));
+
+            sb.append(StringUtils.toBase64(pngBytes));
+            sb.append("\007");
+
+            if (saveInCache) {
+                iterm2Cache.put(cells, sb.toString());
+            }
+
+            return (sortableGotoXY(x, y) + sb.toString());
+        } catch (Exception e) {
             return "";
         }
-
-        sb.append("\033]1337;File=name=");
-        sb.append(StringUtils.toBase64("jexer".getBytes()));
-        sb.append(";inline=1;doNotMoveCursor=1;");
-        sb.append(String.format("width=%dpx;height=%dpx;preserveAspectRatio=1:",
-                image.getWidth(), Math.min(image.getHeight(),
-                    getTextHeight())));
-
-        String bytes = StringUtils.toBase64(pngOutputStream.toByteArray());
-        sb.append(bytes);
-        sb.append("\007");
-
-        if (saveInCache) {
-            // This row is OK to save into the cache.
-            iterm2Cache.put(cells, sb.toString());
-        }
-
-        return (sortableGotoXY(x, y) + sb.toString());
     }
 
     /**
@@ -4207,7 +4275,7 @@ public class ECMA48Terminal extends LogicalScreen
         assert (cells.size() > 0);
         assert (cells.get(0).getImage() != null);
 
-        if (jexerImageOption == JexerImageOption.DISABLED) {
+        if (jexerImageOption == JexerImageOption.DISABLED || !awtAvailable) {
             sb.append(normal());
             sb.append(sortableGotoXY(x, y));
             for (int i = 0; i < cells.size(); i++) {
@@ -4216,110 +4284,87 @@ public class ECMA48Terminal extends LogicalScreen
             return sb.toString();
         }
 
-        // Save and get rows to/from the cache that do NOT have inverted
-        // cells.
+        // Save and get rows to/from the cache that do NOT have inverted cells.
         boolean saveInCache = true;
         for (Cell cell: cells) {
             if (cell.isInvertedImage()) {
                 saveInCache = false;
                 break;
             }
-            // Compute the hashcode so that the cell image hash is available
-            // for looking up in the image cache.
             cell.hashCode();
         }
         if (saveInCache) {
             String cachedResult = jexerCache.get(cells);
             if (cachedResult != null) {
-                // System.err.println("CACHE HIT");
                 sb.append(sortableGotoXY(x, y));
                 sb.append(cachedResult);
                 return sb.toString();
             }
-            // System.err.println("CACHE MISS");
         }
 
-        BufferedImage image = cellsToImage(cells);
-        int fullHeight = image.getHeight();
+        // Convert cells to BufferedImage using reflection
+        Object image = cellsToImage(cells);
+        if (image == null) {
+            sb.append(normal());
+            sb.append(sortableGotoXY(x, y));
+            for (int i = 0; i < cells.size(); i++) {
+                sb.append(' ');
+            }
+            return sb.toString();
+        }
 
-        if (jexerImageOption == JexerImageOption.PNG) {
-            // Encode as PNG
-            ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream(1024);
-            try {
-                if (!ImageIO.write(image.getSubimage(0, 0, image.getWidth(),
-                            Math.min(image.getHeight(), fullHeight)),
-                        "PNG", pngOutputStream)
-                ) {
-                    // We failed to render image, bail out.
-                    return "";
-                }
-            } catch (IOException e) {
-                // We failed to render image, bail out.
+        try {
+            Class<?> helperClass = Class.forName("jexer.backend.ECMA48TerminalHelper");
+            
+            // Get image dimensions
+            Method getDimsMethod = helperClass.getMethod("getImageDimensions", Object.class);
+            int[] dims = (int[]) getDimsMethod.invoke(null, image);
+            if (dims == null) {
                 return "";
             }
+            int imageWidth = dims[0];
+            int imageHeight = dims[1];
 
-            sb.append("\033]444;1;0;");
-            sb.append(StringUtils.toBase64(pngOutputStream.toByteArray()));
-            sb.append("\007");
-
-        } else if (jexerImageOption == JexerImageOption.JPG) {
-
-            // Encode as JPG
-            ByteArrayOutputStream jpgOutputStream = new ByteArrayOutputStream(1024);
-
-            // Convert from ARGB to RGB, otherwise the JPG encode will fail.
-            BufferedImage jpgImage = new BufferedImage(image.getWidth(),
-                image.getHeight(), BufferedImage.TYPE_INT_RGB);
-            int [] pixels = new int[image.getWidth() * image.getHeight()];
-            image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels,
-                0, image.getWidth());
-            jpgImage.setRGB(0, 0, image.getWidth(), image.getHeight(), pixels,
-                0, image.getWidth());
-
-            try {
-                if (!ImageIO.write(jpgImage.getSubimage(0, 0,
-                            jpgImage.getWidth(),
-                            Math.min(jpgImage.getHeight(), fullHeight)),
-                        "JPG", jpgOutputStream)
-                ) {
-                    // We failed to render image, bail out.
+            if (jexerImageOption == JexerImageOption.PNG) {
+                Method encodePNGMethod = helperClass.getMethod("encodeBufferedImagePNG", Object.class, int.class);
+                byte[] pngBytes = (byte[]) encodePNGMethod.invoke(null, image, imageHeight);
+                if (pngBytes == null) {
                     return "";
                 }
-            } catch (IOException e) {
-                // We failed to render image, bail out.
-                return "";
-            }
+                sb.append("\033]444;1;0;");
+                sb.append(StringUtils.toBase64(pngBytes));
+                sb.append("\007");
 
-            sb.append("\033]444;2;0;");
-            sb.append(StringUtils.toBase64(jpgOutputStream.toByteArray()));
-            sb.append("\007");
-
-        } else if (jexerImageOption == JexerImageOption.RGB) {
-
-            // RGB
-            sb.append(String.format("\033]444;0;%d;%d;0;", image.getWidth(),
-                    Math.min(image.getHeight(), fullHeight)));
-
-            byte [] bytes = new byte[image.getWidth() * image.getHeight() * 3];
-            int stride = image.getWidth();
-            for (int px = 0; px < stride; px++) {
-                for (int py = 0; py < image.getHeight(); py++) {
-                    int rgb = image.getRGB(px, py);
-                    bytes[(py * stride * 3) + (px * 3)]     = (byte) ((rgb >>> 16) & 0xFF);
-                    bytes[(py * stride * 3) + (px * 3) + 1] = (byte) ((rgb >>>  8) & 0xFF);
-                    bytes[(py * stride * 3) + (px * 3) + 2] = (byte) ( rgb         & 0xFF);
+            } else if (jexerImageOption == JexerImageOption.JPG) {
+                Method encodeJPGMethod = helperClass.getMethod("encodeBufferedImageJPG", Object.class, int.class);
+                byte[] jpgBytes = (byte[]) encodeJPGMethod.invoke(null, image, imageHeight);
+                if (jpgBytes == null) {
+                    return "";
                 }
+                sb.append("\033]444;2;0;");
+                sb.append(StringUtils.toBase64(jpgBytes));
+                sb.append("\007");
+
+            } else if (jexerImageOption == JexerImageOption.RGB) {
+                Method encodeRGBMethod = helperClass.getMethod("encodeBufferedImageRGB", Object.class, int.class);
+                byte[] rgbBytes = (byte[]) encodeRGBMethod.invoke(null, image, imageHeight);
+                if (rgbBytes == null) {
+                    return "";
+                }
+                sb.append(String.format("\033]444;0;%d;%d;0;", imageWidth,
+                        Math.min(imageHeight, imageHeight)));
+                sb.append(StringUtils.toBase64(rgbBytes));
+                sb.append("\007");
             }
-            sb.append(StringUtils.toBase64(bytes));
-            sb.append("\007");
-        }
 
-        if (saveInCache) {
-            // This row is OK to save into the cache.
-            jexerCache.put(cells, sb.toString());
-        }
+            if (saveInCache) {
+                jexerCache.put(cells, sb.toString());
+            }
 
-        return (gotoXY(x, y) + sb.toString());
+            return (gotoXY(x, y) + sb.toString());
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     /**
@@ -4355,43 +4400,67 @@ public class ECMA48Terminal extends LogicalScreen
         assert (cells.size() > 0);
         assert (cells.get(0).getImage() != null);
 
+        if (!awtAvailable || unicodeGlyphEncoder == null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(normal());
+            sb.append(sortableGotoXY(x, y));
+            for (int i = 0; i < cells.size(); i++) {
+                sb.append(' ');
+            }
+            return sb.toString();
+        }
+
         StringBuilder sb = new StringBuilder();
 
-        // Save and get rows to/from the cache that do NOT have inverted
-        // cells.
+        // Save and get rows to/from the cache that do NOT have inverted cells.
         boolean saveInCache = true;
         for (Cell cell: cells) {
             if (cell.isInvertedImage()) {
                 saveInCache = false;
                 break;
             }
-            // Compute the hashcode so that the cell image hash is available
-            // for looking up in the image cache.
             cell.hashCode();
         }
         if (saveInCache) {
             String cachedResult = unicodeGlyphCache.get(cells);
             if (cachedResult != null) {
-                // System.err.println("CACHE HIT");
                 sb.append(sortableGotoXY(x, y));
                 sb.append(cachedResult);
                 return sb.toString();
             }
-            // System.err.println("CACHE MISS");
         }
 
-        for (int i = 0; i < cells.size(); i++) {
-            BufferedImage image = toBufferedImage(cells.get(i).getImage());
-            sb.append(unicodeGlyphEncoder.toUnicodeGlyph(image,
-                    image.getWidth(), image.getHeight()));
-        }
+        try {
+            Class<?> bufferedImageClass = Class.forName("java.awt.image.BufferedImage");
+            Method toUnicodeGlyphMethod = unicodeGlyphEncoder.getClass().getMethod("toUnicodeGlyph",
+                bufferedImageClass, int.class, int.class);
 
-        if (saveInCache) {
-            // This row is OK to save into the cache.
-            unicodeGlyphCache.put(cells, sb.toString());
-        }
+            for (int i = 0; i < cells.size(); i++) {
+                Object image = toBufferedImage(cells.get(i).getImage());
+                if (image == null) {
+                    sb.append(' ');
+                    continue;
+                }
+                Class<?> helperClass = Class.forName("jexer.backend.ECMA48TerminalHelper");
+                Method getDimsMethod = helperClass.getMethod("getImageDimensions", Object.class);
+                int[] dims = (int[]) getDimsMethod.invoke(null, image);
+                if (dims == null) {
+                    sb.append(' ');
+                    continue;
+                }
+                String glyph = (String) toUnicodeGlyphMethod.invoke(unicodeGlyphEncoder,
+                    image, dims[0], dims[1]);
+                sb.append(glyph);
+            }
 
-        return (sortableGotoXY(x, y) + sb.toString());
+            if (saveInCache) {
+                unicodeGlyphCache.put(cells, sb.toString());
+            }
+
+            return (sortableGotoXY(x, y) + sb.toString());
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     // ------------------------------------------------------------------------
