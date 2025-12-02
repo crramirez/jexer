@@ -139,13 +139,14 @@
                 <exclude>**/backend/TextImpl$*.class</exclude>
                 <exclude>**/backend/BitmapImpl.class</exclude>
                 <exclude>**/backend/BitmapImpl$*.class</exclude>
+                <exclude>demo/DemoPixelsWindow.class</exclude>
+                <exclude>demo/Demo5.class</exclude>
               </excludes>
               <archive>
                 <manifest>
             <mainClass>
-                demo.Demo1
+                demo.DemoCore
               </mainClass>
-
                 </manifest>
                 <manifestEntries>
                   <Implementation-Version>${project.version}</Implementation-Version>
