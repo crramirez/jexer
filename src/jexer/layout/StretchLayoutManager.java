@@ -28,10 +28,10 @@
  */
 package jexer.layout;
 
-import java.awt.Rectangle;
 import java.util.HashMap;
 
 import jexer.TWidget;
+import jexer.bits.Rectangle;
 import jexer.event.TResizeEvent;
 
 /**

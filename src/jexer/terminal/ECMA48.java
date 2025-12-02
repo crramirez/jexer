@@ -28,8 +28,6 @@
  */
 package jexer.terminal;
 
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -44,11 +42,12 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import javax.imageio.ImageIO;
 
 import jexer.TKeypress;
 import jexer.backend.Backend;
@@ -595,6 +594,13 @@ public class ECMA48 implements Runnable {
     private GlyphMaker glyphMaker = null;
 
     /**
+     * The image helper for image parsing and rendering.
+     * This is loaded via reflection and may be null if java-desktop JAR
+     * is not available.
+     */
+    private Object imageHelper = null;
+
+    /**
      * Input queue for keystrokes and mouse events to send to the remote
      * side.
      */
@@ -774,6 +780,9 @@ public class ECMA48 implements Runnable {
         this.displayListener  = displayListener;
         this.backend = backend;
 
+        // Try to load the image helper via reflection
+        loadImageHelper();
+
         reset();
         for (int i = 0; i < height; i++) {
             display.add(new DisplayLine(currentState.attr));
@@ -784,6 +793,21 @@ public class ECMA48 implements Runnable {
         // Spin up the input reader
         readerThread = new Thread(this);
         readerThread.start();
+    }
+
+    /**
+     * Load the ECMA48ImageHelper via reflection.
+     */
+    private void loadImageHelper() {
+        try {
+            Class<?> helperClass = Class.forName("jexer.backend.ECMA48ImageHelper");
+            Constructor<?> constructor = helperClass.getConstructor(
+                int.class, int.class, Backend.class);
+            imageHelper = constructor.newInstance(textWidth, textHeight, backend);
+        } catch (Exception e) {
+            // java-desktop JAR not available, imageHelper remains null
+            imageHelper = null;
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -980,37 +1004,42 @@ public class ECMA48 implements Runnable {
 
     /**
      * Convert ImageRGB to BufferedImage for AWT Graphics operations.
+     * This delegates to imageHelper if available.
      *
      * @param imageRGB the ImageRGB to convert
-     * @return the BufferedImage, or null if imageRGB is null
+     * @return the BufferedImage, or null if imageRGB is null or imageHelper not available
      */
-    private BufferedImage toBufferedImage(final ImageRGB imageRGB) {
-        if (imageRGB == null) {
+    private Object toBufferedImage(final ImageRGB imageRGB) {
+        if (imageRGB == null || imageHelper == null) {
             return null;
         }
-        int width = imageRGB.getWidth();
-        int height = imageRGB.getHeight();
-        BufferedImage result = new BufferedImage(width, height,
-            BufferedImage.TYPE_INT_ARGB);
-        int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
-        result.setRGB(0, 0, width, height, pixels, 0, width);
-        return result;
+        try {
+            Method method = imageHelper.getClass().getMethod("toBufferedImage",
+                ImageRGB.class);
+            return method.invoke(imageHelper, imageRGB);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
      * Convert BufferedImage to ImageRGB.
+     * This delegates to imageHelper if available.
      *
      * @param bufferedImage the BufferedImage to convert
-     * @return the ImageRGB, or null if bufferedImage is null
+     * @return the ImageRGB, or null if bufferedImage is null or imageHelper not available
      */
-    private ImageRGB toImageRGB(final BufferedImage bufferedImage) {
-        if (bufferedImage == null) {
+    private ImageRGB toImageRGBFromBuffered(final Object bufferedImage) {
+        if (bufferedImage == null || imageHelper == null) {
             return null;
         }
-        int width = bufferedImage.getWidth();
-        int height = bufferedImage.getHeight();
-        int[] pixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
-        return new ImageRGB(width, height, pixels);
+        try {
+            Method method = imageHelper.getClass().getMethod("toImageRGB",
+                bufferedImage.getClass());
+            return (ImageRGB) method.invoke(imageHelper, bufferedImage);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -8433,61 +8462,12 @@ public class ECMA48 implements Runnable {
     private void parseJexerImageFile(final int type, final String ps,
         final String data) {
 
-        int imageWidth = 0;
-        int imageHeight = 0;
+        // If image helper is not available, return
+        if (imageHelper == null) {
+            return;
+        }
+
         boolean scroll = false;
-        BufferedImage bImage = null;
-        boolean maybeTransparent = false;
-        try {
-            byte [] bytes = StringUtils.fromBase64(data.getBytes());
-
-            switch (type) {
-            case 1:
-                if ((bytes[0] != (byte) 0x89)
-                    || (bytes[1] != 'P')
-                    || (bytes[2] != 'N')
-                    || (bytes[3] != 'G')
-                    || (bytes[4] != (byte) 0x0D)
-                    || (bytes[5] != (byte) 0x0A)
-                    || (bytes[6] != (byte) 0x1A)
-                    || (bytes[7] != (byte) 0x0A)
-                ) {
-                    // File does not have PNG header, bail out.
-                    return;
-                }
-                maybeTransparent = true;
-                break;
-
-            case 2:
-                if ((bytes[0] != (byte) 0XFF)
-                    || (bytes[1] != (byte) 0xD8)
-                    || (bytes[2] != (byte) 0xFF)
-                ) {
-                    // File does not have JPG header, bail out.
-                    return;
-                }
-                break;
-
-            default:
-                // Unsupported type, bail out.
-                return;
-            }
-
-            bImage = ImageIO.read(new ByteArrayInputStream(bytes));
-        } catch (IOException e) {
-            // SQUASH
-            return;
-        }
-        assert (bImage != null);
-        imageWidth = bImage.getWidth();
-        imageHeight = bImage.getHeight();
-        if ((imageWidth < 1)
-            || (imageWidth > 10000)
-            || (imageHeight < 1)
-            || (imageHeight > 10000)
-        ) {
-            return;
-        }
         if (ps.equals("1")) {
             scroll = true;
         } else if (ps.equals("0")) {
@@ -8495,13 +8475,34 @@ public class ECMA48 implements Runnable {
         } else {
             return;
         }
+
+        // Parse the image via the helper
+        ImageRGB imageRGB = null;
+        boolean maybeTransparent = (type == 1); // PNG may have transparency
+        try {
+            Method method = imageHelper.getClass().getMethod("parseJexerImageFile",
+                int.class, String.class);
+            imageRGB = (ImageRGB) method.invoke(imageHelper, type, data);
+        } catch (Exception e) {
+            return;
+        }
+
+        if (imageRGB == null) {
+            return;
+        }
+
+        // Check transparency via helper if PNG
         if (maybeTransparent) {
-            if (bImage.getTransparency() == java.awt.Transparency.OPAQUE) {
+            try {
+                Method method = imageHelper.getClass().getMethod(
+                    "isJexerImageFileTransparent", int.class, String.class);
+                maybeTransparent = (Boolean) method.invoke(imageHelper, type, data);
+            } catch (Exception e) {
                 maybeTransparent = false;
             }
         }
 
-        imageToCells(toImageRGB(bImage), scroll, maybeTransparent);
+        imageToCells(imageRGB, scroll, maybeTransparent);
     }
 
     /**
@@ -8513,6 +8514,11 @@ public class ECMA48 implements Runnable {
      * "1337".
      */
     private void parseIterm2Image(final String [] args) {
+        // If image helper is not available, return
+        if (imageHelper == null) {
+            return;
+        }
+
         // If the file data is opaque, pass that to imageToCells().
         boolean maybeTransparent = true;
 
@@ -8612,23 +8618,21 @@ public class ECMA48 implements Runnable {
             }
         }
 
-        // We have the options and image data, and it will be displayed.  Now
-        // try to decode it into a bitmap.  We go blindly into the night as
-        // far as image format is concerned.
-        BufferedImage image = null;
-        byte [] bytes = StringUtils.fromBase64(data.getBytes());
-        if (bytes == null) {
-            return;
-        }
+        // Get image dimensions from helper
+        int[] dims = null;
         try {
-            image = ImageIO.read(new ByteArrayInputStream(bytes));
-        } catch (IOException e) {
-            // SQUASH
+            Method method = imageHelper.getClass().getMethod(
+                "getIterm2ImageDimensions", String.class);
+            dims = (int[]) method.invoke(imageHelper, data);
+        } catch (Exception e) {
             return;
         }
-        assert (image != null);
-        int fileImageWidth = image.getWidth();
-        int fileImageHeight = image.getHeight();
+        if (dims == null) {
+            return;
+        }
+        int fileImageWidth = dims[0];
+        int fileImageHeight = dims[1];
+
         if ((fileImageWidth < 1)
             || (fileImageWidth > 10000)
             || (fileImageHeight < 1)
@@ -8636,8 +8640,14 @@ public class ECMA48 implements Runnable {
         ) {
             return;
         }
+
+        // Check transparency via helper
         if (maybeTransparent) {
-            if (image.getTransparency() == java.awt.Transparency.OPAQUE) {
+            try {
+                Method method = imageHelper.getClass().getMethod(
+                    "isIterm2ImageTransparent", String.class);
+                maybeTransparent = (Boolean) method.invoke(imageHelper, data);
+            } catch (Exception e) {
                 maybeTransparent = false;
             }
         }
@@ -8706,35 +8716,29 @@ public class ECMA48 implements Runnable {
             return;
         }
 
-        /*
-        System.err.println("File dims " + fileImageWidth + "x" +
-            fileImageHeight +
-            "Disp dims " + displayWidth + "x" + displayHeight);
-        */
-
         if (doNotMoveCursor) {
             // Truncate image height to fit the screen.
             displayHeight = Math.min(height * textHeight, displayHeight);
         }
 
-        if (preserveAspectRatio
-            && ((displayWidth != fileImageWidth)
-                || (displayHeight != fileImageHeight))
-        ) {
-            // Scale the image to fit the requested dimensions.
-            image = ImageUtils.scaleImage(image, displayWidth, displayHeight,
-                ImageUtils.Scale.SCALE,
+        // Parse and scale the image via helper
+        ImageRGB imageRGB = null;
+        try {
+            Method method = imageHelper.getClass().getMethod(
+                "parseAndScaleIterm2Image", String.class, int.class, int.class,
+                boolean.class, ColorRGB.class);
+            imageRGB = (ImageRGB) method.invoke(imageHelper, data,
+                displayWidth, displayHeight, preserveAspectRatio,
                 backend.attrToBackgroundColor(currentState.attr));
-        } else if ((displayWidth != fileImageWidth)
-            || (displayHeight != fileImageHeight)
-        ) {
-            // Scale the image to fit the requested dimensions.
-            image = ImageUtils.scaleImage(image, displayWidth, displayHeight,
-                ImageUtils.Scale.STRETCH,
-                backend.attrToBackgroundColor(currentState.attr));
+        } catch (Exception e) {
+            return;
         }
 
-        imageToCells(toImageRGB(image), !doNotMoveCursor, maybeTransparent);
+        if (imageRGB == null) {
+            return;
+        }
+
+        imageToCells(imageRGB, !doNotMoveCursor, maybeTransparent);
     }
 
     /**
@@ -8748,35 +8752,12 @@ public class ECMA48 implements Runnable {
     private void imageToCells(ImageRGB imageRGB, final boolean scroll,
         final boolean maybeTransparent) {
 
-        assert (imageRGB != null);
-        
-        // Convert to BufferedImage for internal Graphics operations
-        BufferedImage image = toBufferedImage(imageRGB);
+        // If image helper is not available or imageRGB is null, return
+        if (imageHelper == null || imageRGB == null) {
+            return;
+        }
 
         screenIsDirty = true;
-
-        /*
-         * Procedure:
-         *
-         * Break up the image into text cell sized pieces as a new array of
-         * Cells.
-         *
-         * Note original column position x0.
-         *
-         * For each cell:
-         *
-         * 1. Advance (printCharacter(' ')) for horizontal increment, or
-         *    index (linefeed() + cursorPosition(y, x0)) for vertical
-         *    increment.
-         *
-         * 2. Set (x, y) cell image data.
-         *
-         * 3. For the right and bottom edges (not yet done):
-         *
-         *   a. Render the text to pixels using Terminus font.
-         *
-         *   b. Blit the image on top of the text, using alpha channel.
-         */
 
         // If the backend supports transparent images, then we will not
         // draw the black underneath the cells.
@@ -8786,101 +8767,36 @@ public class ECMA48 implements Runnable {
             transparent = true;
         }
 
-        int cellColumns = image.getWidth() / textWidth;
-        while (cellColumns * textWidth < image.getWidth()) {
-            cellColumns++;
-        }
-        int cellRows = image.getHeight() / textHeight;
-        while (cellRows * textHeight < image.getHeight()) {
-            cellRows++;
-        }
+        // Get cells from the image helper
+        ComplexCell[][] cells = null;
+        int cellColumns = 0;
+        int cellRows = 0;
+        try {
+            // Update helper with current text dimensions
+            Method setDimMethod = imageHelper.getClass().getMethod(
+                "setTextDimensions", int.class, int.class);
+            setDimMethod.invoke(imageHelper, textWidth, textHeight);
 
-        // See the comment in parseSixel().  The partially-transparent cell
-        // will be rendered over a black background below inside the loop.
-        if (false && !transparent && maybeTransparent) {
-            // Re-render the image against a black background, so that alpha
-            // in the image does not lead to bleed-through artifacts.
-            BufferedImage newImage;
-            newImage = new BufferedImage(cellColumns * textWidth,
-                cellRows * textHeight, BufferedImage.TYPE_INT_ARGB);
-
-            java.awt.Graphics gr = newImage.getGraphics();
-            gr.setColor(java.awt.Color.BLACK);
-            gr.fillRect(0, 0, newImage.getWidth(), newImage.getHeight());
-            gr.drawImage(image, 0, 0, null, null);
-            gr.dispose();
-            image = newImage;
+            // Get the cell array from the image
+            Method getCellsMethod = imageHelper.getClass().getMethod(
+                "imageToCellArray", ImageRGB.class, boolean.class, boolean.class);
+            cells = (ComplexCell[][]) getCellsMethod.invoke(imageHelper,
+                imageRGB, transparent, maybeTransparent);
+        } catch (Exception e) {
+            // Image helper failed, return
+            return;
         }
 
-        // Break the image up into an array of cells.
-        int imageId = System.identityHashCode(this);
-        imageId ^= (int) System.currentTimeMillis();
-        ComplexCell [][] cells = new ComplexCell[cellColumns][cellRows];
-        for (int x = 0; x < cellColumns; x++) {
-            for (int y = 0; y < cellRows; y++) {
-                int width = textWidth;
-                if ((x + 1) * textWidth > image.getWidth()) {
-                    width = image.getWidth() - (x * textWidth);
-                }
-                int height = textHeight;
-                if ((y + 1) * textHeight > image.getHeight()) {
-                    height = image.getHeight() - (y * textHeight);
-                }
-
-                // I'm genuinely not sure if making many small cells with
-                // array copy is better than lots of subImages.  Memory
-                // pressure is killing it at high animation rates.  For now,
-                // we will ALWAYS make a copy.
-                ComplexCell cell = new ComplexCell();
-
-                BufferedImage imageSlice = image.getSubimage(x * textWidth,
-                    y * textHeight, width, height);
-
-                if (ImageUtils.isFullyTransparent(imageSlice)) {
-                    // There is nothing more to do, this entire image is
-                    // empty.
-
-                    // NOP
-                } else {
-                    BufferedImage newImage;
-                    newImage = new BufferedImage(textWidth, textHeight,
-                        BufferedImage.TYPE_INT_ARGB);
-                    java.awt.Graphics gr = newImage.getGraphics();
-                    gr.setColor(java.awt.Color.BLACK);
-                    if (!transparent) {
-                        gr.fillRect(0, 0, newImage.getWidth(),
-                            newImage.getHeight());
-                    }
-                    gr.drawImage(imageSlice, 0, 0, null, null);
-                    gr.dispose();
-
-                    imageId++;
-                    cell.setImage(toImageRGB(newImage), imageId & 0x7FFFFFFF);
-
-                    if (maybeTransparent) {
-                        // Check now if this cell has transparent pixels.
-                        // This will slow down the reader thread but unload
-                        // the render thread.
-                        //
-                        // Truth is performance is going to be bad for a
-                        // while...
-                        cell.isTransparentImage();
-                    } else {
-                        // We support transparency, but this image doesn't
-                        // have any transparent pixels.  Force the cell to
-                        // never check transparency.
-                        cell.setOpaqueImage();
-                    }
-                }
-                cells[x][y] = cell;
-            }
+        if (cells == null || cells.length == 0) {
+            return;
         }
+        cellColumns = cells.length;
+        cellRows = cells[0].length;
 
         int x0 = currentState.cursorX;
         int y0 = currentState.cursorY;
         for (int y = 0; y < cellRows; y++) {
             DisplayLine line = display.get(currentState.cursorY);
-            BufferedImage newImage;
 
             for (int x = 0; x < cellColumns; x++) {
                 assert (currentState.cursorX <= rightMargin);
@@ -8894,43 +8810,17 @@ public class ECMA48 implements Runnable {
                     && cells[x][y].isTransparentImage()
                 ) {
                     if (oldCell.isImage()) {
-                        // Blit the old cell image underneath this cell's
-                        // image.
-                        newImage = new BufferedImage(textWidth,
-                            textHeight, BufferedImage.TYPE_INT_ARGB);
-
-                        java.awt.Graphics gr = newImage.getGraphics();
-                        gr.setColor(java.awt.Color.BLACK);
-                        gr.drawImage(toBufferedImage(oldCell.getImage()), 0, 0, null, null);
-                        gr.drawImage(toBufferedImage(cells[x][y].getImage()), 0, 0, null, null);
-                        gr.dispose();
-                        cells[x][y].setImage(toImageRGB(newImage));
-                        cells[x][y].isTransparentImage();
-                    } else if (false) {
-                        // This path would be good for the ECMA48 backend, as
-                        // it renders all images onto cells at once.  On the
-                        // Swing backend it can lead to multiple fonts and
-                        // kind of weird looking things, so leaving it
-                        // disabled.
-
-                        // Render the old cell text underneath this cell.
-                        if (lastTextHeight != textHeight) {
-                            glyphMaker = GlyphMaker.getInstance(textHeight);
-                            lastTextHeight = textHeight;
+                        // Blit the old cell image underneath this cell's image.
+                        try {
+                            Method blendMethod = imageHelper.getClass().getMethod(
+                                "blendImages", ImageRGB.class, ImageRGB.class);
+                            ImageRGB blended = (ImageRGB) blendMethod.invoke(
+                                imageHelper, oldCell.getImage(), cells[x][y].getImage());
+                            cells[x][y].setImage(blended);
+                            cells[x][y].isTransparentImage();
+                        } catch (Exception e) {
+                            // Blending failed, use original cell
                         }
-                        newImage = new BufferedImage(textWidth,
-                            textHeight, BufferedImage.TYPE_INT_ARGB);
-
-                        ImageRGB textImage = glyphMaker.getImage(oldCell,
-                            textWidth, textHeight, backend);
-
-                        java.awt.Graphics gr = newImage.getGraphics();
-                        gr.setColor(java.awt.Color.BLACK);
-                        gr.drawImage(toBufferedImage(textImage), 0, 0, null, null);
-                        gr.drawImage(toBufferedImage(cells[x][y].getImage()), 0, 0, null, null);
-                        gr.dispose();
-                        cells[x][y].setImage(toImageRGB(newImage));
-                        cells[x][y].isTransparentImage();
                     }
                 }
                 if (cells[x][y].isImage()) {

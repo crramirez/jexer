@@ -111,6 +111,8 @@
                 <exclude>**/backend/TButtonDrawHelper$*.class</exclude>
                 <exclude>**/backend/ImageRGBUtils.class</exclude>
                 <exclude>**/backend/ImageRGBUtils$*.class</exclude>
+                <exclude>**/backend/ECMA48ImageHelper.class</exclude>
+                <exclude>**/backend/ECMA48ImageHelper$*.class</exclude>
               </excludes>
               <archive>
                 <manifest>
@@ -145,6 +147,8 @@
                 <include>**/backend/TButtonDrawHelper$*.class</include>
                 <include>**/backend/ImageRGBUtils.class</include>
                 <include>**/backend/ImageRGBUtils$*.class</include>
+                <include>**/backend/ECMA48ImageHelper.class</include>
+                <include>**/backend/ECMA48ImageHelper$*.class</include>
               </includes>
               <archive>
                 <manifest>
