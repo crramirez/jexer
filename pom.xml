@@ -123,6 +123,8 @@
                 <exclude>**/backend/FontHelper$*.class</exclude>
                 <exclude>**/backend/TImageHelper.class</exclude>
                 <exclude>**/backend/TImageHelper$*.class</exclude>
+                <exclude>**/backend/TackboardHelper.class</exclude>
+                <exclude>**/backend/TackboardHelper$*.class</exclude>
               </excludes>
               <archive>
                 <manifest>
@@ -169,6 +171,8 @@
                 <include>**/backend/FontHelper$*.class</include>
                 <include>**/backend/TImageHelper.class</include>
                 <include>**/backend/TImageHelper$*.class</include>
+                <include>**/backend/TackboardHelper.class</include>
+                <include>**/backend/TackboardHelper$*.class</include>
               </includes>
               <archive>
                 <manifest>
