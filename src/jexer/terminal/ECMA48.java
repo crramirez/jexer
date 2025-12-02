@@ -8734,21 +8734,24 @@ public class ECMA48 implements Runnable {
                 backend.attrToBackgroundColor(currentState.attr));
         }
 
-        imageToCells(image, !doNotMoveCursor, maybeTransparent);
+        imageToCells(toImageRGB(image), !doNotMoveCursor, maybeTransparent);
     }
 
     /**
      * Break up an image into the cells at the current cursor.
      *
-     * @param image the image to display
+     * @param imageRGB the image to display
      * @param scroll if true, scroll the image and move the cursor
      * @param maybeTransparent if true, this image format might have
      * transparency
      */
-    private void imageToCells(BufferedImage image, final boolean scroll,
+    private void imageToCells(ImageRGB imageRGB, final boolean scroll,
         final boolean maybeTransparent) {
 
-        assert (image != null);
+        assert (imageRGB != null);
+        
+        // Convert to BufferedImage for internal Graphics operations
+        BufferedImage image = toBufferedImage(imageRGB);
 
         screenIsDirty = true;
 
@@ -8852,7 +8855,7 @@ public class ECMA48 implements Runnable {
                     gr.dispose();
 
                     imageId++;
-                    cell.setImage(newImage, imageId & 0x7FFFFFFF);
+                    cell.setImage(toImageRGB(newImage), imageId & 0x7FFFFFFF);
 
                     if (maybeTransparent) {
                         // Check now if this cell has transparent pixels.
@@ -8898,10 +8901,10 @@ public class ECMA48 implements Runnable {
 
                         java.awt.Graphics gr = newImage.getGraphics();
                         gr.setColor(java.awt.Color.BLACK);
-                        gr.drawImage(oldCell.getImage(), 0, 0, null, null);
-                        gr.drawImage(cells[x][y].getImage(), 0, 0, null, null);
+                        gr.drawImage(toBufferedImage(oldCell.getImage()), 0, 0, null, null);
+                        gr.drawImage(toBufferedImage(cells[x][y].getImage()), 0, 0, null, null);
                         gr.dispose();
-                        cells[x][y].setImage(newImage);
+                        cells[x][y].setImage(toImageRGB(newImage));
                         cells[x][y].isTransparentImage();
                     } else if (false) {
                         // This path would be good for the ECMA48 backend, as
@@ -8918,15 +8921,15 @@ public class ECMA48 implements Runnable {
                         newImage = new BufferedImage(textWidth,
                             textHeight, BufferedImage.TYPE_INT_ARGB);
 
-                        BufferedImage textImage = glyphMaker.getImage(oldCell,
+                        ImageRGB textImage = glyphMaker.getImage(oldCell,
                             textWidth, textHeight, backend);
 
                         java.awt.Graphics gr = newImage.getGraphics();
                         gr.setColor(java.awt.Color.BLACK);
-                        gr.drawImage(textImage, 0, 0, null, null);
-                        gr.drawImage(cells[x][y].getImage(), 0, 0, null, null);
+                        gr.drawImage(toBufferedImage(textImage), 0, 0, null, null);
+                        gr.drawImage(toBufferedImage(cells[x][y].getImage()), 0, 0, null, null);
                         gr.dispose();
-                        cells[x][y].setImage(newImage);
+                        cells[x][y].setImage(toImageRGB(newImage));
                         cells[x][y].isTransparentImage();
                     }
                 }
