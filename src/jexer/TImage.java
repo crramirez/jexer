@@ -35,6 +35,7 @@ import java.awt.image.BufferedImage;
 
 import jexer.bits.Animation;
 import jexer.bits.Cell;
+import jexer.bits.ImageRGB;
 import jexer.bits.ImageUtils;
 import jexer.bits.UnicodeGlyphImage;
 import jexer.event.TCommandEvent;
@@ -563,6 +564,41 @@ public class TImage extends TWidget implements EditMenuUser {
     // ------------------------------------------------------------------------
 
     /**
+     * Convert BufferedImage to ImageRGB.
+     *
+     * @param bufferedImage the BufferedImage to convert
+     * @return the ImageRGB
+     */
+    private static ImageRGB toImageRGB(final BufferedImage bufferedImage) {
+        if (bufferedImage == null) {
+            return null;
+        }
+        int width = bufferedImage.getWidth();
+        int height = bufferedImage.getHeight();
+        int[] pixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
+        return new ImageRGB(width, height, pixels);
+    }
+
+    /**
+     * Convert ImageRGB to BufferedImage.
+     *
+     * @param imageRGB the ImageRGB to convert
+     * @return the BufferedImage
+     */
+    private static BufferedImage toBufferedImage(final ImageRGB imageRGB) {
+        if (imageRGB == null) {
+            return null;
+        }
+        int width = imageRGB.getWidth();
+        int height = imageRGB.getHeight();
+        BufferedImage result = new BufferedImage(width, height,
+            BufferedImage.TYPE_INT_ARGB);
+        int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
+        result.setRGB(0, 0, width, height, pixels, 0, width);
+        return result;
+    }
+
+    /**
      * Size cells[][] according to the screen font size.
      *
      * @param always if true, always resize the cells
@@ -639,7 +675,7 @@ public class TImage extends TWidget implements EditMenuUser {
                     gr.drawImage(subImage, 0, 0, null, null);
                     gr.dispose();
 
-                    cell.setImage(newImage);
+                    cell.setImage(toImageRGB(newImage));
                     if (!maybeTransparent) {
                         cell.setOpaqueImage();
                     } else if (!ImageUtils.isFullyTransparent(newImage)) {
@@ -661,7 +697,7 @@ public class TImage extends TWidget implements EditMenuUser {
                         break;
                     case BLOCKS:
                         if (cell.isImage()) {
-                            int rgb = ImageUtils.rgbAverage(cell.getImage());
+                            int rgb = ImageUtils.rgbAverage(toBufferedImage(cell.getImage()));
                             Cell newCell = new Cell(' ');
                             newCell.setForeColorRGB(rgb);
                             newCell.setBackColorRGB(rgb);

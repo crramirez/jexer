@@ -47,6 +47,7 @@ import jexer.backend.ECMA48Terminal;
 import jexer.backend.SwingTerminal;
 import jexer.bits.Cell;
 import jexer.bits.GlyphMaker;
+import jexer.bits.ImageRGB;
 import jexer.event.TCommandEvent;
 import jexer.event.TKeypressEvent;
 import jexer.event.TMenuEvent;
@@ -825,6 +826,41 @@ public class TTerminal extends TScrollable
     // ------------------------------------------------------------------------
 
     /**
+     * Convert ImageRGB to BufferedImage.
+     *
+     * @param imageRGB the ImageRGB to convert
+     * @return the BufferedImage
+     */
+    private static BufferedImage toBufferedImage(final ImageRGB imageRGB) {
+        if (imageRGB == null) {
+            return null;
+        }
+        int width = imageRGB.getWidth();
+        int height = imageRGB.getHeight();
+        BufferedImage result = new BufferedImage(width, height,
+            BufferedImage.TYPE_INT_ARGB);
+        int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
+        result.setRGB(0, 0, width, height, pixels, 0, width);
+        return result;
+    }
+
+    /**
+     * Convert BufferedImage to ImageRGB.
+     *
+     * @param bufferedImage the BufferedImage to convert
+     * @return the ImageRGB
+     */
+    private static ImageRGB toImageRGB(final BufferedImage bufferedImage) {
+        if (bufferedImage == null) {
+            return null;
+        }
+        int width = bufferedImage.getWidth();
+        int height = bufferedImage.getHeight();
+        int[] pixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
+        return new ImageRGB(width, height, pixels);
+    }
+
+    /**
      * Update the display to account for a change in scrollback.
      */
     private void setDirty() {
@@ -1305,17 +1341,20 @@ public class TTerminal extends TScrollable
         }
         assert (doubleFont != null);
 
-        BufferedImage image;
+        ImageRGB imageRGB;
         if (line.getDoubleHeight() == 1) {
             // Double-height top half: don't draw the underline.
             Cell newCell = new Cell(cell);
             newCell.setUnderline(false);
-            image = doubleFont.getImage(newCell, textWidth * 2, textHeight * 2,
+            imageRGB = doubleFont.getImage(newCell, textWidth * 2, textHeight * 2,
                 getApplication().getBackend(), cursorBlinkVisible);
         } else {
-            image = doubleFont.getImage(cell, textWidth * 2, textHeight * 2,
+            imageRGB = doubleFont.getImage(cell, textWidth * 2, textHeight * 2,
                 getApplication().getBackend(), cursorBlinkVisible);
         }
+        
+        // Convert to BufferedImage for Graphics operations
+        BufferedImage image = toBufferedImage(imageRGB);
 
         // Now that we have the double-wide glyph drawn, copy the right
         // pieces of it to the cells.
@@ -1358,10 +1397,10 @@ public class TTerminal extends TScrollable
         // which looks wrong.
         left.setChar(' ');
         right.setChar(' ');
-        left.setImage(leftImage, Math.abs(leftImage.hashCode()));
+        left.setImage(toImageRGB(leftImage), Math.abs(leftImage.hashCode()));
         left.setOpaqueImage();
         left.setWidth(Cell.Width.LEFT);
-        right.setImage(rightImage, Math.abs(rightImage.hashCode()));
+        right.setImage(toImageRGB(rightImage), Math.abs(rightImage.hashCode()));
         right.setOpaqueImage();
         right.setWidth(Cell.Width.RIGHT);
         putCharXY(x, y, left);

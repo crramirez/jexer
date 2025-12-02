@@ -37,6 +37,7 @@ import jexer.backend.Screen;
 import jexer.bits.Cell;
 import jexer.bits.ColorRGB;
 import jexer.bits.GlyphMaker;
+import jexer.bits.ImageRGB;
 import jexer.bits.ImageUtils;
 
 /**
@@ -115,6 +116,41 @@ public class Tackboard {
     // ------------------------------------------------------------------------
     // Tackboard --------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Convert ImageRGB to BufferedImage.
+     *
+     * @param imageRGB the ImageRGB to convert
+     * @return the BufferedImage
+     */
+    private static BufferedImage toBufferedImage(final ImageRGB imageRGB) {
+        if (imageRGB == null) {
+            return null;
+        }
+        int width = imageRGB.getWidth();
+        int height = imageRGB.getHeight();
+        BufferedImage result = new BufferedImage(width, height,
+            BufferedImage.TYPE_INT_ARGB);
+        int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
+        result.setRGB(0, 0, width, height, pixels, 0, width);
+        return result;
+    }
+
+    /**
+     * Convert BufferedImage to ImageRGB.
+     *
+     * @param bufferedImage the BufferedImage to convert
+     * @return the ImageRGB
+     */
+    private static ImageRGB toImageRGB(final BufferedImage bufferedImage) {
+        if (bufferedImage == null) {
+            return null;
+        }
+        int width = bufferedImage.getWidth();
+        int height = bufferedImage.getHeight();
+        int[] pixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
+        return new ImageRGB(width, height, pixels);
+    }
 
     /**
      * Set dirty flag.
@@ -283,14 +319,14 @@ public class Tackboard {
 
                     if (oldCell.isImage()) {
                         // Blit this image over that one.
-                        BufferedImage oldImage = oldCell.getImage(true);
+                        BufferedImage oldImage = toBufferedImage(oldCell.getImage(true));
                         java.awt.Graphics gr = oldImage.getGraphics();
                         gr.setColor(toAwtColor(screen.getBackend().
                             attrToBackgroundColor(oldCell)));
                         gr.drawImage(newImage, 0, 0, null, null);
                         gr.dispose();
                         imageId++;
-                        oldCell.setImage(oldImage, imageId & 0x7FFFFFFF);
+                        oldCell.setImage(toImageRGB(oldImage), imageId & 0x7FFFFFFF);
                     } else {
                         // Old cell is text only, just add the image.
                         if (!transparent) {
@@ -307,10 +343,10 @@ public class Tackboard {
                             gr.drawImage(newImage, 0, 0, null, null);
                             gr.dispose();
                             imageId++;
-                            oldCell.setImage(backImage, imageId & 0x7FFFFFFF);
+                            oldCell.setImage(toImageRGB(backImage), imageId & 0x7FFFFFFF);
                         } else {
                             imageId++;
-                            oldCell.setImage(newImage, imageId & 0x7FFFFFFF);
+                            oldCell.setImage(toImageRGB(newImage), imageId & 0x7FFFFFFF);
                         }
                     }
                     screen.putCharXY(sx + textX + left, sy + textY + top,
