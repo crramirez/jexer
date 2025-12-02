@@ -48,6 +48,15 @@ import static jexer.TKeypress.*;
 public class TScreenOptionsWindow extends TWindow {
 
     // ------------------------------------------------------------------------
+    // Constants --------------------------------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * Font style constant for plain style (equivalent to java.awt.Font.PLAIN).
+     */
+    private static final int FONT_STYLE_PLAIN = 0;
+
+    // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
     // ------------------------------------------------------------------------
 
@@ -497,7 +506,7 @@ public class TScreenOptionsWindow extends TWindow {
                             terminal.setDefaultFont();
                         } else {
                             Object newFont = createFont(fontName.getText(),
-                                0, terminal.getFontSize());
+                                FONT_STYLE_PLAIN, terminal.getFontSize());
                             if (newFont != null) {
                                 terminal.setFont(newFont);
                             }

@@ -3217,6 +3217,11 @@ public abstract class TWidget implements Comparable<TWidget> {
     }
 
     /**
+     * Cached toImageRGB method reference for reflection.
+     */
+    private static java.lang.reflect.Method toImageRGBMethod;
+
+    /**
      * Convert a BufferedImage (as Object) to ImageRGB via reflection.
      *
      * @param image the BufferedImage object
@@ -3233,22 +3238,19 @@ public abstract class TWidget implements Comparable<TWidget> {
             return null;
         }
         try {
-            return (ImageRGB) imageHelperClass.getMethod("toImageRGB",
-                image.getClass()).invoke(null, image);
-        } catch (Exception e) {
-            // Try with Object parameter
-            try {
-                // Get the method that accepts BufferedImage
-                java.lang.reflect.Method[] methods = imageHelperClass.getMethods();
-                for (java.lang.reflect.Method method : methods) {
-                    if (method.getName().equals("toImageRGB")
-                        && method.getParameterCount() == 1) {
-                        return (ImageRGB) method.invoke(null, image);
-                    }
+            // Cache the method reference for efficiency
+            if (toImageRGBMethod == null) {
+                // TImageHelper.toImageRGB accepts BufferedImage
+                try {
+                    Class<?> bufferedImageClass = Class.forName("java.awt.image.BufferedImage");
+                    toImageRGBMethod = imageHelperClass.getMethod("toImageRGB",
+                        bufferedImageClass);
+                } catch (ClassNotFoundException e) {
+                    return null;
                 }
-            } catch (Exception e2) {
-                // Ignore
             }
+            return (ImageRGB) toImageRGBMethod.invoke(null, image);
+        } catch (Exception e) {
             return null;
         }
     }
