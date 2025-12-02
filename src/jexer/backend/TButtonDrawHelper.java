@@ -57,13 +57,7 @@ public class TButtonDrawHelper {
      * @return the ImageRGB
      */
     private static ImageRGB toImageRGB(final BufferedImage bufferedImage) {
-        if (bufferedImage == null) {
-            return null;
-        }
-        int width = bufferedImage.getWidth();
-        int height = bufferedImage.getHeight();
-        int[] pixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
-        return new ImageRGB(width, height, pixels);
+        return ImageRGBUtils.toImageRGB(bufferedImage);
     }
 
     /**
@@ -80,8 +74,8 @@ public class TButtonDrawHelper {
      * @param buttonRgb the button color as java.awt.Color
      * @param inButtonPress whether the button is being pressed
      * @param imageIdBase base for generating unique image IDs
-     * @return an array of 6 Cell objects: [leftEdgeChar, rightEdgeChar, 
-     *         leftEdgeShadowChar, rightEdgeShadowCharTop, 
+     * @return an array of 6 Cell objects: [leftEdgeChar, rightEdgeChar,
+     *         leftEdgeShadowChar, rightEdgeShadowCharTop,
      *         rightEdgeShadowCharBottom, shadowCharBottom]
      */
     public static Cell[] drawEnds(final TButton.Style style,

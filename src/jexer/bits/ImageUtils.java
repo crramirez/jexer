@@ -165,9 +165,10 @@ public class ImageUtils {
      * @param backColor the background color to use for Scale.SCALE
      * @return the scaled image, or null if java.desktop is not available
      */
+    @SuppressWarnings("unchecked")
     public static ImageRGB scaleImage(final ImageRGB image,
-        final int width, final int height,
-        final Scale scale, final ColorRGB backColor) {
+                                      final int width, final int height,
+                                      final Scale scale, final ColorRGB backColor) {
 
         if (!isImplAvailable()) {
             return null;

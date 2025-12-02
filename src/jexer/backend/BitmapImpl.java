@@ -41,6 +41,9 @@ import jexer.tackboard.TackboardItem;
  */
 public class BitmapImpl {
 
+    private BitmapImpl() {
+    }
+
     /**
      * Convert ImageRGB to BufferedImage.
      *
