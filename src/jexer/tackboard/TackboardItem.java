@@ -32,13 +32,31 @@ import java.awt.image.BufferedImage;
 
 /**
  * TackboardItem class represents a single item that can generate pixels on
- * the tackboard.
+ * the tackboard. If java.awt is not available, tackboard items will simply
+ * not render anything.
  */
 public class TackboardItem implements Comparable<TackboardItem> {
 
     // ------------------------------------------------------------------------
     // Constants --------------------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Whether java.awt.image.BufferedImage is available.
+     */
+    protected static boolean awtAvailable = true;
+
+    /**
+     * Static initializer to check for java.awt availability.
+     */
+    static {
+        try {
+            Class.forName("java.awt.image.BufferedImage");
+            awtAvailable = true;
+        } catch (ClassNotFoundException e) {
+            awtAvailable = false;
+        }
+    }
 
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------

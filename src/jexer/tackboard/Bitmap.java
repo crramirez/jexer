@@ -181,6 +181,9 @@ public class Bitmap extends TackboardItem {
      */
     @Override
     public BufferedImage getImage(final int textWidth, final int textHeight) {
+        if (!awtAvailable) {
+            return null;
+        }
         if (dirty) {
             render(textWidth, textHeight);
             dirty = false;
@@ -213,6 +216,9 @@ public class Bitmap extends TackboardItem {
      * @param textHeight the height of a text cell
      */
     private void render(final int textWidth, final int textHeight) {
+        if (!awtAvailable || image == null) {
+            return;
+        }
         if (animation != null) {
             BufferedImage newFrame = toBufferedImage(animation.getFrame());
             if (newFrame != image) {

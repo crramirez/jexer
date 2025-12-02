@@ -219,6 +219,23 @@ public class TImage extends TWidget implements EditMenuUser {
      */
     private boolean antiAlias = false;
 
+    /**
+     * Whether java.awt.image.BufferedImage is available.
+     */
+    private static boolean awtAvailable = true;
+
+    /**
+     * Static initializer to check for java.awt availability.
+     */
+    static {
+        try {
+            Class.forName("java.awt.image.BufferedImage");
+            awtAvailable = true;
+        } catch (ClassNotFoundException e) {
+            awtAvailable = false;
+        }
+    }
+
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
     // ------------------------------------------------------------------------
@@ -239,7 +256,7 @@ public class TImage extends TWidget implements EditMenuUser {
         final int width, final int height, final ImageRGB image,
         final int left, final int top) {
 
-        this(parent, x, y, width, height, toBufferedImage(image), left, top, null);
+        this(parent, x, y, width, height, awtAvailable ? toBufferedImage(image) : null, left, top, null);
     }
 
     /**
@@ -259,7 +276,7 @@ public class TImage extends TWidget implements EditMenuUser {
         final int width, final int height, final ImageRGB image,
         final int left, final int top, final TAction clickAction) {
 
-        this(parent, x, y, width, height, toBufferedImage(image), left, top, clickAction);
+        this(parent, x, y, width, height, awtAvailable ? toBufferedImage(image) : null, left, top, clickAction);
     }
 
     /**
@@ -352,9 +369,11 @@ public class TImage extends TWidget implements EditMenuUser {
         super(parent, x, y, width, height);
 
         setCursorVisible(false);
-        animation.start(getApplication());
-        this.animation = animation;
-        this.originalImage = toBufferedImage(animation.getFrame());
+        if (awtAvailable) {
+            animation.start(getApplication());
+            this.animation = animation;
+            this.originalImage = toBufferedImage(animation.getFrame());
+        }
         this.left = left;
         this.top = top;
         this.clickAction = clickAction;
@@ -566,6 +585,11 @@ public class TImage extends TWidget implements EditMenuUser {
      */
     @Override
     public void draw() {
+        // If java.awt is not available, do nothing
+        if (!awtAvailable || originalImage == null) {
+            return;
+        }
+
         if (animation != null) {
             BufferedImage newFrame = toBufferedImage(animation.getFrame());
             if (newFrame != originalImage) {
@@ -581,6 +605,9 @@ public class TImage extends TWidget implements EditMenuUser {
 
         // We have already broken the image up, just draw the previously
         // created set of cells.
+        if (image == null || cells == null) {
+            return;
+        }
         for (int x = 0; (x < getWidth()) && (x + left < cellColumns); x++) {
             if ((left + x) * lastTextWidth > image.getWidth()) {
                 continue;
@@ -681,6 +708,11 @@ public class TImage extends TWidget implements EditMenuUser {
      */
     private void sizeToImage(final boolean always) {
 
+        // If java.awt is not available or no image, do nothing
+        if (!awtAvailable || originalImage == null) {
+            return;
+        }
+
         if ((getApplication() == null)
             || (getApplication().getBackend() == null)
         ) {
@@ -702,6 +734,10 @@ public class TImage extends TWidget implements EditMenuUser {
             image = rotateImage(originalImage, clockwise);
             image = scaleImage(image, scaleFactor, getWidth(), getHeight(),
                 textWidth, textHeight);
+        }
+
+        if (image == null) {
+            return;
         }
 
         if ((always == true) ||

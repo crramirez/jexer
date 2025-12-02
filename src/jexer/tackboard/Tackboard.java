@@ -42,6 +42,7 @@ import jexer.bits.ImageUtils;
 
 /**
  * Tackboard maintains a collection of TackboardItems to draw on a Screen.
+ * If java.awt is not available, the tackboard will simply not render anything.
  *
  * <p>Each item has a set of X, Y, Z pixel (not text cell) coordinates.  The
  * coordinate system is right-handed: (0, 0, 0) is the top-left pixel on the
@@ -67,12 +68,32 @@ public class Tackboard {
     // ------------------------------------------------------------------------
 
     /**
+     * Whether java.awt.image.BufferedImage is available.
+     */
+    private static boolean awtAvailable = true;
+
+    /**
+     * Static initializer to check for java.awt availability.
+     */
+    static {
+        try {
+            Class.forName("java.awt.image.BufferedImage");
+            awtAvailable = true;
+        } catch (ClassNotFoundException e) {
+            awtAvailable = false;
+        }
+    }
+
+    /**
      * Convert a ColorRGB to java.awt.Color.
      *
      * @param colorRGB the ColorRGB to convert
-     * @return the java.awt.Color
+     * @return the java.awt.Color, or null if awt not available
      */
     private static java.awt.Color toAwtColor(final ColorRGB colorRGB) {
+        if (!awtAvailable) {
+            return null;
+        }
         return new java.awt.Color(colorRGB.getRed(), colorRGB.getGreen(),
             colorRGB.getBlue(), colorRGB.getAlpha());
     }
@@ -229,6 +250,11 @@ public class Tackboard {
      * drawn to the screen
      */
     public void draw(final Screen screen, final boolean transparent) {
+        // If java.awt is not available, do nothing
+        if (!awtAvailable) {
+            return;
+        }
+
         Collections.sort(items);
         int cellWidth = screen.getTextWidth();
         int cellHeight = screen.getTextHeight();

@@ -94,7 +94,9 @@ public class Text extends Bitmap {
         this.text = text;
         this.fontSize = fontSize;
         this.color = color;
-        font = new Font(fontName, Font.PLAIN, fontSize);
+        if (awtAvailable) {
+            font = new Font(fontName, Font.PLAIN, fontSize);
+        }
     }
 
     /**
