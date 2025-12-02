@@ -28,39 +28,16 @@
  */
 package jexer.bits;
 
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.IndexColorModel;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.metadata.IIOMetadataNode;
-import javax.imageio.stream.ImageInputStream;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
- * ImageUtils contains methods to:
- *
- *    - Check if an image is fully transparent.
- *
- *    - Scale an image and preserve aspect ratio.
- *
- *    - Open an animated image as an Animation.
- *
- *    - Compute the distance between two colors in RGB space.
- *
- *    - Compute the partial movement between two colors in RGB space.
+ * ImageUtils provides image utility methods with fallback when java.desktop
+ * is not available. When the jexer-java-desktop JAR is on the classpath,
+ * full functionality is available. Otherwise, methods return null or
+ * reasonable defaults.
  */
 public class ImageUtils {
 
@@ -88,6 +65,20 @@ public class ImageUtils {
     }
 
     // ------------------------------------------------------------------------
+    // Variables --------------------------------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * Whether the implementation class is available.
+     */
+    private static Boolean implAvailable = null;
+
+    /**
+     * The implementation class.
+     */
+    private static Class<?> implClass = null;
+
+    // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
     // ------------------------------------------------------------------------
 
@@ -101,30 +92,42 @@ public class ImageUtils {
     // ------------------------------------------------------------------------
 
     /**
+     * Check if the implementation is available.
+     *
+     * @return true if ImageUtilsImpl is available
+     */
+    private static boolean isImplAvailable() {
+        if (implAvailable == null) {
+            try {
+                implClass = Class.forName("jexer.backend.ImageUtilsImpl");
+                implAvailable = true;
+            } catch (ClassNotFoundException e) {
+                implAvailable = false;
+            }
+        }
+        return implAvailable;
+    }
+
+    /**
      * Check if any pixels in an image have not-0% alpha value.
      *
      * @param image the image to check
      * @return true if every pixel is fully transparent
      */
-    public static boolean isFullyTransparent(final BufferedImage image) {
-        assert (image != null);
-
-        int [] rgbArray = image.getRGB(0, 0,
-            image.getWidth(), image.getHeight(), null, 0, image.getWidth());
-
-        if (rgbArray.length == 0) {
-            // No image data, fully transparent.
+    public static boolean isFullyTransparent(final ImageRGB image) {
+        if (image == null) {
             return true;
         }
-
-        for (int i = 0; i < rgbArray.length; i++) {
-            int alpha = (rgbArray[i] >>> 24) & 0xFF;
+        int[] pixels = image.getPixels();
+        if (pixels.length == 0) {
+            return true;
+        }
+        for (int i = 0; i < pixels.length; i++) {
+            int alpha = (pixels[i] >>> 24) & 0xFF;
             if (alpha != 0x00) {
-                // A not-fully transparent pixel is found.
                 return false;
             }
         }
-        // Every pixel was transparent.
         return true;
     }
 
@@ -132,27 +135,22 @@ public class ImageUtils {
      * Check if any pixels in an image have not-100% alpha value.
      *
      * @param image the image to check
-     * @return true if every pixel is fully transparent
+     * @return true if every pixel is fully opaque
      */
-    public static boolean isFullyOpaque(final BufferedImage image) {
-        assert (image != null);
-
-        int [] rgbArray = image.getRGB(0, 0,
-            image.getWidth(), image.getHeight(), null, 0, image.getWidth());
-
-        if (rgbArray.length == 0) {
-            // No image data, fully transparent.
+    public static boolean isFullyOpaque(final ImageRGB image) {
+        if (image == null) {
             return true;
         }
-
-        for (int i = 0; i < rgbArray.length; i++) {
-            int alpha = (rgbArray[i] >>> 24) & 0xFF;
+        int[] pixels = image.getPixels();
+        if (pixels.length == 0) {
+            return true;
+        }
+        for (int i = 0; i < pixels.length; i++) {
+            int alpha = (pixels[i] >>> 24) & 0xFF;
             if (alpha != 0xFF) {
-                // A partially transparent pixel is found.
                 return false;
             }
         }
-        // Every pixel was opaque.
         return true;
     }
 
@@ -165,69 +163,44 @@ public class ImageUtils {
      * @param height the height in pixels for the destination image
      * @param scale the scaling type
      * @param backColor the background color to use for Scale.SCALE
-     * @return the scaled image
+     * @return the scaled image, or null if java.desktop is not available
      */
-    public static BufferedImage scaleImage(final BufferedImage image,
+    public static ImageRGB scaleImage(final ImageRGB image,
         final int width, final int height,
         final Scale scale, final ColorRGB backColor) {
 
-        BufferedImage newImage = new BufferedImage(width, height,
-            BufferedImage.TYPE_INT_ARGB);
-
-        int x = 0;
-        int y = 0;
-        int destWidth = width;
-        int destHeight = height;
-        switch (scale) {
-        case STRETCH:
-            break;
-        case SCALE:
-            double a = (double) image.getWidth() / image.getHeight();
-            double b = (double) width / height;
-            double h = (double) height / image.getHeight();
-            double w = (double) width / image.getWidth();
-            assert (a > 0);
-            assert (b > 0);
-
-            if (a > b) {
-                // Horizontal letterbox
-                destHeight = (int) (image.getWidth() / a * w);
-                destWidth = (int) (image.getWidth() * w);
-                y = (height - destHeight) / 2;
-                assert (y >= 0);
-            } else {
-                // Vertical letterbox
-                destHeight = (int) (image.getHeight() * h);
-                destWidth = (int) (image.getHeight() * a * h);
-                x = (width - destWidth) / 2;
-                assert (x >= 0);
-            }
-            break;
+        if (!isImplAvailable()) {
+            return null;
         }
+        try {
+            // Get the Scale enum from the impl class
+            Class<?> scaleEnumClass = Class.forName("jexer.backend.ImageUtilsImpl$Scale");
+            Object implScale = Enum.valueOf((Class<Enum>) scaleEnumClass,
+                scale.name());
 
-        java.awt.Graphics gr = newImage.createGraphics();
-        if (scale == Scale.SCALE) {
-            gr.setColor(new java.awt.Color(backColor.getRed(),
-                backColor.getGreen(), backColor.getBlue(),
-                backColor.getAlpha()));
-            gr.fillRect(0, 0, newImage.getWidth(), newImage.getHeight());
+            Method method = implClass.getMethod("scaleImage",
+                ImageRGB.class, int.class, int.class, scaleEnumClass, ColorRGB.class);
+            return (ImageRGB) method.invoke(null, image, width, height, implScale, backColor);
+        } catch (Exception e) {
+            // SQUASH
+            return null;
         }
-        gr.drawImage(image, x, y, destWidth, destHeight, null);
-        gr.dispose();
-        return newImage;
     }
 
     /**
      * Open an image as an Animation.
      *
      * @param filename the name of the file that contains an animation
-     * @return the animation, or null on error
+     * @return the animation, or null on error or if java.desktop is not available
      */
     public static Animation getAnimation(final String filename) {
+        if (!isImplAvailable()) {
+            return null;
+        }
         try {
-            return getAnimation(new FileInputStream(filename));
-        } catch (IOException e) {
-            // SQUASH
+            Method method = implClass.getMethod("getAnimation", String.class);
+            return (Animation) method.invoke(null, filename);
+        } catch (Exception e) {
             return null;
         }
     }
@@ -236,13 +209,16 @@ public class ImageUtils {
      * Open an image as an Animation.
      *
      * @param file the file that contains an animation
-     * @return the animation, or null on error
+     * @return the animation, or null on error or if java.desktop is not available
      */
     public static Animation getAnimation(final File file) {
+        if (!isImplAvailable()) {
+            return null;
+        }
         try {
-            return getAnimation(new FileInputStream(file));
-        } catch (IOException e) {
-            // SQUASH
+            Method method = implClass.getMethod("getAnimation", File.class);
+            return (Animation) method.invoke(null, file);
+        } catch (Exception e) {
             return null;
         }
     }
@@ -250,14 +226,17 @@ public class ImageUtils {
     /**
      * Open an image as an Animation.
      *
-     * @param url the URK that contains an animation
-     * @return the animation, or null on error
+     * @param url the URL that contains an animation
+     * @return the animation, or null on error or if java.desktop is not available
      */
     public static Animation getAnimation(final URL url) {
+        if (!isImplAvailable()) {
+            return null;
+        }
         try {
-            return getAnimation(url.openStream());
-        } catch (IOException e) {
-            // SQUASH
+            Method method = implClass.getMethod("getAnimation", URL.class);
+            return (Animation) method.invoke(null, url);
+        } catch (Exception e) {
             return null;
         }
     }
@@ -266,201 +245,16 @@ public class ImageUtils {
      * Open an image as an Animation.
      *
      * @param inputStream the inputStream that contains an animation
-     * @return the animation, or null on error
+     * @return the animation, or null on error or if java.desktop is not available
      */
     public static Animation getAnimation(final InputStream inputStream) {
+        if (!isImplAvailable()) {
+            return null;
+        }
         try {
-            List<BufferedImage> frames = new LinkedList<BufferedImage>();
-            List<String> disposals = new LinkedList<String>();
-            int delays = 0;
-
-            /*
-             * Assume infinite loop.  Finite-count looping in GIFs is an
-             * Application Extension made popular by Netscape 2.0: see
-             * http://giflib.sourceforge.net/whatsinagif/bits_and_bytes.html
-             * .
-             *
-             * Unfortunately the Sun GIF decoder did not read and expose
-             * this.
-             */
-            int loopCount = 0;
-
-            ImageReader reader = null;
-            ImageInputStream stream;
-            stream = ImageIO.createImageInputStream(inputStream);
-            Iterator<ImageReader> iter = ImageIO.getImageReaders(stream);
-            while (iter.hasNext()) {
-                reader = iter.next();
-                break;
-            }
-            if (reader == null) {
-                return null;
-            }
-            reader.setInput(stream);
-
-            int width = -1;
-            int height = -1;
-            java.awt.Color backgroundColor = null;
-
-            IIOMetadata metadata = reader.getStreamMetadata();
-            if (metadata != null) {
-                IIOMetadataNode gblRoot;
-                gblRoot = (IIOMetadataNode) metadata.getAsTree(metadata.
-                    getNativeMetadataFormatName());
-                NodeList gblScreenDesc;
-                gblScreenDesc = gblRoot.getElementsByTagName(
-                        "LogicalScreenDescriptor");
-                if ((gblScreenDesc != null)
-                    && (gblScreenDesc.getLength() > 0)
-                ) {
-                    IIOMetadataNode screenDescriptor;
-                    screenDescriptor = (IIOMetadataNode) gblScreenDesc.item(0);
-
-                    if (screenDescriptor != null) {
-                        width = Integer.parseInt(screenDescriptor.
-                            getAttribute("logicalScreenWidth"));
-                        height = Integer.parseInt(screenDescriptor.
-                            getAttribute("logicalScreenHeight"));
-                    }
-                }
-                NodeList gblColorTable = gblRoot.getElementsByTagName(
-                        "GlobalColorTable");
-
-                if ((gblColorTable != null)
-                    && (gblColorTable.getLength() > 0)
-                ) {
-                    IIOMetadataNode colorTable = (IIOMetadataNode) gblColorTable.item(0);
-
-                    if (colorTable != null) {
-                        String bgIndex = colorTable.getAttribute(
-                                "backgroundColorIndex");
-
-                        IIOMetadataNode color;
-                        color = (IIOMetadataNode) colorTable.getFirstChild();
-                        while (color != null) {
-                            if (color.getAttribute("index").equals(bgIndex)) {
-                                int red = Integer.parseInt(
-                                        color.getAttribute("red"));
-                                int green = Integer.parseInt(
-                                        color.getAttribute("green"));
-                                int blue = Integer.parseInt(
-                                        color.getAttribute("blue"));
-                                backgroundColor = new java.awt.Color(red,
-                                    green, blue);
-                                break;
-                            }
-
-                            color = (IIOMetadataNode) color.getNextSibling();
-                        }
-                    }
-                }
-
-            }
-            BufferedImage master = null;
-            Graphics2D masterGraphics = null;
-            int lastx = 0;
-            int lasty = 0;
-            boolean hasBackround = false;
-
-            for (int frameIndex = 0; ; frameIndex++) {
-                BufferedImage image;
-                try {
-                    image = reader.read(frameIndex);
-                } catch (IndexOutOfBoundsException io) {
-                    break;
-                }
-                assert (image != null);
-
-                if (width == -1 || height == -1) {
-                    width = image.getWidth();
-                    height = image.getHeight();
-                }
-                IIOMetadataNode root;
-                root = (IIOMetadataNode) reader.getImageMetadata(frameIndex).
-                        getAsTree("javax_imageio_gif_image_1.0");
-                IIOMetadataNode gce;
-                gce = (IIOMetadataNode) root.getElementsByTagName(
-                        "GraphicControlExtension").item(0);
-                int delay = Integer.valueOf(gce.getAttribute("delayTime"));
-                String disposal = gce.getAttribute("disposalMethod");
-
-                int x = 0;
-                int y = 0;
-
-                if (master == null) {
-                    master = new BufferedImage(width, height,
-                        BufferedImage.TYPE_INT_ARGB);
-                    masterGraphics = master.createGraphics();
-                    masterGraphics.setBackground(new java.awt.Color(0, 0, 0, 0));
-                    if ((image.getWidth() == width)
-                        && (image.getHeight() == height)
-                    ) {
-                        hasBackround = true;
-                    }
-                } else {
-                    NodeList children = root.getChildNodes();
-                    for (int nodeIndex = 0; nodeIndex < children.getLength();
-                         nodeIndex++) {
-
-                        Node nodeItem = children.item(nodeIndex);
-                        if (nodeItem.getNodeName().equals("ImageDescriptor")) {
-                            NamedNodeMap map = nodeItem.getAttributes();
-                            x = Integer.valueOf(map.getNamedItem(
-                                "imageLeftPosition").getNodeValue());
-                            y = Integer.valueOf(map.getNamedItem(
-                                "imageTopPosition").getNodeValue());
-                        }
-                    }
-                }
-                masterGraphics.drawImage(image, x, y, null);
-                lastx = x;
-                lasty = y;
-
-                BufferedImage copy = new BufferedImage(master.getColorModel(),
-                    master.copyData(null), master.isAlphaPremultiplied(), null);
-                frames.add(copy);
-                disposals.add(disposal);
-                delays += delay;
-
-                if (disposal.equals("restoreToPrevious")) {
-                    BufferedImage from = null;
-                    for (int i = frameIndex - 1; i >= 0; i--) {
-                        if (!disposals.get(i).equals("restoreToPrevious")
-                            || (frameIndex == 0)
-                        ) {
-                            from = frames.get(i);
-                            break;
-                        }
-                    }
-
-                    master = new BufferedImage(from.getColorModel(),
-                        from.copyData(null), from.isAlphaPremultiplied(), null);
-                    masterGraphics = master.createGraphics();
-                    masterGraphics.setBackground(new java.awt.Color(0, 0, 0, 0));
-                } else if (disposal.equals("restoreToBackgroundColor")
-                    && (backgroundColor != null)) {
-
-                    if (!hasBackround || (frameIndex > 1)) {
-                        master.createGraphics().fillRect(lastx, lasty,
-                            frames.get(frameIndex - 1).getWidth(),
-                            frames.get(frameIndex - 1).getHeight());
-                    }
-                }
-            }
-            reader.dispose();
-
-            if (frames.size() == 1) {
-                loopCount = 1;
-            }
-            if (frames.size() == 0) {
-                return null;
-            }
-            Animation animation = new Animation(frames,
-                (delays * 10 / frames.size()), loopCount);
-            return animation;
-
-        } catch (IOException e) {
-            // SQUASH
+            Method method = implClass.getMethod("getAnimation", InputStream.class);
+            return (Animation) method.invoke(null, inputStream);
+        } catch (Exception e) {
             return null;
         }
     }
@@ -529,7 +323,7 @@ public class ImageUtils {
      * @param image the image to check
      * @return the average color
      */
-    public static int rgbAverage(final BufferedImage image) {
+    public static int rgbAverage(final ImageRGB image) {
         return rgbAverage(image, false);
     }
 
@@ -540,16 +334,15 @@ public class ImageUtils {
      * @param onlyOpaque if true, only count pixels that are fully opaque
      * @return the average color
      */
-    public static int rgbAverage(final BufferedImage image,
+    public static int rgbAverage(final ImageRGB image,
         final boolean onlyOpaque) {
 
-        assert (image != null);
-
-        int [] rgbArray = image.getRGB(0, 0,
-            image.getWidth(), image.getHeight(), null, 0, image.getWidth());
+        if (image == null) {
+            return 0xFF000000;
+        }
+        int[] rgbArray = image.getPixels();
 
         if (rgbArray.length == 0) {
-            // No image data, return black.
             return 0xFF000000;
         }
 
@@ -571,6 +364,9 @@ public class ImageUtils {
             totalGreen += green;
             totalBlue  += blue;
         }
+        if (count == 0) {
+            return 0xFF000000;
+        }
         totalRed   = (int) (totalRed   / count);
         totalGreen = (int) (totalGreen / count);
         totalBlue  = (int) (totalBlue  / count);
@@ -586,13 +382,16 @@ public class ImageUtils {
      *
      * @param image the image to check
      * @param averageImage the image's "average" pixel values
-     * @return the average color
+     * @return the standard deviation
      * @throws IllegalArgumentException if the two images are of different
      * dimensions
      */
-    public static double rgbStdDev(final BufferedImage image,
-        final BufferedImage averageImage) {
+    public static double rgbStdDev(final ImageRGB image,
+        final ImageRGB averageImage) {
 
+        if (image == null || averageImage == null) {
+            return 0.0;
+        }
         if (image.getWidth() != averageImage.getWidth()) {
             throw new IllegalArgumentException("images have different widths");
         }
@@ -600,15 +399,8 @@ public class ImageUtils {
             throw new IllegalArgumentException("images have different heights");
         }
 
-        assert (image.getWidth() == averageImage.getWidth());
-        assert (image.getHeight() == averageImage.getHeight());
-
-        int [] imageRgbArray = image.getRGB(0, 0,
-            image.getWidth(), image.getHeight(), null, 0, image.getWidth());
-        int [] averageImageRgbArray = averageImage.getRGB(0, 0,
-            image.getWidth(), image.getHeight(), null, 0, image.getWidth());
-
-        assert (imageRgbArray.length == averageImageRgbArray.length);
+        int[] imageRgbArray = image.getPixels();
+        int[] averageImageRgbArray = averageImage.getPixels();
 
         double variance = 0.0;
         for (int i = 0; i < imageRgbArray.length; i++) {
@@ -619,33 +411,6 @@ public class ImageUtils {
         }
 
         return (variance / (double) imageRgbArray.length);
-    }
-
-    /**
-     * Create a BufferedImage using the same color model as another image.
-     *
-     * @param image the original image
-     * @param width the width of the new image
-     * @param height the height of the new image
-     * @return the new image
-     */
-    public static BufferedImage createImage(final BufferedImage image,
-        final int width, final int height) {
-
-        if (image.getType() == BufferedImage.TYPE_INT_ARGB) {
-            return new BufferedImage(width, height,
-                BufferedImage.TYPE_INT_ARGB);
-        }
-
-        ColorModel colorModel = image.getColorModel();
-        if (colorModel instanceof IndexColorModel) {
-            IndexColorModel indexModel = (IndexColorModel) colorModel;
-            return new BufferedImage(width, height, image.getType(),
-                indexModel);
-        }
-
-        // Fallback: ARGB
-        return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
     }
 
 }

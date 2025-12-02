@@ -28,7 +28,6 @@
  */
 package jexer.bits;
 
-import java.awt.image.BufferedImage;
 import java.util.List;
 
 import jexer.TAction;
@@ -43,7 +42,7 @@ public class Animation {
     /**
      * List of images for an animation.
      */
-    private List<BufferedImage> frames;
+    private List<ImageRGB> frames;
 
     /**
      * The index of the frame that is currently visible.
@@ -90,7 +89,7 @@ public class Animation {
      * @param frameLoops the number of times to loop the animation.  0 means
      * play it once.  -1 means to play it forever.
      */
-    public Animation(final List<BufferedImage> frames, final int frameDelay,
+    public Animation(final List<ImageRGB> frames, final int frameDelay,
         final int frameLoops) {
 
         assert (frames != null);
@@ -195,7 +194,7 @@ public class Animation {
      * @param frameNumber the frame number
      * @return the frame
      */
-    public BufferedImage getFrame(final int frameNumber) {
+    public ImageRGB getFrame(final int frameNumber) {
         gotFrame = true;
         return frames.get(frameNumber);
     }
@@ -205,7 +204,7 @@ public class Animation {
      *
      * @return the frame
      */
-    public BufferedImage getFrame() {
+    public ImageRGB getFrame() {
         gotFrame = true;
         return frames.get(currentFrame);
     }
