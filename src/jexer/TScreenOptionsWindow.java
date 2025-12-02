@@ -28,8 +28,6 @@
  */
 package jexer;
 
-import java.awt.Font;
-import java.awt.GraphicsEnvironment;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -149,9 +147,9 @@ public class TScreenOptionsWindow extends TWindow {
     private int oldFontSize = 20;
 
     /**
-     * The original font.
+     * The original font (stored as Object to avoid java.awt.Font import).
      */
-    private Font oldFont = null;
+    private Object oldFont = null;
 
     /**
      * The original text adjust X value.
@@ -484,11 +482,12 @@ public class TScreenOptionsWindow extends TWindow {
             oldCursorStyle = terminal.getCursorStyle();
             oldMouseStyle = terminal.getMouseStyle();
 
-            String [] fontNames = GraphicsEnvironment.
-                getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+            String [] fontNames = getFontFamilyNames();
             List<String> fonts = new ArrayList<String>();
             fonts.add(0, i18n.getString("builtInTerminus"));
-            fonts.addAll(Arrays.asList(fontNames));
+            if (fontNames != null) {
+                fonts.addAll(Arrays.asList(fontNames));
+            }
             fontName = addComboBox(col, 2, 25, fonts, 0, 8,
                 new TAction() {
                     public void DO() {
@@ -497,8 +496,11 @@ public class TScreenOptionsWindow extends TWindow {
 
                             terminal.setDefaultFont();
                         } else {
-                            terminal.setFont(new Font(fontName.getText(),
-                                    Font.PLAIN, terminal.getFontSize()));
+                            Object newFont = createFont(fontName.getText(),
+                                0, terminal.getFontSize());
+                            if (newFont != null) {
+                                terminal.setFont(newFont);
+                            }
                             fontSize.setText(Integer.toString(
                                 terminal.getFontSize()));
                             textAdjustX.setText(Integer.toString(
@@ -1095,6 +1097,67 @@ public class TScreenOptionsWindow extends TWindow {
             super.setBorderStyleMoving(style);
         } else {
             super.setBorderStyleMoving(borderStyle);
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // Font helper methods (use reflection to avoid java.awt imports) ---------
+    // ------------------------------------------------------------------------
+
+    /**
+     * FontHelper class reference, loaded via reflection.
+     */
+    private static Class<?> fontHelperClass;
+
+    /**
+     * Whether FontHelper is available.
+     */
+    private static boolean fontHelperAvailable = true;
+
+    static {
+        try {
+            fontHelperClass = Class.forName("jexer.backend.FontHelper");
+        } catch (ClassNotFoundException e) {
+            fontHelperAvailable = false;
+        }
+    }
+
+    /**
+     * Get the list of available font family names via reflection.
+     *
+     * @return array of font family names, or null if not available
+     */
+    private static String[] getFontFamilyNames() {
+        if (!fontHelperAvailable) {
+            return null;
+        }
+        try {
+            return (String[]) fontHelperClass.getMethod(
+                "getAvailableFontFamilyNames").invoke(null);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Create a Font via reflection.
+     *
+     * @param fontName the font name
+     * @param style the style (0 = PLAIN)
+     * @param size the font size
+     * @return the Font object, or null if not available
+     */
+    private static Object createFont(final String fontName, final int style,
+        final int size) {
+
+        if (!fontHelperAvailable) {
+            return null;
+        }
+        try {
+            return fontHelperClass.getMethod("createFont", String.class,
+                int.class, int.class).invoke(null, fontName, style, size);
+        } catch (Exception e) {
+            return null;
         }
     }
 

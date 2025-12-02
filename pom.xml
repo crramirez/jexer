@@ -113,6 +113,14 @@
                 <exclude>**/backend/ImageRGBUtils$*.class</exclude>
                 <exclude>**/backend/ECMA48ImageHelper.class</exclude>
                 <exclude>**/backend/ECMA48ImageHelper$*.class</exclude>
+                <exclude>**/backend/ImageUtilsImpl.class</exclude>
+                <exclude>**/backend/ImageUtilsImpl$*.class</exclude>
+                <exclude>**/backend/SixelDecoderImpl.class</exclude>
+                <exclude>**/backend/SixelDecoderImpl$*.class</exclude>
+                <exclude>**/backend/ColorEmojiGlyphMakerImpl.class</exclude>
+                <exclude>**/backend/ColorEmojiGlyphMakerImpl$*.class</exclude>
+                <exclude>**/backend/FontHelper.class</exclude>
+                <exclude>**/backend/FontHelper$*.class</exclude>
               </excludes>
               <archive>
                 <manifest>
@@ -149,6 +157,14 @@
                 <include>**/backend/ImageRGBUtils$*.class</include>
                 <include>**/backend/ECMA48ImageHelper.class</include>
                 <include>**/backend/ECMA48ImageHelper$*.class</include>
+                <include>**/backend/ImageUtilsImpl.class</include>
+                <include>**/backend/ImageUtilsImpl$*.class</include>
+                <include>**/backend/SixelDecoderImpl.class</include>
+                <include>**/backend/SixelDecoderImpl$*.class</include>
+                <include>**/backend/ColorEmojiGlyphMakerImpl.class</include>
+                <include>**/backend/ColorEmojiGlyphMakerImpl$*.class</include>
+                <include>**/backend/FontHelper.class</include>
+                <include>**/backend/FontHelper$*.class</include>
               </includes>
               <archive>
                 <manifest>

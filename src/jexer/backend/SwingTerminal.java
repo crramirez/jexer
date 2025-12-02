@@ -1084,6 +1084,18 @@ public class SwingTerminal extends LogicalScreen
     }
 
     /**
+     * Set the font to be used for all the displayed text.  This accepts
+     * an Object parameter to avoid requiring java.awt.Font in the caller.
+     *
+     * @param font the new font (must be a java.awt.Font)
+     */
+    public void setFont(final Object font) {
+        if (font instanceof Font) {
+            setFont((Font) font);
+        }
+    }
+
+    /**
      * Get the font this screen was last set to.
      *
      * @return the font
