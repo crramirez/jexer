@@ -41,52 +41,6 @@ public class Cell extends CellAttributes {
     // ------------------------------------------------------------------------
 
     /**
-     * Convert a ColorRGB to java.awt.Color.
-     *
-     * @param colorRGB the ColorRGB to convert
-     * @return the java.awt.Color
-     */
-    private static java.awt.Color toAwtColor(final ColorRGB colorRGB) {
-        return new java.awt.Color(colorRGB.getRed(), colorRGB.getGreen(),
-            colorRGB.getBlue(), colorRGB.getAlpha());
-    }
-
-    /**
-     * Convert an ImageRGB to java.awt.image.BufferedImage.
-     *
-     * @param imageRGB the ImageRGB to convert
-     * @return the BufferedImage
-     */
-    private static java.awt.image.BufferedImage toBufferedImage(final ImageRGB imageRGB) {
-        if (imageRGB == null) {
-            return null;
-        }
-        int width = imageRGB.getWidth();
-        int height = imageRGB.getHeight();
-        java.awt.image.BufferedImage result = new java.awt.image.BufferedImage(width, height,
-            java.awt.image.BufferedImage.TYPE_INT_ARGB);
-        int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
-        result.setRGB(0, 0, width, height, pixels, 0, width);
-        return result;
-    }
-
-    /**
-     * Convert a java.awt.image.BufferedImage to ImageRGB.
-     *
-     * @param bufferedImage the BufferedImage to convert
-     * @return the ImageRGB
-     */
-    private static ImageRGB fromBufferedImage(final java.awt.image.BufferedImage bufferedImage) {
-        if (bufferedImage == null) {
-            return null;
-        }
-        int width = bufferedImage.getWidth();
-        int height = bufferedImage.getHeight();
-        int[] pixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
-        return new ImageRGB(width, height, pixels);
-    }
-
-    /**
      * How this cell needs to be displayed if it is part of a larger glyph.
      */
     public enum Width {

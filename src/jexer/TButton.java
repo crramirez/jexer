@@ -516,9 +516,9 @@ public class TButton extends TWidget {
                     CellAttributes.class,
                     CellAttributes.class,
                     CellAttributes.class,
-                    java.awt.Color.class,
-                    java.awt.Color.class,
-                    java.awt.Color.class,
+                    jexer.bits.ColorRGB.class,
+                    jexer.bits.ColorRGB.class,
+                    jexer.bits.ColorRGB.class,
                     boolean.class,
                     int.class);
                 drawHelperAvailable = true;
@@ -574,33 +574,27 @@ public class TButton extends TWidget {
             int cellWidth = getScreen().getTextWidth();
             int cellHeight = getScreen().getTextHeight();
 
-            java.awt.Color shadowRgb = null;
+            jexer.bits.ColorRGB shadowRgb = null;
             if (shadowColor.getForeColorRGB() < 0) {
-                jexer.bits.ColorRGB colorRGB = getApplication().getBackend().
+                shadowRgb = getApplication().getBackend().
                     attrToForegroundColor(shadowColor);
-                shadowRgb = new java.awt.Color(colorRGB.getRed(),
-                    colorRGB.getGreen(), colorRGB.getBlue());
             } else {
-                shadowRgb = new java.awt.Color(shadowColor.getForeColorRGB());
+                shadowRgb = new jexer.bits.ColorRGB(shadowColor.getForeColorRGB());
             }
-            java.awt.Color rectangleRgb = null;
+            jexer.bits.ColorRGB rectangleRgb = null;
             if (rectangleColor.getBackColorRGB() < 0) {
-                jexer.bits.ColorRGB colorRGB = getApplication().getBackend().
+                rectangleRgb = getApplication().getBackend().
                     attrToBackgroundColor(rectangleColor);
-                rectangleRgb = new java.awt.Color(colorRGB.getRed(),
-                    colorRGB.getGreen(), colorRGB.getBlue());
             } else {
-                rectangleRgb = new java.awt.Color(rectangleColor.getBackColorRGB());
+                rectangleRgb = new jexer.bits.ColorRGB(rectangleColor.getBackColorRGB());
             }
 
-            java.awt.Color buttonRgb = null;
+            jexer.bits.ColorRGB buttonRgb = null;
             if (buttonColor.getBackColorRGB() < 0) {
-                jexer.bits.ColorRGB colorRGB = getApplication().getBackend().
+                buttonRgb = getApplication().getBackend().
                     attrToBackgroundColor(buttonColor);
-                buttonRgb = new java.awt.Color(colorRGB.getRed(),
-                    colorRGB.getGreen(), colorRGB.getBlue());
             } else {
-                buttonRgb = new java.awt.Color(buttonColor.getBackColorRGB());
+                buttonRgb = new jexer.bits.ColorRGB(buttonColor.getBackColorRGB());
             }
 
             int imageIdBase = System.identityHashCode(this);

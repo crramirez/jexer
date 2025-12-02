@@ -28,12 +28,14 @@
  */
 package jexer.backend;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import jexer.TButton;
 import jexer.bits.Cell;
 import jexer.bits.CellAttributes;
+import jexer.bits.ColorRGB;
 import jexer.bits.ImageRGB;
 
 /**
@@ -61,6 +63,17 @@ public class TButtonDrawHelper {
     }
 
     /**
+     * Convert a ColorRGB to java.awt.Color.
+     *
+     * @param colorRGB the ColorRGB to convert
+     * @return the java.awt.Color
+     */
+    private static Color toAwtColor(final ColorRGB colorRGB) {
+        return new Color(colorRGB.getRed(), colorRGB.getGreen(),
+            colorRGB.getBlue(), colorRGB.getAlpha());
+    }
+
+    /**
      * Draw the button ends for non-SQUARE styles and populate the Cell arrays.
      *
      * @param style the button style
@@ -69,9 +82,9 @@ public class TButtonDrawHelper {
      * @param shadowColor the shadow color attributes
      * @param rectangleColor the background/rectangle color attributes
      * @param buttonColor the button foreground color attributes
-     * @param shadowRgb the shadow color as java.awt.Color
-     * @param rectangleRgb the rectangle color as java.awt.Color
-     * @param buttonRgb the button color as java.awt.Color
+     * @param shadowRgb the shadow color as ColorRGB
+     * @param rectangleRgb the rectangle color as ColorRGB
+     * @param buttonRgb the button color as ColorRGB
      * @param inButtonPress whether the button is being pressed
      * @param imageIdBase base for generating unique image IDs
      * @return an array of 6 Cell objects: [leftEdgeChar, rightEdgeChar,
@@ -83,11 +96,16 @@ public class TButtonDrawHelper {
         final CellAttributes shadowColor,
         final CellAttributes rectangleColor,
         final CellAttributes buttonColor,
-        final java.awt.Color shadowRgb,
-        final java.awt.Color rectangleRgb,
-        final java.awt.Color buttonRgb,
+        final ColorRGB shadowRgb,
+        final ColorRGB rectangleRgb,
+        final ColorRGB buttonRgb,
         final boolean inButtonPress,
         final int imageIdBase) {
+
+        // Convert ColorRGB to java.awt.Color for AWT drawing
+        Color awtShadowRgb = toAwtColor(shadowRgb);
+        Color awtRectangleRgb = toAwtColor(rectangleRgb);
+        Color awtButtonRgb = toAwtColor(buttonRgb);
 
         Cell leftEdgeChar = new Cell(buttonColor);
         Cell rightEdgeChar = new Cell(buttonColor);
@@ -103,9 +121,9 @@ public class TButtonDrawHelper {
 
         // Draw the shadow first, so that it be underneath the right edge.
         Graphics2D gr2s = shadowImage.createGraphics();
-        gr2s.setColor(rectangleRgb);
+        gr2s.setColor(awtRectangleRgb);
         gr2s.fillRect(0, 0, cellWidth * 2, cellHeight * 2);
-        gr2s.setColor(shadowRgb);
+        gr2s.setColor(awtShadowRgb);
 
         int [] xPoints;
         int [] yPoints;
@@ -169,14 +187,14 @@ public class TButtonDrawHelper {
         // gr2s now has the shadow bits, shifted half a cell down from 0.
 
         Graphics2D gr2 = image.createGraphics();
-        gr2.setColor(rectangleRgb);
+        gr2.setColor(awtRectangleRgb);
         gr2.fillRect(0, 0, cellWidth * 2, cellHeight);
         if (!inButtonPress) {
-            gr2.setColor(shadowRgb);
+            gr2.setColor(awtShadowRgb);
             gr2.fillRect(cellWidth, cellHeight / 2, cellWidth,
                 cellHeight - (cellHeight / 2));
         }
-        gr2.setColor(buttonRgb);
+        gr2.setColor(awtButtonRgb);
         switch (style) {
         case ROUND:
             gr2.fillOval(0, 0, cellWidth * 2, cellHeight);
@@ -296,9 +314,9 @@ public class TButtonDrawHelper {
         cellImage = new BufferedImage(cellWidth, cellHeight,
             BufferedImage.TYPE_INT_ARGB);
         gr2s = cellImage.createGraphics();
-        gr2s.setColor(rectangleRgb);
+        gr2s.setColor(awtRectangleRgb);
         gr2s.fillRect(0, 0, cellWidth, cellHeight);
-        gr2s.setColor(shadowRgb);
+        gr2s.setColor(awtShadowRgb);
         gr2s.fillRect(0, 0, cellWidth, cellHeight / 2);
         gr2s.dispose();
         imageId++;
