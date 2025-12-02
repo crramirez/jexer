@@ -62,6 +62,28 @@ public class DemoApplicationCore extends TApplication {
     /**
      * Public constructor.
      *
+     * @param input an InputStream connected to the remote user, or null for
+     * System.in.  If System.in is used, then on non-Windows systems it will
+     * be put in raw mode; shutdown() will (blindly!) put System.in in cooked
+     * mode.  input is always converted to a Reader with UTF-8 encoding.
+     * @param output an OutputStream connected to the remote user, or null
+     * for System.out.  output is always converted to a Writer with UTF-8
+     * encoding.
+     * @throws UnsupportedEncodingException if an exception is thrown when
+     * creating the InputStreamReader
+     */
+    @SuppressWarnings("this-escape")
+    public DemoApplicationCore(final InputStream input,
+                               final OutputStream output) throws UnsupportedEncodingException {
+        super(input, output);
+        addAllWidgets();
+
+        getBackend().setTitle(i18n.getString("applicationTitle"));
+    }
+
+    /**
+     * Public constructor.
+     *
      * @param input the InputStream underlying 'reader'.  Its available()
      * method is used to determine if reader.read() will block or not.
      * @param reader a Reader connected to the remote user.
@@ -78,6 +100,73 @@ public class DemoApplicationCore extends TApplication {
         addAllWidgets();
 
         getBackend().setTitle(i18n.getString("applicationTitle"));
+    }
+
+    /**
+     * Public constructor.
+     *
+     * @param input the InputStream underlying 'reader'.  Its available()
+     * method is used to determine if reader.read() will block or not.
+     * @param reader a Reader connected to the remote user.
+     * @param writer a PrintWriter connected to the remote user.
+     * @throws IllegalArgumentException if input, reader, or writer are null.
+     */
+    public DemoApplicationCore(final InputStream input, final Reader reader,
+                               final PrintWriter writer) {
+
+        this(input, reader, writer, false);
+    }
+
+    /**
+     * Public constructor.
+     *
+     * @param backend a Backend that is already ready to go.
+     */
+    @SuppressWarnings("this-escape")
+    public DemoApplicationCore(final Backend backend) {
+        super(backend);
+
+        addAllWidgets();
+    }
+
+    /**
+     * Public constructor.
+     *
+     * @param backendType one of the TApplication.BackendType values
+     * @throws Exception if TApplication can't instantiate the Backend.
+     */
+    @SuppressWarnings("this-escape")
+    public DemoApplicationCore(final BackendType backendType) throws Exception {
+        // For the Swing demo, use an initial size of 82x28 so that a
+        // terminal window precisely fits the window.
+        super(backendType, (backendType == BackendType.SWING ? 82 : -1),
+                (backendType == BackendType.SWING ? 28 : -1), 20);
+        addAllWidgets();
+        getBackend().setTitle(i18n.getString("applicationTitle"));
+
+        // Use custom theme by default.
+        onMenu(new TMenuEvent(getBackend(), 10002));
+    }
+
+    /**
+     * Public constructor.
+     *
+     * @param backendType one of the TApplication.BackendType values
+     * @param windowWidth the number of text columns to start with
+     * @param windowHeight the number of text rows to start with
+     * @param fontSize the size in points
+     * @throws Exception if TApplication can't instantiate the Backend.
+     */
+    @SuppressWarnings("this-escape")
+    public DemoApplicationCore(final BackendType backendType, final int windowWidth,
+                               final int windowHeight, final int fontSize) throws Exception {
+
+        super(backendType, windowWidth, windowHeight, fontSize);
+        addAllWidgets();
+        getBackend().setTitle(i18n.getString("applicationTitle"));
+
+        // Use custom theme by default.
+        onMenu(new TMenuEvent(getBackend(), 10002));
     }
 
     // ------------------------------------------------------------------------

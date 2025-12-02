@@ -60,7 +60,7 @@ public class DemoCore {
             // overridden by jexer.Swing.
             TApplication.BackendType backendType = TApplication.BackendType.XTERM;
 
-            DemoApplication app = new DemoApplication(backendType);
+            DemoApplicationCore app = new DemoApplicationCore(backendType);
             (new Thread(app)).start();
         } catch (Exception e) {
             e.printStackTrace();
