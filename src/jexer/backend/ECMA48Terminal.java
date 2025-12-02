@@ -4351,8 +4351,7 @@ public class ECMA48Terminal extends LogicalScreen
                 if (rgbBytes == null) {
                     return "";
                 }
-                sb.append(String.format("\033]444;0;%d;%d;0;", imageWidth,
-                        Math.min(imageHeight, imageHeight)));
+                sb.append(String.format("\033]444;0;%d;%d;0;", imageWidth, imageHeight));
                 sb.append(StringUtils.toBase64(rgbBytes));
                 sb.append("\007");
             }
