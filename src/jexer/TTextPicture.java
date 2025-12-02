@@ -36,7 +36,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import jexer.backend.ECMA48Terminal;
-import jexer.backend.SwingTerminal;
 import jexer.bits.Cell;
 import jexer.bits.GlyphMaker;
 import jexer.bits.ImageRGB;
@@ -465,8 +464,13 @@ public class TTextPicture extends TScrollable implements DisplayListener {
         boolean cursorBlinkVisible = true;
 
         if (TApplication.isSwingTerminal(getScreen())) {
-            SwingTerminal terminal = (SwingTerminal) getScreen();
-            cursorBlinkVisible = terminal.getCursorBlinkVisible();
+            // Use reflection to get cursor blink visible state
+            try {
+                Method method = getScreen().getClass().getMethod("getCursorBlinkVisible");
+                cursorBlinkVisible = (Boolean) method.invoke(getScreen());
+            } catch (Exception e) {
+                cursorBlinkVisible = blinkState;
+            }
         } else if (getScreen() instanceof ECMA48Terminal) {
             ECMA48Terminal terminal = (ECMA48Terminal) getScreen();
 
