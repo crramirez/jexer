@@ -139,6 +139,16 @@
                 <exclude>**/backend/TextImpl$*.class</exclude>
                 <exclude>**/backend/BitmapImpl.class</exclude>
                 <exclude>**/backend/BitmapImpl$*.class</exclude>
+                <exclude>**/backend/ECMA48TerminalHelper.class</exclude>
+                <exclude>**/backend/ECMA48TerminalHelper$*.class</exclude>
+                <exclude>**/backend/SixelEncoder.class</exclude>
+                <exclude>**/backend/SixelEncoder$*.class</exclude>
+                <exclude>**/backend/HQSixelEncoder.class</exclude>
+                <exclude>**/backend/HQSixelEncoder$*.class</exclude>
+                <exclude>**/backend/LegacySixelEncoder.class</exclude>
+                <exclude>**/backend/LegacySixelEncoder$*.class</exclude>
+                <exclude>**/backend/UnicodeGlyphEncoder.class</exclude>
+                <exclude>**/backend/UnicodeGlyphEncoder$*.class</exclude>
                 <exclude>demo/DemoPixelsWindow.class</exclude>
                 <exclude>demo/Demo5.class</exclude>
               </excludes>
@@ -202,6 +212,16 @@
                 <include>**/backend/TextImpl$*.class</include>
                 <include>**/backend/BitmapImpl.class</include>
                 <include>**/backend/BitmapImpl$*.class</include>
+                <include>**/backend/ECMA48TerminalHelper.class</include>
+                <include>**/backend/ECMA48TerminalHelper$*.class</include>
+                <include>**/backend/SixelEncoder.class</include>
+                <include>**/backend/SixelEncoder$*.class</include>
+                <include>**/backend/HQSixelEncoder.class</include>
+                <include>**/backend/HQSixelEncoder$*.class</include>
+                <include>**/backend/LegacySixelEncoder.class</include>
+                <include>**/backend/LegacySixelEncoder$*.class</include>
+                <include>**/backend/UnicodeGlyphEncoder.class</include>
+                <include>**/backend/UnicodeGlyphEncoder$*.class</include>
               </includes>
               <archive>
                 <manifest>
