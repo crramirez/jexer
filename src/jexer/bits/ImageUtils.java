@@ -413,4 +413,20 @@ public class ImageUtils {
         return (variance / (double) imageRgbArray.length);
     }
 
+    /**
+     * Create a new ImageRGB with specified dimensions.
+     * The original image parameter is ignored since ImageRGB
+     * always uses ARGB format.
+     *
+     * @param image the original image (ignored for ImageRGB)
+     * @param width the width of the new image
+     * @param height the height of the new image
+     * @return the new image
+     */
+    public static ImageRGB createImage(final ImageRGB image,
+        final int width, final int height) {
+
+        return new ImageRGB(width, height);
+    }
+
 }

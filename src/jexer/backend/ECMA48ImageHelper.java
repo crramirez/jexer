@@ -318,7 +318,7 @@ public class ECMA48ImageHelper {
                 BufferedImage imageSlice = image.getSubimage(x * textWidth,
                     y * textHeight, width, height);
 
-                if (ImageUtils.isFullyTransparent(imageSlice)) {
+                if (isBufferedImageFullyTransparent(imageSlice)) {
                     // There is nothing more to do, this entire image is
                     // empty.
 
@@ -380,8 +380,31 @@ public class ECMA48ImageHelper {
      * @return true if the image is fully transparent
      */
     public boolean isFullyTransparent(final ImageRGB imageRGB) {
-        BufferedImage image = toBufferedImage(imageRGB);
-        return ImageUtils.isFullyTransparent(image);
+        if (imageRGB == null) {
+            return true;
+        }
+        return ImageUtils.isFullyTransparent(imageRGB);
+    }
+
+    /**
+     * Check if a BufferedImage is fully transparent.
+     *
+     * @param image the image to check
+     * @return true if the image is fully transparent
+     */
+    private boolean isBufferedImageFullyTransparent(final BufferedImage image) {
+        if (image == null) {
+            return true;
+        }
+        int[] rgbArray = image.getRGB(0, 0, image.getWidth(), image.getHeight(),
+            null, 0, image.getWidth());
+        for (int i = 0; i < rgbArray.length; i++) {
+            int alpha = (rgbArray[i] >>> 24) & 0xFF;
+            if (alpha != 0x00) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -425,16 +448,67 @@ public class ECMA48ImageHelper {
             && ((displayWidth != fileImageWidth)
                 || (displayHeight != fileImageHeight))
         ) {
-            image = ImageUtils.scaleImage(image, displayWidth, displayHeight,
-                ImageUtils.Scale.SCALE, backgroundColor);
+            image = scaleBufferedImage(image, displayWidth, displayHeight,
+                true, backgroundColor);
         } else if ((displayWidth != fileImageWidth)
             || (displayHeight != fileImageHeight)
         ) {
-            image = ImageUtils.scaleImage(image, displayWidth, displayHeight,
-                ImageUtils.Scale.STRETCH, backgroundColor);
+            image = scaleBufferedImage(image, displayWidth, displayHeight,
+                false, backgroundColor);
         }
 
         return toImageRGB(image);
+    }
+
+    /**
+     * Scale a BufferedImage.
+     *
+     * @param image the image to scale
+     * @param width the target width
+     * @param height the target height
+     * @param preserveAspectRatio if true, preserve aspect ratio (letterbox)
+     * @param backColor the background color for letterboxing
+     * @return the scaled image
+     */
+    private BufferedImage scaleBufferedImage(final BufferedImage image,
+        final int width, final int height,
+        final boolean preserveAspectRatio, final ColorRGB backColor) {
+
+        BufferedImage newImage = new BufferedImage(width, height,
+            BufferedImage.TYPE_INT_ARGB);
+
+        int x = 0;
+        int y = 0;
+        int destWidth = width;
+        int destHeight = height;
+
+        if (preserveAspectRatio) {
+            double a = (double) image.getWidth() / image.getHeight();
+            double b = (double) width / height;
+            double h = (double) height / image.getHeight();
+            double w = (double) width / image.getWidth();
+
+            if (a > b) {
+                destHeight = (int) (image.getWidth() / a * w);
+                destWidth = (int) (image.getWidth() * w);
+                y = (height - destHeight) / 2;
+            } else {
+                destHeight = (int) (image.getHeight() * h);
+                destWidth = (int) (image.getHeight() * a * h);
+                x = (width - destWidth) / 2;
+            }
+        }
+
+        java.awt.Graphics gr = newImage.createGraphics();
+        if (preserveAspectRatio && backColor != null) {
+            gr.setColor(new java.awt.Color(backColor.getRed(),
+                backColor.getGreen(), backColor.getBlue(),
+                backColor.getAlpha()));
+            gr.fillRect(0, 0, newImage.getWidth(), newImage.getHeight());
+        }
+        gr.drawImage(image, x, y, destWidth, destHeight, null);
+        gr.dispose();
+        return newImage;
     }
 
     /**
