@@ -28,7 +28,7 @@
  */
 package jexer.tackboard;
 
-import java.awt.image.BufferedImage;
+import jexer.bits.ImageRGB;
 
 /**
  * TackboardItem class represents a single item that can generate pixels on
@@ -44,16 +44,17 @@ public class TackboardItem implements Comparable<TackboardItem> {
     /**
      * Whether java.awt.image.BufferedImage is available.
      */
-    protected static boolean awtAvailable = true;
+    protected static boolean implAvailable = false;
 
     /**
      * Static initializer to check for java.awt availability.
      */
     static {
         try {
-            Class.forName("java.awt.image.BufferedImage");
+            Class.forName("jexer.backend.TackboardItemImpl");
+            implAvailable = true;
         } catch (ClassNotFoundException e) {
-            awtAvailable = false;
+            implAvailable = false;
         }
     }
 
@@ -205,6 +206,15 @@ public class TackboardItem implements Comparable<TackboardItem> {
     }
 
     /**
+     * Get the tackboard this item is on.
+     *
+     * @return the tackboard
+     */
+    protected final Tackboard getTackboard() {
+        return tackboard;
+    }
+
+    /**
      * Comparison check.  All fields must match to return true.
      *
      * @param rhs another TackboardItem instance
@@ -274,7 +284,7 @@ public class TackboardItem implements Comparable<TackboardItem> {
      * @return the image, or null if this item does not have any pixels to
      * show
      */
-    public BufferedImage getImage(final int textWidth, final int textHeight) {
+    public ImageRGB getImage(final int textWidth, final int textHeight) {
         // Default does nothing.
         return null;
     }

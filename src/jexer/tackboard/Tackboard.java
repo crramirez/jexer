@@ -28,7 +28,7 @@
  */
 package jexer.tackboard;
 
-import java.awt.image.BufferedImage;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,30 +36,11 @@ import java.util.List;
 import jexer.backend.Screen;
 import jexer.bits.Cell;
 import jexer.bits.ColorRGB;
-import jexer.bits.GlyphMaker;
 import jexer.bits.ImageRGB;
-import jexer.bits.ImageUtils;
 
 /**
  * Tackboard maintains a collection of TackboardItems to draw on a Screen.
  * If java.awt is not available, the tackboard will simply not render anything.
- *
- * <p>Each item has a set of X, Y, Z pixel (not text cell) coordinates.  The
- * coordinate system is right-handed: (0, 0, 0) is the top-left pixel on the
- * screen, and positive Z points away from the user.</p>
- *
- * <p>When draw() is called, all the items will be rendered in descending Z,
- * ascending Y, ascending X order (painter's algorithm) onto the cell grid,
- * and using transparent pixels.  If the Screen's backend does not support
- * imagesOverText, then the text of the Cell under transparent images will be
- * rendered via GlyphMaker, which might not look ideal if the internal font
- * is quite different from the terminal's.</p>
- *
- * <p>Tackboards were directly inspired by the Visuals (ncvisuals) of <a
- * href="https://github.com/dankamongmen/notcurses">notcurses</a>. Jexer's
- * performance is unlikely to come close to notcurses, so users requiring
- * low-latency pixel-based rendering are recommended to check out
- * notcurses.</p>
  */
 public class Tackboard {
 
@@ -68,33 +49,25 @@ public class Tackboard {
     // ------------------------------------------------------------------------
 
     /**
-     * Whether java.awt.image.BufferedImage is available.
+     * Whether the implementation is available.
      */
-    private static boolean awtAvailable = true;
+    private static boolean implAvailable = false;
+
+    /**
+     * The implementation class.
+     */
+    private static Class<?> implClass;
 
     /**
      * Static initializer to check for java.awt availability.
      */
     static {
         try {
-            Class.forName("java.awt.image.BufferedImage");
+            implClass = Class.forName("jexer.backend.TackboardImpl");
+            implAvailable = true;
         } catch (ClassNotFoundException e) {
-            awtAvailable = false;
+            implAvailable = false;
         }
-    }
-
-    /**
-     * Convert a ColorRGB to java.awt.Color.
-     *
-     * @param colorRGB the ColorRGB to convert
-     * @return the java.awt.Color, or null if awt not available
-     */
-    private static java.awt.Color toAwtColor(final ColorRGB colorRGB) {
-        if (!awtAvailable) {
-            return null;
-        }
-        return new java.awt.Color(colorRGB.getRed(), colorRGB.getGreen(),
-            colorRGB.getBlue(), colorRGB.getAlpha());
     }
 
     // ------------------------------------------------------------------------
@@ -136,62 +109,6 @@ public class Tackboard {
     // ------------------------------------------------------------------------
     // Tackboard --------------------------------------------------------------
     // ------------------------------------------------------------------------
-
-    /**
-     * Convert ImageRGB to BufferedImage.
-     *
-     * @param imageRGB the ImageRGB to convert
-     * @return the BufferedImage
-     */
-    private static BufferedImage toBufferedImage(final ImageRGB imageRGB) {
-        if (imageRGB == null) {
-            return null;
-        }
-        int width = imageRGB.getWidth();
-        int height = imageRGB.getHeight();
-        BufferedImage result = new BufferedImage(width, height,
-            BufferedImage.TYPE_INT_ARGB);
-        int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
-        result.setRGB(0, 0, width, height, pixels, 0, width);
-        return result;
-    }
-
-    /**
-     * Convert BufferedImage to ImageRGB.
-     *
-     * @param bufferedImage the BufferedImage to convert
-     * @return the ImageRGB
-     */
-    private static ImageRGB toImageRGB(final BufferedImage bufferedImage) {
-        if (bufferedImage == null) {
-            return null;
-        }
-        int width = bufferedImage.getWidth();
-        int height = bufferedImage.getHeight();
-        int[] pixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
-        return new ImageRGB(width, height, pixels);
-    }
-
-    /**
-     * Check if a BufferedImage is fully transparent.
-     *
-     * @param image the image to check
-     * @return true if the image is fully transparent
-     */
-    private static boolean isFullyTransparent(final BufferedImage image) {
-        if (image == null) {
-            return true;
-        }
-        int[] rgbArray = image.getRGB(0, 0, image.getWidth(), image.getHeight(),
-            null, 0, image.getWidth());
-        for (int i = 0; i < rgbArray.length; i++) {
-            int alpha = (rgbArray[i] >>> 24) & 0xFF;
-            if (alpha != 0x00) {
-                return false;
-            }
-        }
-        return true;
-    }
 
     /**
      * Set dirty flag.
@@ -249,8 +166,8 @@ public class Tackboard {
      * drawn to the screen
      */
     public void draw(final Screen screen, final boolean transparent) {
-        // If java.awt is not available, do nothing
-        if (!awtAvailable) {
+        // If implementation is not available, do nothing
+        if (!implAvailable) {
             return;
         }
 
@@ -277,7 +194,7 @@ public class Tackboard {
             if (redraw) {
                 item.setDirty();
             }
-            BufferedImage image = item.getImage(cellWidth, cellHeight);
+            ImageRGB image = item.getImage(cellWidth, cellHeight);
             if (image == null) {
                 continue;
             }
@@ -289,26 +206,9 @@ public class Tackboard {
             int width = image.getWidth();
             int height = image.getHeight();
 
-            if ((width % cellWidth != 0) || (height % cellHeight != 0)) {
-                // These should have lined up, that was the whole point of
-                // the redraw.  Why didn't they?
-                /*
-                System.err.println("HUH? width " + width +
-                    " cellWidth " + cellWidth +
-                    " height " + height +
-                    " cellHeight " + cellHeight);
-                 */
-            } else {
-                // This should be impossible, right?
-                assert (width % cellWidth == 0);
-                assert (height % cellHeight == 0);
-            }
-
             int columns = width / cellWidth;
             int rows = height / cellHeight;
 
-            int screenWidth = screen.getWidth() * screen.getTextWidth();
-            int screenHeight = screen.getHeight() * screen.getTextHeight();
             if ((textX + columns < 0)
                 || (textY + rows < 0)
                 || (textX >= screen.getWidth())
@@ -318,91 +218,58 @@ public class Tackboard {
                 continue;
             }
 
-            int dx = x % cellWidth;
-            int dy = y % cellHeight;
-
-            // I had thought that with the offsets there might be a
-            // discontinuity around +/- 0, but there isn't.  Still, leaving
-            // these here in case I'm wrong later on.
-            final int left = 0;
-            final int top = 0;
-
             for (int sy = 0; sy < rows; sy++) {
-                if ((sy + textY + top < 0)
-                    || (sy + textY + top >= screen.getHeight())
+                if ((sy + textY < 0)
+                    || (sy + textY >= screen.getHeight())
                 ) {
-                    // This row of cells is off-screen, skip it.
                     continue;
                 }
                 for (int sx = 0; sx < columns; sx++) {
-                    while (sx + textX + left < 0) {
-                        // This cell is off-screen, advance.
+                    while (sx + textX < 0) {
                         sx++;
                     }
-                    if (sx + textX + left >= screen.getWidth()) {
-                        // This cell is off-screen, done with this entire row.
+                    if (sx + textX >= screen.getWidth()) {
                         break;
                     }
 
-                    Cell oldCell = screen.getCharXY(sx + textX + left,
-                        sy + textY + top, true);
+                    Cell oldCell = screen.getCharXY(sx + textX, sy + textY, true);
                     if (oldCell == null) {
-                        // This image fragment would not be visible on the
-                        // screen.
                         continue;
                     }
 
-                    BufferedImage newImage = image.getSubimage(sx * cellWidth,
+                    ImageRGB newImage = image.getSubimage(sx * cellWidth,
                         sy * cellHeight, cellWidth, cellHeight);
 
-                    if (isFullyTransparent(newImage)) {
-                        // Skip this cell.
+                    if (newImage.isFullyTransparent()) {
                         continue;
                     }
-
-                    // newImage has the image that needs to be overlaid on
-                    // (sx + textX + left, sy + textY + top)
 
                     if (oldCell.isImage()) {
                         // Blit this image over that one.
-                        BufferedImage oldImage = toBufferedImage(oldCell.getImage(true));
-                        java.awt.Graphics gr = oldImage.getGraphics();
-                        gr.setColor(toAwtColor(screen.getBackend().
-                            attrToBackgroundColor(oldCell)));
-                        gr.drawImage(newImage, 0, 0, null, null);
-                        gr.dispose();
+                        ImageRGB oldImage = oldCell.getImage(true);
+                        oldImage.drawImage(newImage, 0, 0);
                         imageId++;
-                        oldCell.setImage(toImageRGB(oldImage), imageId & 0x7FFFFFFF);
+                        oldCell.setImage(oldImage, imageId & 0x7FFFFFFF);
                     } else {
                         // Old cell is text only, just add the image.
                         if (!transparent) {
-                            BufferedImage backImage;
-                            backImage = new BufferedImage(cellWidth,
-                                cellHeight, BufferedImage.TYPE_INT_ARGB);
-                            java.awt.Graphics gr = backImage.getGraphics();
-
-                            java.awt.Color oldColor = toAwtColor(screen.getBackend().
-                                    attrToBackgroundColor(oldCell));
-                            gr.setColor(oldColor);
-                            gr.fillRect(0, 0, backImage.getWidth(),
-                                backImage.getHeight());
-                            gr.drawImage(newImage, 0, 0, null, null);
-                            gr.dispose();
+                            ColorRGB bgColor = screen.getBackend().
+                                attrToBackgroundColor(oldCell);
+                            ImageRGB backImage = new ImageRGB(cellWidth, cellHeight);
+                            backImage.fillRect(0, 0, cellWidth, cellHeight,
+                                bgColor.getRGB());
+                            backImage.drawImage(newImage, 0, 0);
                             imageId++;
-                            oldCell.setImage(toImageRGB(backImage), imageId & 0x7FFFFFFF);
+                            oldCell.setImage(backImage, imageId & 0x7FFFFFFF);
                         } else {
                             imageId++;
-                            oldCell.setImage(toImageRGB(newImage), imageId & 0x7FFFFFFF);
+                            oldCell.setImage(newImage, imageId & 0x7FFFFFFF);
                         }
                     }
-                    screen.putCharXY(sx + textX + left, sy + textY + top,
-                        oldCell);
-
-                } // for (int sx = 0; sx < columns; sx++)
-
-            } // for (int sy = 0; sy < rows; sy++)
-
-        } // for (TackboardItem item: items)
+                    screen.putCharXY(sx + textX, sy + textY, oldCell);
+                }
+            }
+        }
 
         dirty = false;
     }

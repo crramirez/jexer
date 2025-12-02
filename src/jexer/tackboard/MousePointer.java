@@ -30,15 +30,13 @@ package jexer.tackboard;
 
 import java.awt.image.BufferedImage;
 
+import jexer.bits.ImageRGB;
+
 /**
  * MousePointer is a Bitmap with a hotspot location to represent the "tip" of
  * a mouse icon.
  */
 public class MousePointer extends Bitmap implements Pointer {
-
-    // ------------------------------------------------------------------------
-    // Constants --------------------------------------------------------------
-    // ------------------------------------------------------------------------
 
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
@@ -69,11 +67,45 @@ public class MousePointer extends Bitmap implements Pointer {
      * @param hotspotY the hotspot Y location relative to y
      */
     public MousePointer(final int x, final int y, final int z,
-        final BufferedImage image, final int hotspotX, final int hotspotY) {
+        final ImageRGB image, final int hotspotX, final int hotspotY) {
 
         super(x, y, z, image);
         this.hotspotX = hotspotX;
         this.hotspotY = hotspotY;
+    }
+
+    /**
+     * Public constructor with BufferedImage.
+     *
+     * @param x X pixel coordinate
+     * @param y Y pixel coordinate
+     * @param z Z coordinate
+     * @param image the image (BufferedImage)
+     * @param hotspotX the hotspot X location relative to x
+     * @param hotspotY the hotspot Y location relative to y
+     */
+    public MousePointer(final int x, final int y, final int z,
+        final BufferedImage image, final int hotspotX, final int hotspotY) {
+
+        super(x, y, z, toImageRGB(image));
+        this.hotspotX = hotspotX;
+        this.hotspotY = hotspotY;
+    }
+
+    /**
+     * Convert BufferedImage to ImageRGB.
+     *
+     * @param image the BufferedImage
+     * @return the ImageRGB
+     */
+    private static ImageRGB toImageRGB(final BufferedImage image) {
+        if (image == null) {
+            return null;
+        }
+        int width = image.getWidth();
+        int height = image.getHeight();
+        int[] pixels = image.getRGB(0, 0, width, height, null, 0, width);
+        return new ImageRGB(width, height, pixels);
     }
 
     // ------------------------------------------------------------------------

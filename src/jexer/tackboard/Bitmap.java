@@ -36,12 +36,9 @@ import jexer.bits.ImageRGB;
 
 /**
  * Bitmap is a raw bitmap image.
+ * If java.awt is not available, this class does nothing.
  */
 public class Bitmap extends TackboardItem {
-
-    // ------------------------------------------------------------------------
-    // Constants --------------------------------------------------------------
-    // ------------------------------------------------------------------------
 
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
@@ -50,40 +47,17 @@ public class Bitmap extends TackboardItem {
     /**
      * The image data.
      */
-    private BufferedImage image;
+    private ImageRGB image;
 
     /**
      * The rendered image data.
      */
-    private BufferedImage renderedImage;
+    private ImageRGB renderedImage;
 
     /**
      * Animation to display.
      */
     private Animation animation;
-
-    // ------------------------------------------------------------------------
-    // Helper methods ---------------------------------------------------------
-    // ------------------------------------------------------------------------
-
-    /**
-     * Convert ImageRGB to BufferedImage.
-     *
-     * @param imageRGB the ImageRGB to convert
-     * @return the BufferedImage
-     */
-    private static BufferedImage toBufferedImage(final ImageRGB imageRGB) {
-        if (imageRGB == null) {
-            return null;
-        }
-        int width = imageRGB.getWidth();
-        int height = imageRGB.getHeight();
-        BufferedImage result = new BufferedImage(width, height,
-            BufferedImage.TYPE_INT_ARGB);
-        int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
-        result.setRGB(0, 0, width, height, pixels, 0, width);
-        return result;
-    }
 
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
@@ -98,10 +72,25 @@ public class Bitmap extends TackboardItem {
      * @param image the image
      */
     public Bitmap(final int x, final int y, final int z,
-        final BufferedImage image) {
+        final ImageRGB image) {
 
         super(x, y, z);
         this.image = image;
+    }
+
+    /**
+     * Public constructor with BufferedImage.
+     *
+     * @param x X pixel coordinate
+     * @param y Y pixel coordinate
+     * @param z Z coordinate
+     * @param image the image (BufferedImage)
+     */
+    public Bitmap(final int x, final int y, final int z,
+        final BufferedImage image) {
+
+        super(x, y, z);
+        this.image = toImageRGB(image);
     }
 
     /**
@@ -119,8 +108,28 @@ public class Bitmap extends TackboardItem {
 
         super(x, y, z);
         this.animation = animation;
-        image = toBufferedImage(animation.getFrame());
+        image = animation.getFrame();
         animation.start(application);
+    }
+
+    // ------------------------------------------------------------------------
+    // Helper methods ---------------------------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * Convert BufferedImage to ImageRGB.
+     *
+     * @param bufferedImage the BufferedImage
+     * @return the ImageRGB
+     */
+    private static ImageRGB toImageRGB(final BufferedImage bufferedImage) {
+        if (bufferedImage == null) {
+            return null;
+        }
+        int width = bufferedImage.getWidth();
+        int height = bufferedImage.getHeight();
+        int[] pixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
+        return new ImageRGB(width, height, pixels);
     }
 
     // ------------------------------------------------------------------------
@@ -140,7 +149,7 @@ public class Bitmap extends TackboardItem {
         }
         Bitmap that = (Bitmap) rhs;
         return (super.equals(rhs)
-            && (this.image.equals(that.image)));
+            && (this.image != null ? this.image.equals(that.image) : that.image == null));
     }
 
     /**
@@ -154,7 +163,7 @@ public class Bitmap extends TackboardItem {
         int B = 23;
         int hash = A;
         hash = (B * hash) + super.hashCode();
-        hash = (B * hash) + image.hashCode();
+        hash = (B * hash) + (image != null ? image.hashCode() : 0);
         return hash;
     }
 
@@ -166,8 +175,8 @@ public class Bitmap extends TackboardItem {
     @Override
     public String toString() {
         return String.format("(%d, %d, %d) %d X %d", getX(), getY(), getZ(),
-            (image != null ? image.getWidth() : "null"),
-            (image != null ? image.getHeight() : "null"));
+            (image != null ? image.getWidth() : 0),
+            (image != null ? image.getHeight() : 0));
     }
 
     /**
@@ -180,8 +189,8 @@ public class Bitmap extends TackboardItem {
      * show
      */
     @Override
-    public BufferedImage getImage(final int textWidth, final int textHeight) {
-        if (!awtAvailable) {
+    public ImageRGB getImage(final int textWidth, final int textHeight) {
+        if (!implAvailable) {
             return null;
         }
         if (dirty) {
@@ -216,11 +225,11 @@ public class Bitmap extends TackboardItem {
      * @param textHeight the height of a text cell
      */
     private void render(final int textWidth, final int textHeight) {
-        if (!awtAvailable || image == null) {
+        if (!implAvailable || image == null) {
             return;
         }
         if (animation != null) {
-            BufferedImage newFrame = toBufferedImage(animation.getFrame());
+            ImageRGB newFrame = animation.getFrame();
             if (newFrame != image) {
                 image = newFrame;
                 renderedImage = null;
@@ -246,13 +255,17 @@ public class Bitmap extends TackboardItem {
             rows++;
         }
 
-        renderedImage = new BufferedImage(columns * textWidth,
-            rows * textHeight, BufferedImage.TYPE_INT_ARGB);
+        renderedImage = new ImageRGB(columns * textWidth, rows * textHeight);
+        renderedImage.drawImage(image, dx, dy);
+    }
 
-        java.awt.Graphics gr = renderedImage.getGraphics();
-        gr.setColor(java.awt.Color.BLACK);
-        gr.drawImage(image, dx, dy, null, null);
-        gr.dispose();
+    /**
+     * Get the image.
+     *
+     * @return the image
+     */
+    protected ImageRGB getRawImage() {
+        return image;
     }
 
     /**
@@ -260,13 +273,22 @@ public class Bitmap extends TackboardItem {
      *
      * @param image the new image
      */
-    public void setImage(final BufferedImage image) {
+    public void setImage(final ImageRGB image) {
         if (animation != null) {
             animation.stop();
             animation = null;
         }
         this.image = image;
         setDirty();
+    }
+
+    /**
+     * Set the image with BufferedImage.
+     *
+     * @param image the new image (BufferedImage)
+     */
+    public void setImage(final BufferedImage image) {
+        setImage(toImageRGB(image));
     }
 
 }

@@ -125,6 +125,20 @@
                 <exclude>**/backend/TImageHelper$*.class</exclude>
                 <exclude>**/backend/TackboardHelper.class</exclude>
                 <exclude>**/backend/TackboardHelper$*.class</exclude>
+                <exclude>**/backend/TTerminalHelper.class</exclude>
+                <exclude>**/backend/TTerminalHelper$*.class</exclude>
+                <exclude>**/backend/TImageImpl.class</exclude>
+                <exclude>**/backend/TImageImpl$*.class</exclude>
+                <exclude>**/backend/TTextPictureImpl.class</exclude>
+                <exclude>**/backend/TTextPictureImpl$*.class</exclude>
+                <exclude>**/backend/TackboardItemImpl.class</exclude>
+                <exclude>**/backend/TackboardItemImpl$*.class</exclude>
+                <exclude>**/backend/TackboardImpl.class</exclude>
+                <exclude>**/backend/TackboardImpl$*.class</exclude>
+                <exclude>**/backend/TextImpl.class</exclude>
+                <exclude>**/backend/TextImpl$*.class</exclude>
+                <exclude>**/backend/BitmapImpl.class</exclude>
+                <exclude>**/backend/BitmapImpl$*.class</exclude>
               </excludes>
               <archive>
                 <manifest>
@@ -179,6 +193,14 @@
                 <include>**/backend/TImageImpl$*.class</include>
                 <include>**/backend/TTextPictureImpl.class</include>
                 <include>**/backend/TTextPictureImpl$*.class</include>
+                <include>**/backend/TackboardItemImpl.class</include>
+                <include>**/backend/TackboardItemImpl$*.class</include>
+                <include>**/backend/TackboardImpl.class</include>
+                <include>**/backend/TackboardImpl$*.class</include>
+                <include>**/backend/TextImpl.class</include>
+                <include>**/backend/TextImpl$*.class</include>
+                <include>**/backend/BitmapImpl.class</include>
+                <include>**/backend/BitmapImpl$*.class</include>
               </includes>
               <archive>
                 <manifest>
