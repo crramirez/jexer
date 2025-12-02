@@ -247,9 +247,11 @@ public class Tackboard {
                     if (oldCell.isImage()) {
                         // Blit this image over that one.
                         ImageRGB oldImage = oldCell.getImage(true);
-                        oldImage.drawImage(newImage, 0, 0);
+                        ImageRGB compositeImage = new ImageRGB(oldImage.getWidth(), oldImage.getHeight());
+                        compositeImage.drawImage(oldImage, 0, 0);
+                        compositeImage.drawImage(newImage, 0, 0);
                         imageId++;
-                        oldCell.setImage(oldImage, imageId & 0x7FFFFFFF);
+                        oldCell.setImage(compositeImage, imageId & 0x7FFFFFFF);
                     } else {
                         // Old cell is text only, just add the image.
                         if (!transparent) {

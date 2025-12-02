@@ -132,7 +132,7 @@ public class Text extends Bitmap {
 
         this.text = text;
         this.font = font;
-        this.fontName = font.getFamily();
+        this.fontName = (font != null) ? font.getFamily() : null;
         this.fontSize = fontSize;
         this.color = color;
     }
