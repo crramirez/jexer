@@ -591,7 +591,7 @@ public class UnicodeGlyphImage {
         if (!cell.isImage()) {
             throw new IllegalArgumentException("cell does not have an image");
         }
-        this.image = cell.getImage();
+        this.image = toBufferedImage(cell.getImage());
 
         palette = new Palette(image);
 
@@ -627,6 +627,25 @@ public class UnicodeGlyphImage {
     // ------------------------------------------------------------------------
     // UnicodeGlyphImage ---------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Convert ImageRGB to BufferedImage.
+     *
+     * @param imageRGB the ImageRGB to convert
+     * @return the BufferedImage
+     */
+    private static BufferedImage toBufferedImage(final ImageRGB imageRGB) {
+        if (imageRGB == null) {
+            return null;
+        }
+        int width = imageRGB.getWidth();
+        int height = imageRGB.getHeight();
+        BufferedImage result = new BufferedImage(width, height,
+            BufferedImage.TYPE_INT_ARGB);
+        int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
+        result.setRGB(0, 0, width, height, pixels, 0, width);
+        return result;
+    }
 
     /**
      * Get the index used to map half blocks and quadrants.
