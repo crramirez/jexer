@@ -61,6 +61,7 @@ import jexer.bits.CellAttributes;
 import jexer.bits.Color;
 import jexer.bits.ColorRGB;
 import jexer.bits.GlyphMaker;
+import jexer.bits.ImageRGB;
 import jexer.bits.ImageUtils;
 import jexer.bits.StringUtils;
 import jexer.event.TCommandEvent;
@@ -1365,6 +1366,41 @@ public class ECMA48Terminal extends LogicalScreen
     // ------------------------------------------------------------------------
 
     /**
+     * Convert ImageRGB to BufferedImage for AWT Graphics operations.
+     *
+     * @param imageRGB the ImageRGB to convert
+     * @return the BufferedImage, or null if imageRGB is null
+     */
+    private BufferedImage toBufferedImage(final ImageRGB imageRGB) {
+        if (imageRGB == null) {
+            return null;
+        }
+        int width = imageRGB.getWidth();
+        int height = imageRGB.getHeight();
+        BufferedImage result = new BufferedImage(width, height,
+            BufferedImage.TYPE_INT_ARGB);
+        int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
+        result.setRGB(0, 0, width, height, pixels, 0, width);
+        return result;
+    }
+
+    /**
+     * Convert BufferedImage to ImageRGB.
+     *
+     * @param bufferedImage the BufferedImage to convert
+     * @return the ImageRGB, or null if bufferedImage is null
+     */
+    private ImageRGB toImageRGB(final BufferedImage bufferedImage) {
+        if (bufferedImage == null) {
+            return null;
+        }
+        int width = bufferedImage.getWidth();
+        int height = bufferedImage.getHeight();
+        int[] pixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
+        return new ImageRGB(width, height, pixels);
+    }
+
+    /**
      * Get the bytes per second from the last second.
      *
      * @return the bytes per second
@@ -1791,7 +1827,7 @@ public class ECMA48Terminal extends LogicalScreen
                 ) {
                     // If a fallback font is available that can support
                     // Symbols for Legacy Computing, always use it.
-                    BufferedImage newImage = glyphMaker.getImage(lCell,
+                    ImageRGB newImage = glyphMaker.getImage(lCell,
                         getTextWidth(), getTextHeight(), getBackend());
                     if (newImage != null) {
                         lCell.setImage(newImage);
@@ -1813,14 +1849,14 @@ public class ECMA48Terminal extends LogicalScreen
                 ) {
                     blankImageRow = new ArrayList<Cell>(width);
                     Cell blank = new Cell();
-                    BufferedImage newImage = new BufferedImage(textWidthPixels,
+                    BufferedImage newBufImage = new BufferedImage(textWidthPixels,
                         textHeightPixels, BufferedImage.TYPE_INT_ARGB);
-                    java.awt.Graphics gr = newImage.getGraphics();
+                    java.awt.Graphics gr = newBufImage.getGraphics();
                     gr.setColor(new java.awt.Color(0, 0, 0));
-                    gr.fillRect(0, 0, newImage.getWidth(),
-                        newImage.getHeight());
+                    gr.fillRect(0, 0, newBufImage.getWidth(),
+                        newBufImage.getHeight());
                     gr.dispose();
-                    blank.setImage(newImage);
+                    blank.setImage(toImageRGB(newBufImage));
                     for (int x = 0; x < width; x++) {
                         blankImageRow.add(new Cell(blank));
                     }
@@ -3814,7 +3850,7 @@ public class ECMA48Terminal extends LogicalScreen
             totalWidth += cells.get(i).getImage().getWidth();
         }
 
-        BufferedImage image = ImageUtils.createImage(cells.get(0).getImage(),
+        BufferedImage image = ImageUtils.createImage(toBufferedImage(cells.get(0).getImage()),
             fullWidth, fullHeight);
 
         int [] rgbArray;
@@ -4330,7 +4366,7 @@ public class ECMA48Terminal extends LogicalScreen
         }
 
         for (int i = 0; i < cells.size(); i++) {
-            BufferedImage image = cells.get(i).getImage();
+            BufferedImage image = toBufferedImage(cells.get(i).getImage());
             sb.append(unicodeGlyphEncoder.toUnicodeGlyph(image,
                     image.getWidth(), image.getHeight()));
         }
