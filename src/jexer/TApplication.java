@@ -741,15 +741,15 @@ public class TApplication implements Runnable {
         try {
             Class<?> swingBackendClass = Class.forName("jexer.desktop.SwingBackend");
             if (windowWidth > 0 && windowHeight > 0 && fontSize > 0) {
-                // Use constructor with dimensions
+                // Use constructor with listener and dimensions
                 return (Backend) swingBackendClass
-                    .getConstructor(int.class, int.class, int.class)
-                    .newInstance(windowWidth, windowHeight, fontSize);
+                    .getConstructor(Object.class, int.class, int.class, int.class)
+                    .newInstance(app, windowWidth, windowHeight, fontSize);
             } else {
-                // Use default constructor
+                // Use constructor with listener only (default dimensions)
                 return (Backend) swingBackendClass
-                    .getConstructor()
-                    .newInstance();
+                    .getConstructor(Object.class)
+                    .newInstance(app);
             }
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException(
