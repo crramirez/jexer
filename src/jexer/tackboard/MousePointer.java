@@ -28,17 +28,15 @@
  */
 package jexer.tackboard;
 
-import java.awt.image.BufferedImage;
+import java.lang.reflect.Method;
+
+import jexer.bits.ImageRGB;
 
 /**
  * MousePointer is a Bitmap with a hotspot location to represent the "tip" of
  * a mouse icon.
  */
 public class MousePointer extends Bitmap implements Pointer {
-
-    // ------------------------------------------------------------------------
-    // Constants --------------------------------------------------------------
-    // ------------------------------------------------------------------------
 
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
@@ -69,11 +67,58 @@ public class MousePointer extends Bitmap implements Pointer {
      * @param hotspotY the hotspot Y location relative to y
      */
     public MousePointer(final int x, final int y, final int z,
-        final BufferedImage image, final int hotspotX, final int hotspotY) {
+        final ImageRGB image, final int hotspotX, final int hotspotY) {
 
         super(x, y, z, image);
         this.hotspotX = hotspotX;
         this.hotspotY = hotspotY;
+    }
+
+    /**
+     * Public constructor with BufferedImage (passed as Object to avoid
+     * java.awt dependency).
+     *
+     * @param x X pixel coordinate
+     * @param y Y pixel coordinate
+     * @param z Z coordinate
+     * @param bufferedImage the image (BufferedImage as Object)
+     * @param hotspotX the hotspot X location relative to x
+     * @param hotspotY the hotspot Y location relative to y
+     */
+    public MousePointer(final int x, final int y, final int z,
+        final Object bufferedImage, final int hotspotX, final int hotspotY) {
+
+        super(x, y, z, toImageRGB(bufferedImage));
+        this.hotspotX = hotspotX;
+        this.hotspotY = hotspotY;
+    }
+
+    /**
+     * Convert BufferedImage (passed as Object) to ImageRGB via reflection.
+     *
+     * @param bufferedImage the BufferedImage as Object
+     * @return the ImageRGB
+     */
+    private static ImageRGB toImageRGB(final Object bufferedImage) {
+        if (bufferedImage == null) {
+            return null;
+        }
+        try {
+            // Use reflection to call getWidth(), getHeight(), getRGB()
+            Class<?> clazz = bufferedImage.getClass();
+            Method getWidth = clazz.getMethod("getWidth");
+            Method getHeight = clazz.getMethod("getHeight");
+            Method getRGB = clazz.getMethod("getRGB", int.class, int.class,
+                int.class, int.class, int[].class, int.class, int.class);
+            
+            int width = (Integer) getWidth.invoke(bufferedImage);
+            int height = (Integer) getHeight.invoke(bufferedImage);
+            int[] pixels = (int[]) getRGB.invoke(bufferedImage, 0, 0,
+                width, height, null, 0, width);
+            return new ImageRGB(width, height, pixels);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     // ------------------------------------------------------------------------

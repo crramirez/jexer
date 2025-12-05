@@ -28,15 +28,13 @@
  */
 package jexer;
 
-import java.awt.Font;
-import java.awt.GraphicsEnvironment;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
 import jexer.backend.ECMA48Terminal;
-import jexer.backend.SwingTerminal;
 import jexer.bits.BorderStyle;
 import jexer.bits.CellAttributes;
 import jexer.bits.GraphicsChars;
@@ -50,6 +48,15 @@ import static jexer.TKeypress.*;
 public class TScreenOptionsWindow extends TWindow {
 
     // ------------------------------------------------------------------------
+    // Constants --------------------------------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * Font style constant for plain style (equivalent to java.awt.Font.PLAIN).
+     */
+    private static final int FONT_STYLE_PLAIN = 0;
+
+    // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
     // ------------------------------------------------------------------------
 
@@ -59,9 +66,9 @@ public class TScreenOptionsWindow extends TWindow {
     private ResourceBundle i18n = null;
 
     /**
-     * The Swing screen.
+     * The Swing screen (stored as Object to avoid dependency on SwingTerminal class).
      */
-    private SwingTerminal terminal = null;
+    private Object terminal = null;
 
     /**
      * The ECMA48 screen.
@@ -149,9 +156,9 @@ public class TScreenOptionsWindow extends TWindow {
     private int oldFontSize = 20;
 
     /**
-     * The original font.
+     * The original font (stored as Object to avoid java.awt.Font import).
      */
-    private Font oldFont = null;
+    private Object oldFont = null;
 
     /**
      * The original text adjust X value.
@@ -189,9 +196,9 @@ public class TScreenOptionsWindow extends TWindow {
     private boolean oldTripleBuffer = true;
 
     /**
-     * The original cursor style.
+     * The original cursor style (stored as Object to avoid dependency on SwingTerminal.CursorStyle).
      */
-    private SwingTerminal.CursorStyle oldCursorStyle;
+    private Object oldCursorStyle;
 
     /**
      * The original mouse style.
@@ -219,6 +226,277 @@ public class TScreenOptionsWindow extends TWindow {
     private int oldWindowOpacity = 100;
 
     // ------------------------------------------------------------------------
+    // SwingTerminal reflection helpers ---------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * Get the font from SwingTerminal via reflection.
+     * @return the font Object or null
+     */
+    private Object terminalGetFont() {
+        if (terminal == null) return null;
+        try {
+            Method method = terminal.getClass().getMethod("getFont");
+            return method.invoke(terminal);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Get the font size from SwingTerminal via reflection.
+     * @return the font size or 0
+     */
+    private int terminalGetFontSize() {
+        if (terminal == null) return 0;
+        try {
+            Method method = terminal.getClass().getMethod("getFontSize");
+            return (Integer) method.invoke(terminal);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Set the font on SwingTerminal via reflection.
+     * @param font the font Object to set
+     */
+    private void terminalSetFont(Object font) {
+        if (terminal == null) return;
+        try {
+            Method method = terminal.getClass().getMethod("setFont", Object.class);
+            method.invoke(terminal, font);
+        } catch (Exception e) {
+            // ignore
+        }
+    }
+
+    /**
+     * Set the font size on SwingTerminal via reflection.
+     * @param size the font size to set
+     */
+    private void terminalSetFontSize(int size) {
+        if (terminal == null) return;
+        try {
+            Method method = terminal.getClass().getMethod("setFontSize", int.class);
+            method.invoke(terminal, size);
+        } catch (Exception e) {
+            // ignore
+        }
+    }
+
+    /**
+     * Set the default font on SwingTerminal via reflection.
+     */
+    private void terminalSetDefaultFont() {
+        if (terminal == null) return;
+        try {
+            Method method = terminal.getClass().getMethod("setDefaultFont");
+            method.invoke(terminal);
+        } catch (Exception e) {
+            // ignore
+        }
+    }
+
+    /**
+     * Get text adjust X from SwingTerminal via reflection.
+     * @return the adjustment or 0
+     */
+    private int terminalGetTextAdjustX() {
+        if (terminal == null) return 0;
+        try {
+            Method method = terminal.getClass().getMethod("getTextAdjustX");
+            return (Integer) method.invoke(terminal);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Get text adjust Y from SwingTerminal via reflection.
+     * @return the adjustment or 0
+     */
+    private int terminalGetTextAdjustY() {
+        if (terminal == null) return 0;
+        try {
+            Method method = terminal.getClass().getMethod("getTextAdjustY");
+            return (Integer) method.invoke(terminal);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Get text adjust height from SwingTerminal via reflection.
+     * @return the adjustment or 0
+     */
+    private int terminalGetTextAdjustHeight() {
+        if (terminal == null) return 0;
+        try {
+            Method method = terminal.getClass().getMethod("getTextAdjustHeight");
+            return (Integer) method.invoke(terminal);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Get text adjust width from SwingTerminal via reflection.
+     * @return the adjustment or 0
+     */
+    private int terminalGetTextAdjustWidth() {
+        if (terminal == null) return 0;
+        try {
+            Method method = terminal.getClass().getMethod("getTextAdjustWidth");
+            return (Integer) method.invoke(terminal);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Set text adjust X on SwingTerminal via reflection.
+     * @param adjust the adjustment value
+     */
+    private void terminalSetTextAdjustX(int adjust) {
+        if (terminal == null) return;
+        try {
+            Method method = terminal.getClass().getMethod("setTextAdjustX", int.class);
+            method.invoke(terminal, adjust);
+        } catch (Exception e) {
+            // ignore
+        }
+    }
+
+    /**
+     * Set text adjust Y on SwingTerminal via reflection.
+     * @param adjust the adjustment value
+     */
+    private void terminalSetTextAdjustY(int adjust) {
+        if (terminal == null) return;
+        try {
+            Method method = terminal.getClass().getMethod("setTextAdjustY", int.class);
+            method.invoke(terminal, adjust);
+        } catch (Exception e) {
+            // ignore
+        }
+    }
+
+    /**
+     * Set text adjust height on SwingTerminal via reflection.
+     * @param adjust the adjustment value
+     */
+    private void terminalSetTextAdjustHeight(int adjust) {
+        if (terminal == null) return;
+        try {
+            Method method = terminal.getClass().getMethod("setTextAdjustHeight", int.class);
+            method.invoke(terminal, adjust);
+        } catch (Exception e) {
+            // ignore
+        }
+    }
+
+    /**
+     * Set text adjust width on SwingTerminal via reflection.
+     * @param adjust the adjustment value
+     */
+    private void terminalSetTextAdjustWidth(int adjust) {
+        if (terminal == null) return;
+        try {
+            Method method = terminal.getClass().getMethod("setTextAdjustWidth", int.class);
+            method.invoke(terminal, adjust);
+        } catch (Exception e) {
+            // ignore
+        }
+    }
+
+    /**
+     * Get cursor style from SwingTerminal via reflection.
+     * @return the cursor style Object or null
+     */
+    private Object terminalGetCursorStyle() {
+        if (terminal == null) return null;
+        try {
+            Method method = terminal.getClass().getMethod("getCursorStyle");
+            return method.invoke(terminal);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Set cursor style on SwingTerminal via reflection.
+     * @param cursorStyle the cursor style Object to set
+     */
+    private void terminalSetCursorStyle(Object cursorStyle) {
+        if (terminal == null) return;
+        try {
+            // Get the CursorStyle class
+            Class<?> cursorStyleClass = cursorStyle.getClass();
+            Method method = terminal.getClass().getMethod("setCursorStyle", cursorStyleClass);
+            method.invoke(terminal, cursorStyle);
+        } catch (Exception e) {
+            // ignore
+        }
+    }
+
+    /**
+     * Get mouse style from SwingTerminal via reflection.
+     * @return the mouse style string or "default"
+     */
+    private String terminalGetMouseStyle() {
+        if (terminal == null) return "default";
+        try {
+            Method method = terminal.getClass().getMethod("getMouseStyle");
+            return (String) method.invoke(terminal);
+        } catch (Exception e) {
+            return "default";
+        }
+    }
+
+    /**
+     * Set mouse style on SwingTerminal via reflection.
+     * @param mouseStyle the mouse style string
+     */
+    private void terminalSetMouseStyle(String mouseStyle) {
+        if (terminal == null) return;
+        try {
+            Method method = terminal.getClass().getMethod("setMouseStyle", String.class);
+            method.invoke(terminal, mouseStyle);
+        } catch (Exception e) {
+            // ignore
+        }
+    }
+
+    /**
+     * Check if triple buffer is enabled on SwingTerminal via reflection.
+     * @return true if triple buffer enabled
+     */
+    private boolean terminalIsTripleBuffer() {
+        if (terminal == null) return true;
+        try {
+            Method method = terminal.getClass().getMethod("isTripleBuffer");
+            return (Boolean) method.invoke(terminal);
+        } catch (Exception e) {
+            return true;
+        }
+    }
+
+    /**
+     * Set triple buffer on SwingTerminal via reflection.
+     * @param tripleBuffer the value to set
+     */
+    private void terminalSetTripleBuffer(boolean tripleBuffer) {
+        if (terminal == null) return;
+        try {
+            Method method = terminal.getClass().getMethod("setTripleBuffer", boolean.class);
+            method.invoke(terminal, tripleBuffer);
+        } catch (Exception e) {
+            // ignore
+        }
+    }
+
+    // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
     // ------------------------------------------------------------------------
 
@@ -239,8 +517,8 @@ public class TScreenOptionsWindow extends TWindow {
         // Add shortcut text
         newStatusBar(i18n.getString("statusBar"));
 
-        if (getScreen() instanceof SwingTerminal) {
-            terminal = (SwingTerminal) getScreen();
+        if (TApplication.isSwingTerminal(getScreen())) {
+            terminal = getScreen();  // Store as Object, methods called via reflection
         }
         if (getScreen() instanceof ECMA48Terminal) {
             ecmaTerminal = (ECMA48Terminal) getScreen();
@@ -475,40 +753,44 @@ public class TScreenOptionsWindow extends TWindow {
         }
 
         if (terminal != null) {
-            oldFont = terminal.getFont();
-            oldFontSize = terminal.getFontSize();
-            oldTextAdjustX = terminal.getTextAdjustX();
-            oldTextAdjustY = terminal.getTextAdjustY();
-            oldTextAdjustHeight = terminal.getTextAdjustHeight();
-            oldTextAdjustWidth = terminal.getTextAdjustWidth();
-            oldCursorStyle = terminal.getCursorStyle();
-            oldMouseStyle = terminal.getMouseStyle();
+            oldFont = terminalGetFont();
+            oldFontSize = terminalGetFontSize();
+            oldTextAdjustX = terminalGetTextAdjustX();
+            oldTextAdjustY = terminalGetTextAdjustY();
+            oldTextAdjustHeight = terminalGetTextAdjustHeight();
+            oldTextAdjustWidth = terminalGetTextAdjustWidth();
+            oldCursorStyle = terminalGetCursorStyle();
+            oldMouseStyle = terminalGetMouseStyle();
 
-            String [] fontNames = GraphicsEnvironment.
-                getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+            String [] fontNames = getFontFamilyNames();
             List<String> fonts = new ArrayList<String>();
             fonts.add(0, i18n.getString("builtInTerminus"));
-            fonts.addAll(Arrays.asList(fontNames));
+            if (fontNames != null) {
+                fonts.addAll(Arrays.asList(fontNames));
+            }
             fontName = addComboBox(col, 2, 25, fonts, 0, 8,
                 new TAction() {
                     public void DO() {
                         if (fontName.getText().equals(i18n.
                                 getString("builtInTerminus"))) {
 
-                            terminal.setDefaultFont();
+                            terminalSetDefaultFont();
                         } else {
-                            terminal.setFont(new Font(fontName.getText(),
-                                    Font.PLAIN, terminal.getFontSize()));
+                            Object newFont = createFont(fontName.getText(),
+                                FONT_STYLE_PLAIN, terminalGetFontSize());
+                            if (newFont != null) {
+                                terminalSetFont(newFont);
+                            }
                             fontSize.setText(Integer.toString(
-                                terminal.getFontSize()));
+                                terminalGetFontSize()));
                             textAdjustX.setText(Integer.toString(
-                                terminal.getTextAdjustX()));
+                                terminalGetTextAdjustX()));
                             textAdjustY.setText(Integer.toString(
-                                terminal.getTextAdjustY()));
+                                terminalGetTextAdjustY()));
                             textAdjustHeight.setText(Integer.toString(
-                                terminal.getTextAdjustHeight()));
+                                terminalGetTextAdjustHeight()));
                             textAdjustWidth.setText(Integer.toString(
-                                terminal.getTextAdjustWidth()));
+                                terminalGetTextAdjustWidth()));
                         }
                     }
                 }
@@ -516,10 +798,10 @@ public class TScreenOptionsWindow extends TWindow {
 
             // Font size
             fontSize = addField(col, 3, 3, true,
-                Integer.toString(terminal.getFontSize()),
+                Integer.toString(terminalGetFontSize()),
                 new TAction() {
                     public void DO() {
-                        int currentSize = terminal.getFontSize();
+                        int currentSize = terminalGetFontSize();
                         int newSize = currentSize;
                         try {
                             newSize = Integer.parseInt(fontSize.getText());
@@ -527,15 +809,15 @@ public class TScreenOptionsWindow extends TWindow {
                             fontSize.setText(Integer.toString(currentSize));
                         }
                         if (newSize != currentSize) {
-                            terminal.setFontSize(newSize);
+                            terminalSetFontSize(newSize);
                             textAdjustX.setText(Integer.toString(
-                                terminal.getTextAdjustX()));
+                                terminalGetTextAdjustX()));
                             textAdjustY.setText(Integer.toString(
-                                terminal.getTextAdjustY()));
+                                terminalGetTextAdjustY()));
                             textAdjustHeight.setText(Integer.toString(
-                                terminal.getTextAdjustHeight()));
+                                terminalGetTextAdjustHeight()));
                             textAdjustWidth.setText(Integer.toString(
-                                terminal.getTextAdjustWidth()));
+                                terminalGetTextAdjustWidth()));
                         }
                     }
                 },
@@ -544,7 +826,7 @@ public class TScreenOptionsWindow extends TWindow {
             addSpinner(col + 3, 3,
                 new TAction() {
                     public void DO() {
-                        int currentSize = terminal.getFontSize();
+                        int currentSize = terminalGetFontSize();
                         int newSize = currentSize;
                         try {
                             newSize = Integer.parseInt(fontSize.getText());
@@ -554,21 +836,21 @@ public class TScreenOptionsWindow extends TWindow {
                         }
                         fontSize.setText(Integer.toString(newSize));
                         if (newSize != currentSize) {
-                            terminal.setFontSize(newSize);
+                            terminalSetFontSize(newSize);
                             textAdjustX.setText(Integer.toString(
-                                terminal.getTextAdjustX()));
+                                terminalGetTextAdjustX()));
                             textAdjustY.setText(Integer.toString(
-                                terminal.getTextAdjustY()));
+                                terminalGetTextAdjustY()));
                             textAdjustHeight.setText(Integer.toString(
-                                terminal.getTextAdjustHeight()));
+                                terminalGetTextAdjustHeight()));
                             textAdjustWidth.setText(Integer.toString(
-                                terminal.getTextAdjustWidth()));
+                                terminalGetTextAdjustWidth()));
                         }
                     }
                 },
                 new TAction() {
                     public void DO() {
-                        int currentSize = terminal.getFontSize();
+                        int currentSize = terminalGetFontSize();
                         int newSize = currentSize;
                         try {
                             newSize = Integer.parseInt(fontSize.getText());
@@ -578,15 +860,15 @@ public class TScreenOptionsWindow extends TWindow {
                         }
                         fontSize.setText(Integer.toString(newSize));
                         if (newSize != currentSize) {
-                            terminal.setFontSize(newSize);
+                            terminalSetFontSize(newSize);
                             textAdjustX.setText(Integer.toString(
-                                terminal.getTextAdjustX()));
+                                terminalGetTextAdjustX()));
                             textAdjustY.setText(Integer.toString(
-                                terminal.getTextAdjustY()));
+                                terminalGetTextAdjustY()));
                             textAdjustHeight.setText(Integer.toString(
-                                terminal.getTextAdjustHeight()));
+                                terminalGetTextAdjustHeight()));
                             textAdjustWidth.setText(Integer.toString(
-                                terminal.getTextAdjustWidth()));
+                                terminalGetTextAdjustWidth()));
                         }
                     }
                 }
@@ -594,10 +876,10 @@ public class TScreenOptionsWindow extends TWindow {
 
             // textAdjustX
             textAdjustX = addField(col, 4, 3, true,
-                Integer.toString(terminal.getTextAdjustX()),
+                Integer.toString(terminalGetTextAdjustX()),
                 new TAction() {
                     public void DO() {
-                        int currentAdjust = terminal.getTextAdjustX();
+                        int currentAdjust = terminalGetTextAdjustX();
                         int newAdjust = currentAdjust;
                         try {
                             newAdjust = Integer.parseInt(textAdjustX.getText());
@@ -605,7 +887,7 @@ public class TScreenOptionsWindow extends TWindow {
                             textAdjustX.setText(Integer.toString(currentAdjust));
                         }
                         if (newAdjust != currentAdjust) {
-                            terminal.setTextAdjustX(newAdjust);
+                            terminalSetTextAdjustX(newAdjust);
                         }
                     }
                 },
@@ -614,7 +896,7 @@ public class TScreenOptionsWindow extends TWindow {
             addSpinner(col + 3, 4,
                 new TAction() {
                     public void DO() {
-                        int currentAdjust = terminal.getTextAdjustX();
+                        int currentAdjust = terminalGetTextAdjustX();
                         int newAdjust = currentAdjust;
                         try {
                             newAdjust = Integer.parseInt(textAdjustX.getText());
@@ -624,13 +906,13 @@ public class TScreenOptionsWindow extends TWindow {
                         }
                         textAdjustX.setText(Integer.toString(newAdjust));
                         if (newAdjust != currentAdjust) {
-                            terminal.setTextAdjustX(newAdjust);
+                            terminalSetTextAdjustX(newAdjust);
                         }
                     }
                 },
                 new TAction() {
                     public void DO() {
-                        int currentAdjust = terminal.getTextAdjustX();
+                        int currentAdjust = terminalGetTextAdjustX();
                         int newAdjust = currentAdjust;
                         try {
                             newAdjust = Integer.parseInt(textAdjustX.getText());
@@ -640,7 +922,7 @@ public class TScreenOptionsWindow extends TWindow {
                         }
                         textAdjustX.setText(Integer.toString(newAdjust));
                         if (newAdjust != currentAdjust) {
-                            terminal.setTextAdjustX(newAdjust);
+                            terminalSetTextAdjustX(newAdjust);
                         }
                     }
                 }
@@ -648,10 +930,10 @@ public class TScreenOptionsWindow extends TWindow {
 
             // textAdjustY
             textAdjustY = addField(col, 5, 3, true,
-                Integer.toString(terminal.getTextAdjustY()),
+                Integer.toString(terminalGetTextAdjustY()),
                 new TAction() {
                     public void DO() {
-                        int currentAdjust = terminal.getTextAdjustY();
+                        int currentAdjust = terminalGetTextAdjustY();
                         int newAdjust = currentAdjust;
                         try {
                             newAdjust = Integer.parseInt(textAdjustY.getText());
@@ -659,7 +941,7 @@ public class TScreenOptionsWindow extends TWindow {
                             textAdjustY.setText(Integer.toString(currentAdjust));
                         }
                         if (newAdjust != currentAdjust) {
-                            terminal.setTextAdjustY(newAdjust);
+                            terminalSetTextAdjustY(newAdjust);
                         }
                     }
                 },
@@ -668,7 +950,7 @@ public class TScreenOptionsWindow extends TWindow {
             addSpinner(col + 3, 5,
                 new TAction() {
                     public void DO() {
-                        int currentAdjust = terminal.getTextAdjustY();
+                        int currentAdjust = terminalGetTextAdjustY();
                         int newAdjust = currentAdjust;
                         try {
                             newAdjust = Integer.parseInt(textAdjustY.getText());
@@ -678,13 +960,13 @@ public class TScreenOptionsWindow extends TWindow {
                         }
                         textAdjustY.setText(Integer.toString(newAdjust));
                         if (newAdjust != currentAdjust) {
-                            terminal.setTextAdjustY(newAdjust);
+                            terminalSetTextAdjustY(newAdjust);
                         }
                     }
                 },
                 new TAction() {
                     public void DO() {
-                        int currentAdjust = terminal.getTextAdjustY();
+                        int currentAdjust = terminalGetTextAdjustY();
                         int newAdjust = currentAdjust;
                         try {
                             newAdjust = Integer.parseInt(textAdjustY.getText());
@@ -694,7 +976,7 @@ public class TScreenOptionsWindow extends TWindow {
                         }
                         textAdjustY.setText(Integer.toString(newAdjust));
                         if (newAdjust != currentAdjust) {
-                            terminal.setTextAdjustY(newAdjust);
+                            terminalSetTextAdjustY(newAdjust);
                         }
                     }
                 }
@@ -702,10 +984,10 @@ public class TScreenOptionsWindow extends TWindow {
 
             // textAdjustHeight
             textAdjustHeight = addField(col, 6, 3, true,
-                Integer.toString(terminal.getTextAdjustHeight()),
+                Integer.toString(terminalGetTextAdjustHeight()),
                 new TAction() {
                     public void DO() {
-                        int currentAdjust = terminal.getTextAdjustHeight();
+                        int currentAdjust = terminalGetTextAdjustHeight();
                         int newAdjust = currentAdjust;
                         try {
                             newAdjust = Integer.parseInt(textAdjustHeight.getText());
@@ -713,7 +995,7 @@ public class TScreenOptionsWindow extends TWindow {
                             textAdjustHeight.setText(Integer.toString(currentAdjust));
                         }
                         if (newAdjust != currentAdjust) {
-                            terminal.setTextAdjustHeight(newAdjust);
+                            terminalSetTextAdjustHeight(newAdjust);
                         }
                     }
                 },
@@ -722,7 +1004,7 @@ public class TScreenOptionsWindow extends TWindow {
             addSpinner(col + 3, 6,
                 new TAction() {
                     public void DO() {
-                        int currentAdjust = terminal.getTextAdjustHeight();
+                        int currentAdjust = terminalGetTextAdjustHeight();
                         int newAdjust = currentAdjust;
                         try {
                             newAdjust = Integer.parseInt(textAdjustHeight.getText());
@@ -732,13 +1014,13 @@ public class TScreenOptionsWindow extends TWindow {
                         }
                         textAdjustHeight.setText(Integer.toString(newAdjust));
                         if (newAdjust != currentAdjust) {
-                            terminal.setTextAdjustHeight(newAdjust);
+                            terminalSetTextAdjustHeight(newAdjust);
                         }
                     }
                 },
                 new TAction() {
                     public void DO() {
-                        int currentAdjust = terminal.getTextAdjustHeight();
+                        int currentAdjust = terminalGetTextAdjustHeight();
                         int newAdjust = currentAdjust;
                         try {
                             newAdjust = Integer.parseInt(textAdjustHeight.getText());
@@ -748,7 +1030,7 @@ public class TScreenOptionsWindow extends TWindow {
                         }
                         textAdjustHeight.setText(Integer.toString(newAdjust));
                         if (newAdjust != currentAdjust) {
-                            terminal.setTextAdjustHeight(newAdjust);
+                            terminalSetTextAdjustHeight(newAdjust);
                         }
                     }
                 }
@@ -756,10 +1038,10 @@ public class TScreenOptionsWindow extends TWindow {
 
             // textAdjustWidth
             textAdjustWidth = addField(col, 7, 3, true,
-                Integer.toString(terminal.getTextAdjustWidth()),
+                Integer.toString(terminalGetTextAdjustWidth()),
                 new TAction() {
                     public void DO() {
-                        int currentAdjust = terminal.getTextAdjustWidth();
+                        int currentAdjust = terminalGetTextAdjustWidth();
                         int newAdjust = currentAdjust;
                         try {
                             newAdjust = Integer.parseInt(textAdjustWidth.getText());
@@ -767,7 +1049,7 @@ public class TScreenOptionsWindow extends TWindow {
                             textAdjustWidth.setText(Integer.toString(currentAdjust));
                         }
                         if (newAdjust != currentAdjust) {
-                            terminal.setTextAdjustWidth(newAdjust);
+                            terminalSetTextAdjustWidth(newAdjust);
                         }
                     }
                 },
@@ -776,7 +1058,7 @@ public class TScreenOptionsWindow extends TWindow {
             addSpinner(col + 3, 7,
                 new TAction() {
                     public void DO() {
-                        int currentAdjust = terminal.getTextAdjustWidth();
+                        int currentAdjust = terminalGetTextAdjustWidth();
                         int newAdjust = currentAdjust;
                         try {
                             newAdjust = Integer.parseInt(textAdjustWidth.getText());
@@ -786,13 +1068,13 @@ public class TScreenOptionsWindow extends TWindow {
                         }
                         textAdjustWidth.setText(Integer.toString(newAdjust));
                         if (newAdjust != currentAdjust) {
-                            terminal.setTextAdjustWidth(newAdjust);
+                            terminalSetTextAdjustWidth(newAdjust);
                         }
                     }
                 },
                 new TAction() {
                     public void DO() {
-                        int currentAdjust = terminal.getTextAdjustWidth();
+                        int currentAdjust = terminalGetTextAdjustWidth();
                         int newAdjust = currentAdjust;
                         try {
                             newAdjust = Integer.parseInt(textAdjustWidth.getText());
@@ -802,7 +1084,7 @@ public class TScreenOptionsWindow extends TWindow {
                         }
                         textAdjustWidth.setText(Integer.toString(newAdjust));
                         if (newAdjust != currentAdjust) {
-                            terminal.setTextAdjustWidth(newAdjust);
+                            terminalSetTextAdjustWidth(newAdjust);
                         }
                     }
                 }
@@ -811,7 +1093,7 @@ public class TScreenOptionsWindow extends TWindow {
         } // if (terminal != null)
 
         tripleBuffer = addCheckBox(3, 9, i18n.getString("tripleBuffer"),
-            (terminal != null ? terminal.isTripleBuffer() :
+            (terminal != null ? terminalIsTripleBuffer() :
                 System.getProperty("jexer.Swing.tripleBuffer",
                     "true").equals("true")));
         oldTripleBuffer = tripleBuffer.isChecked();
@@ -823,12 +1105,12 @@ public class TScreenOptionsWindow extends TWindow {
         cursorStyle = addComboBox(22, 10, 25, cursorStyles, 0, 4,
             new TAction() {
                 public void DO() {
-                    terminal.setCursorStyle(cursorStyle.getText());
+                    terminalSetCursorStyle(cursorStyle.getText());
                 }
             });
         cursorStyle.setText((terminal == null ?
                 System.getProperty("jexer.Swing.cursorStyle", "underline") :
-                terminal.getCursorStyle().toString().toLowerCase()));
+                terminalGetCursorStyle().toString().toLowerCase()));
 
         ArrayList<String> mouseStyles = new ArrayList<String>();
         mouseStyles.add("default");
@@ -845,12 +1127,12 @@ public class TScreenOptionsWindow extends TWindow {
                     // cancel the screen, it will be put back.
                     String newMouseStyle = mouseStyle.getText();
                     System.setProperty("jexer.Swing.mouseStyle", newMouseStyle);
-                    terminal.setMouseStyle(newMouseStyle);
+                    terminalSetMouseStyle(newMouseStyle);
                 }
             });
         mouseStyle.setText((terminal == null ?
                 System.getProperty("jexer.Swing.mouseStyle", "default") :
-                terminal.getMouseStyle().toLowerCase()));
+                terminalGetMouseStyle().toLowerCase()));
 
         if (terminal == null) {
             tripleBuffer.setEnabled(false);
@@ -872,8 +1154,8 @@ public class TScreenOptionsWindow extends TWindow {
                         ecmaTerminal.setRgbColor(rgbColor.isChecked());
                     }
                     if (terminal != null) {
-                        terminal.setTripleBuffer(tripleBuffer.isChecked());
-                        terminal.setFont(terminal.getFont());
+                        terminalSetTripleBuffer(tripleBuffer.isChecked());
+                        terminalSetFont(terminalGetFont());
                     }
 
                     // Close window.
@@ -887,15 +1169,15 @@ public class TScreenOptionsWindow extends TWindow {
                 public void DO() {
                     // Restore old values, then close the window.
                     if (terminal != null) {
-                        terminal.setFont(oldFont);
-                        terminal.setFontSize(oldFontSize);
-                        terminal.setTextAdjustX(oldTextAdjustX);
-                        terminal.setTextAdjustY(oldTextAdjustY);
-                        terminal.setTextAdjustHeight(oldTextAdjustHeight);
-                        terminal.setTextAdjustWidth(oldTextAdjustWidth);
-                        terminal.setTripleBuffer(oldTripleBuffer);
-                        terminal.setCursorStyle(oldCursorStyle);
-                        terminal.setMouseStyle(oldMouseStyle);
+                        terminalSetFont(oldFont);
+                        terminalSetFontSize(oldFontSize);
+                        terminalSetTextAdjustX(oldTextAdjustX);
+                        terminalSetTextAdjustY(oldTextAdjustY);
+                        terminalSetTextAdjustHeight(oldTextAdjustHeight);
+                        terminalSetTextAdjustWidth(oldTextAdjustWidth);
+                        terminalSetTripleBuffer(oldTripleBuffer);
+                        terminalSetCursorStyle(oldCursorStyle);
+                        terminalSetMouseStyle(oldMouseStyle);
                         System.setProperty("jexer.Swing.mouseStyle",
                             oldMouseStyle);
                     }
@@ -933,15 +1215,15 @@ public class TScreenOptionsWindow extends TWindow {
         if (keypress.equals(kbEsc)) {
             // Restore old values, then close the window.
             if (terminal != null) {
-                terminal.setFont(oldFont);
-                terminal.setFontSize(oldFontSize);
-                terminal.setTextAdjustX(oldTextAdjustX);
-                terminal.setTextAdjustY(oldTextAdjustY);
-                terminal.setTextAdjustHeight(oldTextAdjustHeight);
-                terminal.setTextAdjustWidth(oldTextAdjustWidth);
-                terminal.setTripleBuffer(oldTripleBuffer);
-                terminal.setCursorStyle(oldCursorStyle);
-                terminal.setMouseStyle(oldMouseStyle);
+                terminalSetFont(oldFont);
+                terminalSetFontSize(oldFontSize);
+                terminalSetTextAdjustX(oldTextAdjustX);
+                terminalSetTextAdjustY(oldTextAdjustY);
+                terminalSetTextAdjustHeight(oldTextAdjustHeight);
+                terminalSetTextAdjustWidth(oldTextAdjustWidth);
+                terminalSetTripleBuffer(oldTripleBuffer);
+                terminalSetCursorStyle(oldCursorStyle);
+                terminalSetMouseStyle(oldMouseStyle);
                 System.setProperty("jexer.Swing.mouseStyle", oldMouseStyle);
             }
             if (ecmaTerminal != null) {
@@ -1095,6 +1377,67 @@ public class TScreenOptionsWindow extends TWindow {
             super.setBorderStyleMoving(style);
         } else {
             super.setBorderStyleMoving(borderStyle);
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // Font helper methods (use reflection to avoid java.awt imports) ---------
+    // ------------------------------------------------------------------------
+
+    /**
+     * FontHelper class reference, loaded via reflection.
+     */
+    private static Class<?> fontHelperClass;
+
+    /**
+     * Whether FontHelper is available.
+     */
+    private static boolean fontHelperAvailable = true;
+
+    static {
+        try {
+            fontHelperClass = Class.forName("jexer.desktop.FontHelper");
+        } catch (ClassNotFoundException e) {
+            fontHelperAvailable = false;
+        }
+    }
+
+    /**
+     * Get the list of available font family names via reflection.
+     *
+     * @return array of font family names, or null if not available
+     */
+    private static String[] getFontFamilyNames() {
+        if (!fontHelperAvailable) {
+            return null;
+        }
+        try {
+            return (String[]) fontHelperClass.getMethod(
+                "getAvailableFontFamilyNames").invoke(null);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Create a Font via reflection.
+     *
+     * @param fontName the font name
+     * @param style the style (0 = PLAIN)
+     * @param size the font size
+     * @return the Font object, or null if not available
+     */
+    private static Object createFont(final String fontName, final int style,
+        final int size) {
+
+        if (!fontHelperAvailable) {
+            return null;
+        }
+        try {
+            return fontHelperClass.getMethod("createFont", String.class,
+                int.class, int.class).invoke(null, fontName, style, size);
+        } catch (Exception e) {
+            return null;
         }
     }
 

@@ -26,13 +26,14 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.backend;
+package jexer.desktop;
 
 import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import javax.imageio.ImageIO;
 
 import jexer.bits.Cell;
+import jexer.bits.ImageRGB;
 import jexer.bits.ImageUtils;
 import jexer.bits.UnicodeGlyphImage;
 
@@ -109,6 +110,41 @@ public class UnicodeGlyphEncoder {
     // ------------------------------------------------------------------------
     // UnicodeGlyphEncoder ---------------------------------------------------
     // ------------------------------------------------------------------------
+
+    /**
+     * Convert BufferedImage to ImageRGB.
+     *
+     * @param bufferedImage the BufferedImage to convert
+     * @return the ImageRGB
+     */
+    private static ImageRGB toImageRGB(final BufferedImage bufferedImage) {
+        if (bufferedImage == null) {
+            return null;
+        }
+        int width = bufferedImage.getWidth();
+        int height = bufferedImage.getHeight();
+        int[] pixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
+        return new ImageRGB(width, height, pixels);
+    }
+
+    /**
+     * Convert ImageRGB to BufferedImage.
+     *
+     * @param imageRGB the ImageRGB to convert
+     * @return the BufferedImage
+     */
+    private static BufferedImage toBufferedImage(final ImageRGB imageRGB) {
+        if (imageRGB == null) {
+            return null;
+        }
+        int width = imageRGB.getWidth();
+        int height = imageRGB.getHeight();
+        BufferedImage result = new BufferedImage(width, height,
+            BufferedImage.TYPE_INT_ARGB);
+        int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
+        result.setRGB(0, 0, width, height, pixels, 0, width);
+        return result;
+    }
 
     /**
      * Reload options from System properties.
@@ -209,7 +245,7 @@ public class UnicodeGlyphEncoder {
                 gr.fillRect(0, 0, newImage.getWidth(), newImage.getHeight());
                 gr.drawImage(imageSlice, 0, 0, null, null);
                 gr.dispose();
-                cell.setImage(newImage);
+                cell.setImage(toImageRGB(newImage));
                 cells[x][y] = cell;
             }
         }
@@ -261,7 +297,7 @@ public class UnicodeGlyphEncoder {
      */
     public static void main(final String [] args) {
         if (args.length < 3) {
-            System.err.println("USAGE: java jexer.backend.UnicodeGlyphEncoder { cell width } { cell height } { file1 [ file2 ... ] }");
+            System.err.println("USAGE: java jexer.desktop.UnicodeGlyphEncoder { cell width } { cell height } { file1 [ file2 ... ] }");
             System.exit(-1);
         }
 

@@ -52,7 +52,7 @@ import jexer.menu.TMenu;
 import jexer.menu.TMenuItem;
 import jexer.menu.TSubMenu;
 import jexer.backend.Backend;
-import jexer.backend.SwingTerminal;
+import jexer.desktop.SwingTerminal;
 
 /**
  * The demo application itself.
@@ -158,7 +158,7 @@ public class DemoApplication extends TApplication {
         getBackend().setTitle(i18n.getString("applicationTitle"));
 
         // Use custom theme by default.
-        onMenu(new TMenuEvent(getBackend(), 10003));
+        onMenu(new TMenuEvent(getBackend(), 10002));
     }
 
     /**
@@ -179,7 +179,7 @@ public class DemoApplication extends TApplication {
         getBackend().setTitle(i18n.getString("applicationTitle"));
 
         // Use custom theme by default.
-        onMenu(new TMenuEvent(getBackend(), 10003));
+        onMenu(new TMenuEvent(getBackend(), 10002));
     }
 
     // ------------------------------------------------------------------------
@@ -198,14 +198,14 @@ public class DemoApplication extends TApplication {
 
         if (menu.getId() == 3000) {
             // Bigger +2
-            assert (getScreen() instanceof SwingTerminal);
+            assert (isSwingTerminal(getScreen()));
             SwingTerminal terminal = (SwingTerminal) getScreen();
             terminal.setFontSize(terminal.getFontSize() + 2);
             return true;
         }
         if (menu.getId() == 3001) {
             // Smaller -2
-            assert (getScreen() instanceof SwingTerminal);
+            assert (isSwingTerminal(getScreen()));
             SwingTerminal terminal = (SwingTerminal) getScreen();
             terminal.setFontSize(terminal.getFontSize() - 2);
             return true;
@@ -466,7 +466,7 @@ public class DemoApplication extends TApplication {
         item.setEnabled(false);
         item = subMenu.addItem(2002, i18n.getString("normalSub"));
 
-        if (getScreen() instanceof SwingTerminal) {
+        if (isSwingTerminal(getScreen())) {
             TMenu swingMenu = addMenu(i18n.getString("swing"));
             item = swingMenu.addItem(3000, i18n.getString("bigger"));
             item.setIcon(0x1f5da);

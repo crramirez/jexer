@@ -26,12 +26,17 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.backend;
+package jexer.desktop;
+import jexer.backend.ColorUtils;
+import jexer.backend.Backend;
+import jexer.backend.SessionInfo;
+import jexer.backend.GenericBackend;
 
 import java.awt.Font;
 import javax.swing.JComponent;
 
 import jexer.bits.CellAttributes;
+import jexer.bits.ColorRGB;
 
 /**
  * This class uses standard Swing calls to handle screen, keyboard, and mouse
@@ -216,25 +221,25 @@ public class SwingBackend extends GenericBackend {
     }
 
     /**
-     * Convert a CellAttributes foreground color to an AWT Color.
+     * Convert a CellAttributes foreground color to a ColorRGB.
      *
      * @param attr the text attributes
-     * @return the AWT Color
+     * @return the ColorRGB
      */
-    public java.awt.Color attrToForegroundColor(final CellAttributes attr) {
-        // Use Swing colors.
-        return SwingTerminal.attrToForegroundColor(attr);
+    public ColorRGB attrToForegroundColor(final CellAttributes attr) {
+        // Use color utility.
+        return ColorUtils.attrToForegroundColor(attr);
     }
 
     /**
-     * Convert a CellAttributes background color to an AWT Color.
+     * Convert a CellAttributes background color to a ColorRGB.
      *
      * @param attr the text attributes
-     * @return the AWT Color
+     * @return the ColorRGB
      */
-    public java.awt.Color attrToBackgroundColor(final CellAttributes attr) {
-        // Use Swing colors.
-        return SwingTerminal.attrToBackgroundColor(attr);
+    public ColorRGB attrToBackgroundColor(final CellAttributes attr) {
+        // Use color utility.
+        return ColorUtils.attrToBackgroundColor(attr);
     }
 
 }

@@ -26,7 +26,7 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.backend;
+package jexer.desktop;
 
 import java.awt.Color;
 import java.awt.Cursor;

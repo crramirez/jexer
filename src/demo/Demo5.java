@@ -36,7 +36,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
-import jexer.backend.SwingBackend;
+import jexer.desktop.SwingBackend;
 import jexer.event.TMenuEvent;
 
 /**

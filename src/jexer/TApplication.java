@@ -67,8 +67,6 @@ import jexer.backend.Backend;
 import jexer.backend.ECMA48Backend;
 import jexer.backend.MultiBackend;
 import jexer.backend.Screen;
-import jexer.backend.SwingBackend;
-import jexer.backend.SwingTerminal;
 import jexer.backend.TWindowBackend;
 import jexer.help.HelpFile;
 import jexer.help.Topic;
@@ -176,7 +174,7 @@ public class TApplication implements Runnable {
     /**
      * The clipboard for copy and paste.
      */
-    private Clipboard clipboard = new Clipboard();
+    private Clipboard clipboard = Clipboard.getClipboard();
 
     /**
      * Actual mouse coordinate X.
@@ -727,6 +725,104 @@ public class TApplication implements Runnable {
     // ------------------------------------------------------------------------
 
     /**
+     * Helper method to create a SwingBackend using reflection.
+     * This allows jexer.jar to work without SwingBackend on the classpath.
+     *
+     * @param app the TApplication instance
+     * @param windowWidth the number of text columns to start with (0 for default)
+     * @param windowHeight the number of text rows to start with (0 for default)
+     * @param fontSize the size in points (0 for default)
+     * @return a SwingBackend instance
+     * @throws IllegalArgumentException if SwingBackend class is not available
+     */
+    private static Backend createSwingBackend(final TApplication app,
+        final int windowWidth, final int windowHeight, final int fontSize) {
+
+        try {
+            Class<?> swingBackendClass = Class.forName("jexer.desktop.SwingBackend");
+            if (windowWidth > 0 && windowHeight > 0 && fontSize > 0) {
+                // Use constructor with listener and dimensions
+                return (Backend) swingBackendClass
+                    .getConstructor(Object.class, int.class, int.class, int.class)
+                    .newInstance(app, windowWidth, windowHeight, fontSize);
+            } else {
+                // Use constructor with listener only (default dimensions)
+                return (Backend) swingBackendClass
+                    .getConstructor(Object.class)
+                    .newInstance(app);
+            }
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException(
+                "SwingBackend class not found. Please add jexer-swing.jar to classpath.", e);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(
+                "Failed to instantiate SwingBackend: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Helper method to check if backend is a SwingBackend using reflection.
+     *
+     * @param backend the backend to check
+     * @return true if backend is a SwingBackend
+     */
+    private static boolean isSwingBackend(final Backend backend) {
+        try {
+            Class<?> swingBackendClass = Class.forName("jexer.desktop.SwingBackend");
+            return swingBackendClass.isInstance(backend);
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Helper method to get blink millis from SwingBackend using reflection.
+     *
+     * @param backend the backend
+     * @return the blink milliseconds, or 500 if not a SwingBackend
+     */
+    private static long getSwingBackendBlinkMillis(final Backend backend) {
+        try {
+            return (Long) backend.getClass()
+                .getMethod("getBlinkMillis")
+                .invoke(backend);
+        } catch (Exception e) {
+            return 500; // Default value
+        }
+    }
+
+    /**
+     * Helper method to check if screen is a SwingTerminal using reflection.
+     *
+     * @param screen the screen to check
+     * @return true if screen is a SwingTerminal
+     */
+    protected static boolean isSwingTerminal(final Screen screen) {
+        try {
+            Class<?> swingTerminalClass = Class.forName("jexer.desktop.SwingTerminal");
+            return swingTerminalClass.isInstance(screen);
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Helper method to set mouse style on SwingTerminal using reflection.
+     *
+     * @param screen the screen
+     * @param mouseStyle the mouse style to set
+     */
+    private static void setSwingTerminalMouseStyle(final Screen screen, final String mouseStyle) {
+        try {
+            screen.getClass()
+                .getMethod("setMouseStyle", String.class)
+                .invoke(screen, mouseStyle);
+        } catch (Exception e) {
+            // Ignore if method not available
+        }
+    }
+
+    /**
      * Public constructor.
      *
      * @param backendType BackendType.XTERM, BackendType.ECMA48 or
@@ -751,8 +847,7 @@ public class TApplication implements Runnable {
 
         switch (backendType) {
         case SWING:
-            backend = new SwingBackend(this, windowWidth, windowHeight,
-                fontSize);
+            backend = createSwingBackend(this, windowWidth, windowHeight, fontSize);
             break;
         case XTERM:
             // Fall through...
@@ -792,8 +887,8 @@ public class TApplication implements Runnable {
             // SwingBackend constructor here.  For example, if you wanted
             // 90x30, 16 pt font:
             //
-            // backend = new SwingBackend(this, 90, 30, 16);
-            backend = new SwingBackend(this);
+            // backend = createSwingBackend(this, 90, 30, 16);
+            backend = createSwingBackend(this, 0, 0, 0);
             break;
         case XTERM:
             // Fall through...
@@ -927,8 +1022,8 @@ public class TApplication implements Runnable {
 
             // Special case: the Swing backend needs to have a timer to drive
             // its blink state.
-            if (backend instanceof SwingBackend) {
-                long millis = ((SwingBackend) backend).getBlinkMillis();
+            if (isSwingBackend(backend)) {
+                long millis = getSwingBackendBlinkMillis(backend);
                 addTimer(millis, true,
                     new TAction() {
                         public void DO() {
@@ -2466,10 +2561,9 @@ public class TApplication implements Runnable {
         customMousePointer = pointer;
         if (customMousePointer == null) {
             // Custom bitmap mouse pointer removed.
-            if (getScreen() instanceof SwingTerminal) {
+            if (isSwingTerminal(getScreen())) {
                 // Restore the Swing pointer to the application default.
-                SwingTerminal terminal = (SwingTerminal) getScreen();
-                terminal.setMouseStyle(System.getProperty(
+                setSwingTerminalMouseStyle(getScreen(), System.getProperty(
                     "jexer.Swing.mouseStyle", "default"));
             }
             return;
@@ -2489,10 +2583,9 @@ public class TApplication implements Runnable {
         customMousePointer.setY(pixelY);
         overlay.addItem(pointer);
 
-        if (getScreen() instanceof SwingTerminal) {
+        if (isSwingTerminal(getScreen())) {
             // Turn off the Swing pointer.
-            SwingTerminal terminal = (SwingTerminal) getScreen();
-            terminal.setMouseStyle("none");
+            setSwingTerminalMouseStyle(getScreen(), "none");
         }
     }
 

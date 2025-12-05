@@ -28,8 +28,6 @@
  */
 package jexer;
 
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
@@ -44,9 +42,9 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import jexer.backend.ECMA48Terminal;
-import jexer.backend.SwingTerminal;
 import jexer.bits.Cell;
 import jexer.bits.GlyphMaker;
+import jexer.bits.ImageRGB;
 import jexer.event.TCommandEvent;
 import jexer.event.TKeypressEvent;
 import jexer.event.TMenuEvent;
@@ -825,6 +823,49 @@ public class TTerminal extends TScrollable
     // ------------------------------------------------------------------------
 
     /**
+     * The TTerminalHelper class for image operations, loaded via reflection.
+     */
+    private static Class<?> terminalHelperClass = null;
+    
+    /**
+     * The splitDoubleWidthImage method from TTerminalHelper.
+     */
+    private static Method splitDoubleWidthImageMethod = null;
+    
+    /**
+     * The getImageHashCode method from TTerminalHelper.
+     */
+    private static Method getImageHashCodeMethod = null;
+    
+    /**
+     * Whether we have tried to load the helper class.
+     */
+    private static boolean helperClassLoaded = false;
+
+    /**
+     * Load the TTerminalHelper class via reflection.
+     */
+    private static void loadTerminalHelper() {
+        if (helperClassLoaded) {
+            return;
+        }
+        helperClassLoaded = true;
+        try {
+            terminalHelperClass = Class.forName("jexer.desktop.TTerminalHelper");
+            splitDoubleWidthImageMethod = terminalHelperClass.getMethod(
+                "splitDoubleWidthImage", ImageRGB.class, int.class, int.class, int.class);
+            getImageHashCodeMethod = terminalHelperClass.getMethod(
+                "getImageHashCode", ImageRGB.class);
+        } catch (ClassNotFoundException e) {
+            // java-desktop JAR not available, that's OK
+            terminalHelperClass = null;
+        } catch (NoSuchMethodException e) {
+            // Method not found, shouldn't happen
+            terminalHelperClass = null;
+        }
+    }
+
+    /**
      * Update the display to account for a change in scrollback.
      */
     private void setDirty() {
@@ -1286,13 +1327,27 @@ public class TTerminal extends TScrollable
     private void putDoubleWidthCharXY(final DisplayLine line, final int x,
         final int y, final Cell cell) {
 
+        // Load helper if needed
+        loadTerminalHelper();
+        if (splitDoubleWidthImageMethod == null) {
+            // java-desktop JAR not available, fall back to text characters
+            putCharXY(x, y, cell);
+            putCharXY(x + 1, y, ' ', cell);
+            return;
+        }
+
         int textWidth = getScreen().getTextWidth();
         int textHeight = getScreen().getTextHeight();
         boolean cursorBlinkVisible = true;
 
-        if (getScreen() instanceof SwingTerminal) {
-            SwingTerminal terminal = (SwingTerminal) getScreen();
-            cursorBlinkVisible = terminal.getCursorBlinkVisible();
+        if (TApplication.isSwingTerminal(getScreen())) {
+            // Use reflection to get cursor blink visible state
+            try {
+                Method method = getScreen().getClass().getMethod("getCursorBlinkVisible");
+                cursorBlinkVisible = (Boolean) method.invoke(getScreen());
+            } catch (Exception e) {
+                cursorBlinkVisible = blinkState;
+            }
         } else {
             cursorBlinkVisible = blinkState;
         }
@@ -1303,70 +1358,75 @@ public class TTerminal extends TScrollable
             lastTextWidth = textWidth;
             lastTextHeight = textHeight;
         }
-        assert (doubleFont != null);
+        if (doubleFont == null) {
+            // GlyphMaker not available, fall back to text characters
+            putCharXY(x, y, cell);
+            putCharXY(x + 1, y, ' ', cell);
+            return;
+        }
 
-        BufferedImage image;
+        ImageRGB imageRGB;
         if (line.getDoubleHeight() == 1) {
             // Double-height top half: don't draw the underline.
             Cell newCell = new Cell(cell);
             newCell.setUnderline(false);
-            image = doubleFont.getImage(newCell, textWidth * 2, textHeight * 2,
+            imageRGB = doubleFont.getImage(newCell, textWidth * 2, textHeight * 2,
                 getApplication().getBackend(), cursorBlinkVisible);
         } else {
-            image = doubleFont.getImage(cell, textWidth * 2, textHeight * 2,
+            imageRGB = doubleFont.getImage(cell, textWidth * 2, textHeight * 2,
                 getApplication().getBackend(), cursorBlinkVisible);
         }
-
-        // Now that we have the double-wide glyph drawn, copy the right
-        // pieces of it to the cells.
-        Cell left = new Cell(cell);
-        Cell right = new Cell(cell);
-        BufferedImage leftImage = null;
-        BufferedImage rightImage = null;
-        /*
-        System.err.println("image " + image + " textWidth " + textWidth +
-            " textHeight " + textHeight);
-         */
-
-        switch (line.getDoubleHeight()) {
-        case 1:
-            // Top half double height
-            leftImage = image.getSubimage(0, 0, textWidth, textHeight);
-            rightImage = image.getSubimage(textWidth, 0, textWidth, textHeight);
-            break;
-        case 2:
-            // Bottom half double height
-            leftImage = image.getSubimage(0, textHeight, textWidth, textHeight);
-            rightImage = image.getSubimage(textWidth, textHeight,
-                textWidth, textHeight);
-            break;
-        default:
-            // Either single height double-width, or error fallback
-            BufferedImage wideImage = new BufferedImage(textWidth * 2,
-                textHeight, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D grWide = wideImage.createGraphics();
-            grWide.drawImage(image, 0, 0, wideImage.getWidth(),
-                wideImage.getHeight(), null);
-            grWide.dispose();
-            leftImage = wideImage.getSubimage(0, 0, textWidth, textHeight);
-            rightImage = wideImage.getSubimage(textWidth, 0, textWidth,
-                textHeight);
-            break;
+        
+        if (imageRGB == null) {
+            // Image not available, fall back to text characters
+            putCharXY(x, y, cell);
+            putCharXY(x + 1, y, ' ', cell);
+            return;
         }
-        // Since we have image data, ditch the character here.  Otherwise, a
-        // drawBoxShadow() over the terminal window will show the characters
-        // which looks wrong.
-        left.setChar(' ');
-        right.setChar(' ');
-        left.setImage(leftImage, Math.abs(leftImage.hashCode()));
-        left.setOpaqueImage();
-        left.setWidth(Cell.Width.LEFT);
-        right.setImage(rightImage, Math.abs(rightImage.hashCode()));
-        right.setOpaqueImage();
-        right.setWidth(Cell.Width.RIGHT);
-        putCharXY(x, y, left);
-        putCharXY(x + 1, y, right);
+
+        // Use reflection to split the image
+        try {
+            ImageRGB[] splitImages = (ImageRGB[]) splitDoubleWidthImageMethod.invoke(
+                null, imageRGB, textWidth, textHeight, line.getDoubleHeight());
+            
+            ImageRGB leftImageRGB = splitImages[0];
+            ImageRGB rightImageRGB = splitImages[1];
+
+            if (leftImageRGB == null || rightImageRGB == null) {
+                // Fall back to regular character
+                putCharXY(x, y, cell);
+                return;
+            }
+
+            // Get hash codes for the images
+            int leftHash = (Integer) getImageHashCodeMethod.invoke(null, leftImageRGB);
+            int rightHash = (Integer) getImageHashCodeMethod.invoke(null, rightImageRGB);
+
+            // Now that we have the double-wide glyph drawn, copy the right
+            // pieces of it to the cells.
+            Cell left = new Cell(cell);
+            Cell right = new Cell(cell);
+
+            // Since we have image data, ditch the character here.  Otherwise, a
+            // drawBoxShadow() over the terminal window will show the characters
+            // which looks wrong.
+            left.setChar(' ');
+            right.setChar(' ');
+            left.setImage(leftImageRGB, leftHash);
+            left.setOpaqueImage();
+            left.setWidth(Cell.Width.LEFT);
+            right.setImage(rightImageRGB, rightHash);
+            right.setOpaqueImage();
+            right.setWidth(Cell.Width.RIGHT);
+            putCharXY(x, y, left);
+            putCharXY(x + 1, y, right);
+        } catch (Exception e) {
+            // Reflection failed, fall back to text characters
+            putCharXY(x, y, cell);
+            putCharXY(x + 1, y, ' ', cell);
+        }
     }
+
 
     /**
      * Set up the double-width font.

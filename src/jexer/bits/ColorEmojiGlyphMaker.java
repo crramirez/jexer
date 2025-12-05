@@ -28,17 +28,13 @@
  */
 package jexer.bits;
 
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.util.HashMap;
-import javax.imageio.ImageIO;
-
 import jexer.backend.Backend;
 
 /**
  * ColorEmojiGlyphMaker provides access to the color emoji image files
- * located in "emojis/" on the classpath.
+ * located in "emojis/" on the classpath.  This is a stub class that
+ * delegates to ColorEmojiGlyphMakerImpl via reflection when the
+ * java-desktop JAR is available.
  */
 public class ColorEmojiGlyphMaker {
 
@@ -46,14 +42,23 @@ public class ColorEmojiGlyphMaker {
     // Constants --------------------------------------------------------------
     // ------------------------------------------------------------------------
 
-    // ------------------------------------------------------------------------
-    // Variables --------------------------------------------------------------
-    // ------------------------------------------------------------------------
+    /**
+     * Whether the implementation is available.
+     */
+    private static boolean implAvailable = true;
 
     /**
-     * Cache of original-size images by lookup string.
+     * The implementation class.
      */
-    private static HashMap<String, BufferedImage> emojis = new HashMap<String, BufferedImage>();
+    private static Class<?> implClass;
+
+    static {
+        try {
+            implClass = Class.forName("jexer.desktop.ColorEmojiGlyphMakerImpl");
+        } catch (ClassNotFoundException e) {
+            implAvailable = false;
+        }
+    }
 
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
@@ -123,35 +128,6 @@ public class ColorEmojiGlyphMaker {
     }
 
     /**
-     * Checks if an emoji glyph for the specified codepoint(s) is available.
-     *
-     * @param codePoints the emoji (sequence of Unicode codepoints) for which
-     * a glyph is needed.
-     * @return true if a glyph for the character is available; false
-     * otherwise.
-     */
-    private static BufferedImage getEmoji(final int [] codePoints) {
-        String key = makeKey(codePoints);
-        if (emojis.containsKey(key)) {
-            return emojis.get(key);
-        }
-
-        BufferedImage image = null;
-        try {
-            ClassLoader loader = Thread.currentThread().
-                getContextClassLoader();
-            String filename = makeKey(codePoints);
-            java.net.URL url = loader.getResource(filename);
-            assert (url != null);
-            image = ImageIO.read(url);
-            emojis.put(key, image);
-        } catch (IOException e) {
-            // SQUASH
-        }
-        return image;
-    }
-
-    /**
      * Get an emoji image for a complex cell.
      *
      * @param complexCell the emoji to draw
@@ -160,68 +136,24 @@ public class ColorEmojiGlyphMaker {
      * @param backend the backend that can obtain the correct background
      * color
      * @param blinkVisible if true, the cell is visible if it is blinking
-     * @return the glyph as an image
+     * @return the glyph as an image, or null if java-desktop not available
      */
-    public static BufferedImage getImage(final ComplexCell complexCell,
+    public static ImageRGB getImage(final ComplexCell complexCell,
         final int cellWidth, final int cellHeight, final Backend backend,
         final boolean blinkVisible) {
 
-        // Generate glyph and draw it.
-        BufferedImage image = new BufferedImage(cellWidth, cellHeight,
-            BufferedImage.TYPE_INT_ARGB);
-        Graphics2D gr2 = image.createGraphics();
-
-        Cell cellColor = new Cell(complexCell);
-
-        // Check for reverse
-        if (complexCell.isReverse()) {
-            if (complexCell.getBackColorRGB() < 0) {
-                cellColor.setForeColor(complexCell.getBackColor());
-            } else {
-                cellColor.setForeColorRGB(complexCell.getBackColorRGB());
-            }
-            if (complexCell.getForeColorRGB() < 0) {
-                cellColor.setBackColor(complexCell.getForeColor());
-            } else {
-                cellColor.setBackColorRGB(complexCell.getForeColorRGB());
-            }
+        if (!implAvailable) {
+            return null;
         }
 
-        // Draw the background rectangle.
-        gr2.setColor(backend.attrToBackgroundColor(cellColor));
-        gr2.fillRect(0, 0, cellWidth, cellHeight);
-
-        BufferedImage emojiImage = getEmoji(complexCell.getCodePoints());
-
-        if (emojiImage != null) {
-            // Blit the emoji over the background, vertically aligned to the
-            // middle.
-            int emojiWidth = emojiImage.getWidth();
-            int emojiHeight = emojiImage.getHeight();
-            int yOffset = 0;
-            if (emojiWidth != emojiHeight) {
-                yOffset = ((emojiWidth - emojiHeight) / 2);
-                yOffset *= (cellWidth / emojiWidth);
-                if (yOffset < 0) {
-                    yOffset = 0;
-                }
-            }
-            gr2.drawImage(emojiImage, 0, yOffset,
-                cellWidth, (cellHeight - (yOffset * 2)),
-                0, 0, emojiWidth, emojiHeight, null);
+        try {
+            return (ImageRGB) implClass.getMethod("getImage",
+                ComplexCell.class, int.class, int.class, Backend.class,
+                boolean.class).invoke(null, complexCell, cellWidth, cellHeight,
+                backend, blinkVisible);
+        } catch (Exception e) {
+            return null;
         }
-
-        // Handle blink and underline
-        if (complexCell.isUnderline()
-            && (!complexCell.isBlink()
-                || (complexCell.isBlink() && blinkVisible))
-        ) {
-            gr2.setColor(backend.attrToForegroundColor(cellColor));
-            gr2.fillRect(0, cellHeight - 2, cellWidth, 2);
-        }
-        gr2.dispose();
-
-        return image;
     }
 
 }

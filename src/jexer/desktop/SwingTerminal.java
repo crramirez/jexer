@@ -26,7 +26,14 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.backend;
+package jexer.desktop;
+import jexer.backend.TerminalReader;
+import jexer.backend.ColorUtils;
+import jexer.backend.Screen;
+import jexer.backend.Backend;
+import jexer.backend.SessionInfo;
+
+import jexer.backend.LogicalScreen;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -65,6 +72,7 @@ import jexer.TKeypress;
 import jexer.bits.Cell;
 import jexer.bits.CellAttributes;
 import jexer.bits.GlyphMaker;
+import jexer.bits.ImageRGB;
 import jexer.bits.StringUtils;
 import jexer.event.TCommandEvent;
 import jexer.event.TInputEvent;
@@ -180,6 +188,29 @@ public class SwingTerminal extends LogicalScreen
      */
     private static boolean dosColors = false;
 
+    // ------------------------------------------------------------------------
+    // Conversion helpers -----------------------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * Convert an ImageRGB to a BufferedImage.
+     *
+     * @param imageRGB the ImageRGB to convert
+     * @return the BufferedImage
+     */
+    private static BufferedImage toBufferedImage(final ImageRGB imageRGB) {
+        if (imageRGB == null) {
+            return null;
+        }
+        int width = imageRGB.getWidth();
+        int height = imageRGB.getHeight();
+        BufferedImage result = new BufferedImage(width, height,
+            BufferedImage.TYPE_INT_ARGB);
+        int[] pixels = imageRGB.getRGB(0, 0, width, height, null, 0, width);
+        result.setRGB(0, 0, width, height, pixels, 0, width);
+        return result;
+    }
+
     /**
      * The minimum number of milliseconds between a triple-buffer frame sync
      * request.  If Toolkit.sync() is called too frequently, the window
@@ -201,10 +232,7 @@ public class SwingTerminal extends LogicalScreen
      */
     private long lastSyncTime = 0;
 
-    /**
-     * The backend that is reading from this terminal.
-     */
-    private Backend backend;
+    // Note: backend is inherited from LogicalScreen via setBackend()/getBackend()
 
     /**
      * The Swing component or frame to draw to.
@@ -399,7 +427,7 @@ public class SwingTerminal extends LogicalScreen
     public SwingTerminal(final Backend backend, final int windowWidth,
         final int windowHeight, final int fontSize, final Object listener) {
 
-        this.backend = backend;
+        setBackend(backend);
         this.fontSize = fontSize;
 
         reloadOptions();
@@ -530,7 +558,7 @@ public class SwingTerminal extends LogicalScreen
         final int windowWidth, final int windowHeight, final int fontSize,
         final Object listener) {
 
-        this.backend = backend;
+        setBackend(backend);
         this.fontSize = fontSize;
 
         reloadOptions();
@@ -1060,6 +1088,18 @@ public class SwingTerminal extends LogicalScreen
     }
 
     /**
+     * Set the font to be used for all the displayed text.  This accepts
+     * an Object parameter to avoid requiring java.awt.Font in the caller.
+     *
+     * @param font the new font (must be a java.awt.Font)
+     */
+    public void setFont(final Object font) {
+        if (font instanceof Font) {
+            setFont((Font) font);
+        }
+    }
+
+    /**
      * Get the font this screen was last set to.
      *
      * @return the font
@@ -1189,56 +1229,13 @@ public class SwingTerminal extends LogicalScreen
      *
      * @param attr the text attributes
      * @return the AWT Color
+     * @deprecated Use ColorUtils.attrToForegroundColor instead
      */
+    @Deprecated
     public static Color attrToForegroundColor(final CellAttributes attr) {
-        int rgb = attr.getForeColorRGB();
-        if (rgb >= 0) {
-            int red     = (rgb >>> 16) & 0xFF;
-            int green   = (rgb >>>  8) & 0xFF;
-            int blue    =  rgb         & 0xFF;
-
-            return new Color(red, green, blue);
-        }
-
-        if (attr.isBold()) {
-            if (attr.getForeColor().equals(jexer.bits.Color.BLACK)) {
-                return MYBOLD_BLACK;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.RED)) {
-                return MYBOLD_RED;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.BLUE)) {
-                return MYBOLD_BLUE;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.GREEN)) {
-                return MYBOLD_GREEN;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.YELLOW)) {
-                return MYBOLD_YELLOW;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.CYAN)) {
-                return MYBOLD_CYAN;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.MAGENTA)) {
-                return MYBOLD_MAGENTA;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.WHITE)) {
-                return MYBOLD_WHITE;
-            }
-        } else {
-            if (attr.getForeColor().equals(jexer.bits.Color.BLACK)) {
-                return MYBLACK;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.RED)) {
-                return MYRED;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.BLUE)) {
-                return MYBLUE;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.GREEN)) {
-                return MYGREEN;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.YELLOW)) {
-                return MYYELLOW;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.CYAN)) {
-                return MYCYAN;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.MAGENTA)) {
-                return MYMAGENTA;
-            } else if (attr.getForeColor().equals(jexer.bits.Color.WHITE)) {
-                return MYWHITE;
-            }
-        }
-        throw new IllegalArgumentException("Invalid color: " +
-            attr.getForeColor().getValue());
+        jexer.bits.ColorRGB colorRGB = ColorUtils.attrToForegroundColor(attr);
+        return new Color(colorRGB.getRed(), colorRGB.getGreen(),
+            colorRGB.getBlue());
     }
 
     /**
@@ -1246,36 +1243,13 @@ public class SwingTerminal extends LogicalScreen
      *
      * @param attr the text attributes
      * @return the AWT Color
+     * @deprecated Use ColorUtils.attrToBackgroundColor instead
      */
+    @Deprecated
     public static Color attrToBackgroundColor(final CellAttributes attr) {
-        int rgb = attr.getBackColorRGB();
-        if (rgb >= 0) {
-            int red     = (rgb >>> 16) & 0xFF;
-            int green   = (rgb >>>  8) & 0xFF;
-            int blue    =  rgb         & 0xFF;
-
-            return new Color(red, green, blue);
-        }
-
-        if (attr.getBackColor().equals(jexer.bits.Color.BLACK)) {
-            return MYBLACK;
-        } else if (attr.getBackColor().equals(jexer.bits.Color.RED)) {
-            return MYRED;
-        } else if (attr.getBackColor().equals(jexer.bits.Color.BLUE)) {
-            return MYBLUE;
-        } else if (attr.getBackColor().equals(jexer.bits.Color.GREEN)) {
-            return MYGREEN;
-        } else if (attr.getBackColor().equals(jexer.bits.Color.YELLOW)) {
-            return MYYELLOW;
-        } else if (attr.getBackColor().equals(jexer.bits.Color.CYAN)) {
-            return MYCYAN;
-        } else if (attr.getBackColor().equals(jexer.bits.Color.MAGENTA)) {
-            return MYMAGENTA;
-        } else if (attr.getBackColor().equals(jexer.bits.Color.WHITE)) {
-            return MYWHITE;
-        }
-        throw new IllegalArgumentException("Invalid color: " +
-            attr.getBackColor().getValue());
+        jexer.bits.ColorRGB colorRGB = ColorUtils.attrToBackgroundColor(attr);
+        return new Color(colorRGB.getRed(), colorRGB.getGreen(),
+            colorRGB.getBlue());
     }
 
     /**
@@ -1446,7 +1420,7 @@ public class SwingTerminal extends LogicalScreen
 
         assert (cell.isImage());
 
-        BufferedImage image = cell.getImage();
+        BufferedImage image = toBufferedImage(cell.getImage());
         assert (image != null);
 
         if (swing.getFrame() != null) {
@@ -1502,8 +1476,9 @@ public class SwingTerminal extends LogicalScreen
             || !swing.getFont().canDisplay(ch)
         ) {
             // The main font cannot display this glyph.  Try a fallback font.
-            BufferedImage newImage = glyphMaker.getImage(cell, textWidth,
+            ImageRGB glyphImageRGB = glyphMaker.getImage(cell, textWidth,
                 textHeight, getBackend(), cursorBlinkVisible);
+            BufferedImage newImage = toBufferedImage(glyphImageRGB);
 
             if (swing.getFrame() != null) {
                 gr.drawImage(newImage, xPixel, yPixel, swing.getFrame());
@@ -1541,7 +1516,7 @@ public class SwingTerminal extends LogicalScreen
         Cell cellColor = new Cell(cell);
         if (cell.isPulse()) {
             cellColor.setPulse(false, false, 0);
-            cellColor.setForeColorRGB(cell.getForeColorPulseRGB(backend,
+            cellColor.setForeColorRGB(cell.getForeColorPulseRGB(getBackend(),
                     System.currentTimeMillis()));
         }
 
@@ -2275,7 +2250,7 @@ public class SwingTerminal extends LogicalScreen
 
         // Save it and we are done.
         synchronized (eventQueue) {
-            eventQueue.add(new TKeypressEvent(backend, keypress));
+            eventQueue.add(new TKeypressEvent(getBackend(), keypress));
             resetBlinkTimer();
         }
         if (listener != null) {
@@ -2318,7 +2293,7 @@ public class SwingTerminal extends LogicalScreen
     public void windowClosing(final WindowEvent event) {
         // Drop a cmBackendDisconnect and walk away
         synchronized (eventQueue) {
-            eventQueue.add(new TCommandEvent(backend, cmBackendDisconnect));
+            eventQueue.add(new TCommandEvent(getBackend(), cmBackendDisconnect));
             resetBlinkTimer();
         }
         if (listener != null) {
@@ -2417,7 +2392,7 @@ public class SwingTerminal extends LogicalScreen
         // Drop a new TResizeEvent into the queue
         sessionInfo.queryWindowSize();
         synchronized (eventQueue) {
-            TResizeEvent windowResize = new TResizeEvent(backend,
+            TResizeEvent windowResize = new TResizeEvent(getBackend(),
                 TResizeEvent.Type.SCREEN,
                 sessionInfo.getWindowWidth(), sessionInfo.getWindowHeight());
             eventQueue.add(windowResize);
@@ -2485,7 +2460,7 @@ public class SwingTerminal extends LogicalScreen
         int offsetX = (mouse.getX() - left) % textWidth;
         int offsetY = (mouse.getY() - top) % textHeight;
 
-        TMouseEvent mouseEvent = new TMouseEvent(backend,
+        TMouseEvent mouseEvent = new TMouseEvent(getBackend(),
             TMouseEvent.Type.MOUSE_MOTION, x, y, x, y, offsetX, offsetY,
             mouse1, mouse2, mouse3, false, false,
             eventAlt, eventCtrl, eventShift);
@@ -2533,7 +2508,7 @@ public class SwingTerminal extends LogicalScreen
             eventShift = true;
         }
 
-        TMouseEvent mouseEvent = new TMouseEvent(backend,
+        TMouseEvent mouseEvent = new TMouseEvent(getBackend(),
             TMouseEvent.Type.MOUSE_MOTION, x, y, x, y, offsetX, offsetY,
             mouse1, mouse2, mouse3, false, false,
             eventAlt, eventCtrl, eventShift);
@@ -2621,7 +2596,7 @@ public class SwingTerminal extends LogicalScreen
         int offsetX = (mouse.getX() - left) % textWidth;
         int offsetY = (mouse.getY() - top) % textHeight;
 
-        TMouseEvent mouseEvent = new TMouseEvent(backend,
+        TMouseEvent mouseEvent = new TMouseEvent(getBackend(),
             TMouseEvent.Type.MOUSE_DOWN, x, y, x, y, offsetX, offsetY,
             mouse1, mouse2, mouse3, false, false,
             eventAlt, eventCtrl, eventShift);
@@ -2687,7 +2662,7 @@ public class SwingTerminal extends LogicalScreen
         int offsetX = (mouse.getX() - left) % textWidth;
         int offsetY = (mouse.getY() - top) % textHeight;
 
-        TMouseEvent mouseEvent = new TMouseEvent(backend,
+        TMouseEvent mouseEvent = new TMouseEvent(getBackend(),
             TMouseEvent.Type.MOUSE_UP, x, y, x, y, offsetX, offsetY,
             eventMouse1, eventMouse2, eventMouse3, false, false,
             eventAlt, eventCtrl, eventShift);
@@ -2756,7 +2731,7 @@ public class SwingTerminal extends LogicalScreen
         int offsetX = (mouse.getX() - left) % textWidth;
         int offsetY = (mouse.getY() - top) % textHeight;
 
-        TMouseEvent mouseEvent = new TMouseEvent(backend,
+        TMouseEvent mouseEvent = new TMouseEvent(getBackend(),
             TMouseEvent.Type.MOUSE_DOWN, x, y, x, y, offsetX, offsetY,
             mouse1, mouse2, mouse3, mouseWheelUp, mouseWheelDown,
             eventAlt, eventCtrl, eventShift);

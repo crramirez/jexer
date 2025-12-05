@@ -28,11 +28,10 @@
  */
 package jexer.effect;
 
-import java.awt.image.BufferedImage;
-
 import jexer.TApplication;
 import jexer.TWindow;
 import jexer.backend.Screen;
+import jexer.bits.ImageRGB;
 import jexer.event.TInputEvent;
 import jexer.tackboard.Bitmap;
 
@@ -124,25 +123,22 @@ public class WindowBurnInEffect implements Effect {
                 fakeWindow.setY(y);
                 fakeWindow.setAlpha(alpha);
 
-                // Generate the plasma.
+                // Generate the plasma using ImageRGB.
                 Screen screen = fakeWindow.getScreen();
                 int width = fakeWindow.getWidth() * screen.getTextWidth();
                 int height = fakeWindow.getHeight() * screen.getTextHeight();
-                BufferedImage burn = new BufferedImage(width, height,
-                    BufferedImage.TYPE_INT_ARGB);
+                int[] pixels = new int[width * height];
 
                 // https://lodev.org/cgtutor/plasma.html has the general
                 // idea.  I just played around and it's alright for a start.
-                int w = width;
-                int h = height;
-                for (int x = 0; x < width; x++) {
-                    for (int y = 0; y < height; y++) {
-                        int red = (int) ((128.0 + 2 * (Math.sin((x + y) / 2.0) +
-                                    Math.sin(x * x + y)) * 128.0) * 2.0);
-                        int green = (int) ((128.0 + (Math.sin((x - y) / 7.0) +
-                                    Math.cos(Math.log(x * y / 6))) * 128.0));
-                        int blue = (int) ((128.0 + Math.cos(Math.sqrt(x * x +
-                                        y * y) / 3.0) * 128.0) / 3);
+                for (int px = 0; px < width; px++) {
+                    for (int py = 0; py < height; py++) {
+                        int red = (int) ((128.0 + 2 * (Math.sin((px + py) / 2.0) +
+                                    Math.sin(px * px + py)) * 128.0) * 2.0);
+                        int green = (int) ((128.0 + (Math.sin((px - py) / 7.0) +
+                                    Math.cos(Math.log(px * py / 6))) * 128.0));
+                        int blue = (int) ((128.0 + Math.cos(Math.sqrt(px * px +
+                                        py * py) / 3.0) * 128.0) / 3);
                         red = Math.max(0, Math.min(red, 255));
                         green = Math.max(0, Math.min(green, 255));
                         blue = Math.max(0, Math.min(blue, 255));
@@ -150,10 +146,11 @@ public class WindowBurnInEffect implements Effect {
                                     | (  red << 16)
                                     | (green <<  8)
                                     |  blue;
-                        burn.setRGB(x, y, rgb);
+                        pixels[py * width + px] = rgb;
                     }
                 }
 
+                ImageRGB burn = new ImageRGB(width, height, pixels);
                 plasma = new Bitmap(0, 0, 0, burn);
 
                 fakeWindow.addOverlay(plasma);

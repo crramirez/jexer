@@ -35,6 +35,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 
 import jexer.bits.CellAttributes;
+import jexer.bits.ColorRGB;
 
 /**
  * This class uses an xterm/ANSI X3.64/ECMA-48 type terminal to provide a
@@ -244,22 +245,22 @@ public class ECMA48Backend extends GenericBackend {
     }
 
     /**
-     * Convert a CellAttributes foreground color to an AWT Color.
+     * Convert a CellAttributes foreground color to a ColorRGB.
      *
      * @param attr the text attributes
-     * @return the AWT Color
+     * @return the ColorRGB
      */
-    public java.awt.Color attrToForegroundColor(final CellAttributes attr) {
+    public ColorRGB attrToForegroundColor(final CellAttributes attr) {
         return ((ECMA48Terminal) terminal).attrToForegroundColor(attr);
     }
 
     /**
-     * Convert a CellAttributes background color to an AWT Color.
+     * Convert a CellAttributes background color to a ColorRGB.
      *
      * @param attr the text attributes
-     * @return the AWT Color
+     * @return the ColorRGB
      */
-    public java.awt.Color attrToBackgroundColor(final CellAttributes attr) {
+    public ColorRGB attrToBackgroundColor(final CellAttributes attr) {
         return ((ECMA48Terminal) terminal).attrToBackgroundColor(attr);
     }
 

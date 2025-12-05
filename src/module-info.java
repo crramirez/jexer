@@ -39,7 +39,11 @@
  */
 module jexer {
     requires java.base;
-    requires transitive java.desktop;
+    // java.desktop is optional - the library works without it for terminal-only applications.
+    // When java.desktop is not available, image/font features gracefully degrade.
+    requires static java.desktop;
+    // java.xml is needed for help file parsing
+    requires static java.xml;
 
     exports jexer;
     exports jexer.backend;

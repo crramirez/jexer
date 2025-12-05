@@ -28,10 +28,8 @@
  */
 package jexer;
 
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
+import java.lang.reflect.Method;
 
-import jexer.bits.BorderStyle;
 import jexer.bits.Cell;
 import jexer.bits.CellAttributes;
 import jexer.bits.Color;
@@ -156,6 +154,21 @@ public class TButton extends TWidget {
      * The bottom shadow character.
      */
     private Cell shadowCharBottom;
+
+    /**
+     * If true, we have already tried to load TButtonDrawHelper.
+     */
+    private static boolean triedDrawHelper = false;
+
+    /**
+     * If true, TButtonDrawHelper is available.
+     */
+    private static boolean drawHelperAvailable = false;
+
+    /**
+     * The drawEnds method from TButtonDrawHelper.
+     */
+    private static Method drawEndsMethod = null;
 
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
@@ -489,6 +502,49 @@ public class TButton extends TWidget {
     }
 
     /**
+     * Check if TButtonDrawHelper is available (requires java.desktop).
+     */
+    private static synchronized void checkDrawHelper() {
+        if (!triedDrawHelper) {
+            triedDrawHelper = true;
+            try {
+                Class<?> helperClass = Class.forName("jexer.desktop.TButtonDrawHelper");
+                drawEndsMethod = helperClass.getMethod("drawEnds",
+                    Style.class,
+                    int.class,
+                    int.class,
+                    CellAttributes.class,
+                    CellAttributes.class,
+                    CellAttributes.class,
+                    jexer.bits.ColorRGB.class,
+                    jexer.bits.ColorRGB.class,
+                    jexer.bits.ColorRGB.class,
+                    boolean.class,
+                    int.class);
+                drawHelperAvailable = true;
+            } catch (ClassNotFoundException e) {
+                drawHelperAvailable = false;
+            } catch (NoSuchMethodException e) {
+                drawHelperAvailable = false;
+            }
+        }
+    }
+
+    /**
+     * Set button cells to SQUARE style (text-based, no AWT).
+     *
+     * @param buttonColor the button foreground color
+     */
+    private void setSquareStyle(final CellAttributes buttonColor) {
+        leftEdgeChar = new Cell(buttonColor);
+        rightEdgeChar = new Cell(buttonColor);
+        leftEdgeShadowChar = new Cell(GraphicsChars.CP437[0xDF], shadowColor);
+        rightEdgeShadowCharTop = new Cell(GraphicsChars.CP437[0xDC], shadowColor);
+        rightEdgeShadowCharBottom = new Cell(GraphicsChars.CP437[0xDF], shadowColor);
+        shadowCharBottom = new Cell(GraphicsChars.CP437[0xDF], shadowColor);
+    }
+
+    /**
      * Draw the button ends and populate leftEdgeChar, rightEdgeChar,
      * leftEdgeShadowChar, and rightEdgeShadowChar.
      *
@@ -498,260 +554,80 @@ public class TButton extends TWidget {
     private void drawEnds(final CellAttributes rectangleColor,
         final CellAttributes buttonColor) {
 
+        // SQUARE style doesn't need AWT, handle it directly
         if (style == Style.SQUARE) {
-            leftEdgeChar = new Cell(buttonColor);
-            rightEdgeChar = new Cell(buttonColor);
-            leftEdgeShadowChar = new Cell(GraphicsChars.CP437[0xDF],
-                shadowColor);
-            rightEdgeShadowCharTop = new Cell(GraphicsChars.CP437[0xDC],
-                shadowColor);
-            rightEdgeShadowCharBottom = new Cell(GraphicsChars.CP437[0xDF],
-                shadowColor);
-            shadowCharBottom = new Cell(GraphicsChars.CP437[0xDF],
-                shadowColor);
+            setSquareStyle(buttonColor);
             return;
         }
-        leftEdgeChar = new Cell(buttonColor);
-        rightEdgeChar = new Cell(buttonColor);
-        leftEdgeShadowChar = new Cell(shadowColor);
-        rightEdgeShadowCharTop = new Cell(shadowColor);
-        rightEdgeShadowCharBottom = new Cell(shadowColor);
-        shadowCharBottom = new Cell(shadowColor);
 
-        int cellWidth = getScreen().getTextWidth();
-        int cellHeight = getScreen().getTextHeight();
+        // For non-SQUARE styles, try to use TButtonDrawHelper via reflection
+        checkDrawHelper();
 
-        BufferedImage image = new BufferedImage(cellWidth * 2, cellHeight,
-            BufferedImage.TYPE_INT_ARGB);
-        BufferedImage shadowImage = new BufferedImage(cellWidth * 2,
-            cellHeight * 2, BufferedImage.TYPE_INT_ARGB);
-
-        java.awt.Color shadowRgb = null;
-        if (shadowColor.getForeColorRGB() < 0) {
-            shadowRgb = getApplication().getBackend().
-                attrToForegroundColor(shadowColor);
-        } else {
-            shadowRgb = new java.awt.Color(shadowColor.getForeColorRGB());
-        }
-        java.awt.Color rectangleRgb = null;
-        if (rectangleColor.getBackColorRGB() < 0) {
-            rectangleRgb = getApplication().getBackend().
-                attrToBackgroundColor(rectangleColor);
-        } else {
-            rectangleRgb = new java.awt.Color(rectangleColor.getBackColorRGB());
-        }
-
-        java.awt.Color buttonRgb = null;
-        if (buttonColor.getBackColorRGB() < 0) {
-            buttonRgb = getApplication().getBackend().
-                attrToBackgroundColor(buttonColor);
-        } else {
-            buttonRgb = new java.awt.Color(buttonColor.getBackColorRGB());
-        }
-
-        // Draw the shadow first, so that it be underneath the right edge.
-        Graphics2D gr2s = shadowImage.createGraphics();
-        gr2s.setColor(rectangleRgb);
-        gr2s.fillRect(0, 0, cellWidth * 2, cellHeight * 2);
-        gr2s.setColor(shadowRgb);
-
-        int [] xPoints;
-        int [] yPoints;
-        switch (style) {
-        case ROUND:
-            gr2s.fillOval(0, cellHeight / 2, cellWidth * 2, cellHeight);
-            break;
-        case DIAMOND:
-            xPoints = new int[4];
-            yPoints = new int[4];
-            xPoints[0] = 0;
-            xPoints[1] = cellWidth;
-            xPoints[2] = 2 * cellWidth;
-            xPoints[3] = cellWidth;
-            yPoints[0] = cellHeight;
-            yPoints[1] = cellHeight / 2;
-            yPoints[2] = cellHeight;
-            yPoints[3] = cellHeight + cellHeight / 2;
-            gr2s.fillPolygon(xPoints, yPoints, 4);
-            break;
-        case ARROW_LEFT:
-            xPoints = new int[6];
-            yPoints = new int[6];
-            xPoints[0] = 0;
-            xPoints[1] = cellWidth;
-            xPoints[2] = 2 * cellWidth;
-            xPoints[3] = cellWidth;
-            xPoints[4] = 2 * cellWidth;
-            xPoints[5] = cellWidth;
-            yPoints[0] = cellHeight;
-            yPoints[1] = cellHeight / 2;
-            yPoints[2] = cellHeight / 2;
-            yPoints[3] = cellHeight;
-            yPoints[4] = cellHeight + cellHeight / 2;
-            yPoints[5] = cellHeight + cellHeight / 2;
-            gr2s.fillPolygon(xPoints, yPoints, 6);
-            break;
-        case ARROW_RIGHT:
-            xPoints = new int[6];
-            yPoints = new int[6];
-            xPoints[0] = 2 * cellWidth;
-            xPoints[1] = cellWidth;
-            xPoints[2] = 0;
-            xPoints[3] = cellWidth;
-            xPoints[4] = 0;
-            xPoints[5] = cellWidth;
-            yPoints[0] = cellHeight;
-            yPoints[1] = cellHeight / 2;
-            yPoints[2] = cellHeight / 2;
-            yPoints[3] = cellHeight;
-            yPoints[4] = cellHeight + cellHeight / 2;
-            yPoints[5] = cellHeight + cellHeight / 2;
-            gr2s.fillPolygon(xPoints, yPoints, 6);
-            break;
-        case SQUARE:
-            // Not possible.
+        if (!drawHelperAvailable) {
+            // Fall back to SQUARE style if helper is not available
+            setSquareStyle(buttonColor);
             return;
         }
-        gr2s.dispose();
-        // gr2s now has the shadow bits, shifted half a cell down from 0.
 
-        Graphics2D gr2 = image.createGraphics();
-        gr2.setColor(rectangleRgb);
-        gr2.fillRect(0, 0, cellWidth * 2, cellHeight);
-        if (!inButtonPress) {
-            gr2.setColor(shadowRgb);
-            gr2.fillRect(cellWidth, cellHeight / 2, cellWidth,
-                cellHeight - (cellHeight / 2));
+        // Use the helper to draw non-SQUARE button ends
+        try {
+            int cellWidth = getScreen().getTextWidth();
+            int cellHeight = getScreen().getTextHeight();
+
+            jexer.bits.ColorRGB shadowRgb = null;
+            if (shadowColor.getForeColorRGB() < 0) {
+                shadowRgb = getApplication().getBackend().
+                    attrToForegroundColor(shadowColor);
+            } else {
+                shadowRgb = new jexer.bits.ColorRGB(shadowColor.getForeColorRGB());
+            }
+            jexer.bits.ColorRGB rectangleRgb = null;
+            if (rectangleColor.getBackColorRGB() < 0) {
+                rectangleRgb = getApplication().getBackend().
+                    attrToBackgroundColor(rectangleColor);
+            } else {
+                rectangleRgb = new jexer.bits.ColorRGB(rectangleColor.getBackColorRGB());
+            }
+
+            jexer.bits.ColorRGB buttonRgb = null;
+            if (buttonColor.getBackColorRGB() < 0) {
+                buttonRgb = getApplication().getBackend().
+                    attrToBackgroundColor(buttonColor);
+            } else {
+                buttonRgb = new jexer.bits.ColorRGB(buttonColor.getBackColorRGB());
+            }
+
+            int imageIdBase = System.identityHashCode(this);
+            imageIdBase ^= (int) System.currentTimeMillis();
+
+            Cell[] cells = (Cell[]) drawEndsMethod.invoke(null,
+                style,
+                cellWidth,
+                cellHeight,
+                shadowColor,
+                rectangleColor,
+                buttonColor,
+                shadowRgb,
+                rectangleRgb,
+                buttonRgb,
+                inButtonPress,
+                imageIdBase);
+
+            if (cells != null && cells.length == 6) {
+                leftEdgeChar = cells[0];
+                rightEdgeChar = cells[1];
+                leftEdgeShadowChar = cells[2];
+                rightEdgeShadowCharTop = cells[3];
+                rightEdgeShadowCharBottom = cells[4];
+                shadowCharBottom = cells[5];
+            } else {
+                // Fall back to SQUARE
+                setSquareStyle(buttonColor);
+            }
+        } catch (Exception e) {
+            // Fall back to SQUARE on any error
+            setSquareStyle(buttonColor);
         }
-        gr2.setColor(buttonRgb);
-        switch (style) {
-        case ROUND:
-            gr2.fillOval(0, 0, cellWidth * 2, cellHeight);
-            break;
-        case DIAMOND:
-            xPoints = new int[4];
-            yPoints = new int[4];
-            xPoints[0] = 0;
-            xPoints[1] = cellWidth;
-            xPoints[2] = 2 * cellWidth;
-            xPoints[3] = cellWidth;
-            yPoints[0] = cellHeight / 2;
-            yPoints[1] = 0;
-            yPoints[2] = cellHeight / 2;
-            yPoints[3] = cellHeight;
-            gr2.fillPolygon(xPoints, yPoints, 4);
-            break;
-        case ARROW_LEFT:
-            xPoints = new int[6];
-            yPoints = new int[6];
-            xPoints[0] = 0;
-            xPoints[1] = cellWidth;
-            xPoints[2] = 2 * cellWidth;
-            xPoints[3] = cellWidth;
-            xPoints[4] = 2 * cellWidth;
-            xPoints[5] = cellWidth;
-            yPoints[0] = cellHeight / 2;
-            yPoints[1] = 0;
-            yPoints[2] = 0;
-            yPoints[3] = cellHeight / 2;
-            yPoints[4] = cellHeight;
-            yPoints[5] = cellHeight;
-            gr2.fillPolygon(xPoints, yPoints, 6);
-            break;
-        case ARROW_RIGHT:
-            xPoints = new int[6];
-            yPoints = new int[6];
-            xPoints[0] = 2 * cellWidth;
-            xPoints[1] = cellWidth;
-            xPoints[2] = 0;
-            xPoints[3] = cellWidth;
-            xPoints[4] = 0;
-            xPoints[5] = cellWidth;
-            yPoints[0] = cellHeight / 2;
-            yPoints[1] = 0;
-            yPoints[2] = 0;
-            yPoints[3] = cellHeight / 2;
-            yPoints[4] = cellHeight;
-            yPoints[5] = cellHeight;
-            gr2.fillPolygon(xPoints, yPoints, 6);
-            break;
-        case SQUARE:
-            // Not possible.
-            return;
-        }
-        gr2.dispose();
-        // gr2 now has the foreground ends, on both halves.
-
-        int imageId = System.identityHashCode(this);
-        imageId ^= (int) System.currentTimeMillis();
-
-        // Left edge: left half of image
-        BufferedImage cellImage = new BufferedImage(cellWidth, cellHeight,
-            BufferedImage.TYPE_INT_ARGB);
-        gr2 = cellImage.createGraphics();
-        gr2.drawImage(image.getSubimage(0, 0, cellWidth, cellHeight),
-            0, 0, null);
-        gr2.dispose();
-        imageId++;
-        leftEdgeChar.setImage(cellImage, imageId & 0x7FFFFFFF);
-        leftEdgeChar.setOpaqueImage();
-
-        // Right edge: left half of image
-        cellImage = new BufferedImage(cellWidth, cellHeight,
-            BufferedImage.TYPE_INT_ARGB);
-        gr2 = cellImage.createGraphics();
-        gr2.drawImage(image.getSubimage(cellWidth, 0, cellWidth, cellHeight),
-            0, 0, null);
-        gr2.dispose();
-        imageId++;
-        rightEdgeChar.setImage(cellImage, imageId & 0x7FFFFFFF);
-        rightEdgeChar.setOpaqueImage();
-
-        // Left shadow edge: bottom-left half of shadowImage
-        cellImage = new BufferedImage(cellWidth, cellHeight,
-            BufferedImage.TYPE_INT_ARGB);
-        gr2s = cellImage.createGraphics();
-        gr2s.drawImage(shadowImage.getSubimage(0, cellHeight,
-                cellWidth, cellHeight), 0, 0, null);
-        gr2s.dispose();
-        imageId++;
-        leftEdgeShadowChar.setImage(cellImage, imageId & 0x7FFFFFFF);
-        leftEdgeShadowChar.setOpaqueImage();
-
-        // Right shadow edge top: top-right half of shadowImage
-        cellImage = new BufferedImage(cellWidth, cellHeight,
-            BufferedImage.TYPE_INT_ARGB);
-        gr2s = cellImage.createGraphics();
-        gr2s.drawImage(shadowImage.getSubimage(cellWidth, 0,
-                cellWidth, cellHeight), 0, 0, null);
-        gr2s.dispose();
-        imageId++;
-        rightEdgeShadowCharTop.setImage(cellImage, imageId & 0x7FFFFFFF);
-        rightEdgeShadowCharTop.setOpaqueImage();
-
-        // Right shadow edge bottom: bottom-right half of shadowImage
-        cellImage = new BufferedImage(cellWidth, cellHeight,
-            BufferedImage.TYPE_INT_ARGB);
-        gr2s = cellImage.createGraphics();
-        gr2s.drawImage(shadowImage.getSubimage(cellWidth, cellHeight,
-                cellWidth, cellHeight), 0, 0, null);
-        gr2s.dispose();
-        imageId++;
-        rightEdgeShadowCharBottom.setImage(cellImage, imageId & 0x7FFFFFFF);
-        rightEdgeShadowCharBottom.setOpaqueImage();
-
-        cellImage = new BufferedImage(cellWidth, cellHeight,
-            BufferedImage.TYPE_INT_ARGB);
-        gr2s = cellImage.createGraphics();
-        gr2s.setColor(rectangleRgb);
-        gr2s.fillRect(0, 0, cellWidth, cellHeight);
-        gr2s.setColor(shadowRgb);
-        gr2s.fillRect(0, 0, cellWidth, cellHeight / 2);
-        gr2s.dispose();
-        imageId++;
-        shadowCharBottom.setImage(cellImage, imageId & 0x7FFFFFFF);
-        shadowCharBottom.setOpaqueImage();
-
     }
 
     /**

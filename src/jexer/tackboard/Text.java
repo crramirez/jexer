@@ -28,24 +28,17 @@
  */
 package jexer.tackboard;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontFormatException;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
+import java.lang.reflect.Method;
 
+import jexer.bits.ColorRGB;
+import jexer.bits.ImageRGB;
 import jexer.bits.StringUtils;
 
 /**
- * Text is a raw bitmap image.
+ * Text is a raw bitmap image of rendered text.
+ * If java.awt is not available, this class does nothing.
  */
 public class Text extends Bitmap {
-
-    // ------------------------------------------------------------------------
-    // Constants --------------------------------------------------------------
-    // ------------------------------------------------------------------------
 
     // ------------------------------------------------------------------------
     // Variables --------------------------------------------------------------
@@ -57,9 +50,15 @@ public class Text extends Bitmap {
     private String text;
 
     /**
-     * The font.
+     * The font name (may be null if font object is used).
      */
-    private Font font;
+    private String fontName;
+
+    /**
+     * The font object (may be null if fontName is used). Stored as Object
+     * to avoid java.awt dependency.
+     */
+    private Object font;
 
     /**
      * The font size in points.
@@ -69,7 +68,23 @@ public class Text extends Bitmap {
     /**
      * The color.
      */
-    private Color color;
+    private ColorRGB color;
+
+    /**
+     * The implementation class.
+     */
+    private static Class<?> implClass;
+
+    /**
+     * Static initializer to load implementation.
+     */
+    static {
+        try {
+            implClass = Class.forName("jexer.desktop.TextImpl");
+        } catch (ClassNotFoundException e) {
+            implClass = null;
+        }
+    }
 
     // ------------------------------------------------------------------------
     // Constructors -----------------------------------------------------------
@@ -88,37 +103,61 @@ public class Text extends Bitmap {
      */
     public Text(final int x, final int y, final int z,
         final String text, final String fontName, final int fontSize,
-        final Color color) {
+        final ColorRGB color) {
 
-        super(x, y, z, null);
+        super(x, y, z, (ImageRGB) null);
 
         this.text = text;
+        this.fontName = fontName;
         this.fontSize = fontSize;
         this.color = color;
-        font = new Font(fontName, Font.PLAIN, fontSize);
     }
 
     /**
-     * Public constructor.
+     * Public constructor with Font object (passed as Object to avoid
+     * java.awt dependency).
      *
      * @param x X pixel coordinate
      * @param y Y pixel coordinate
      * @param z Z coordinate
      * @param text the text string
-     * @param font the font
+     * @param font the font (as Object)
      * @param fontSize the font size in points
      * @param color the color of the text
      */
     public Text(final int x, final int y, final int z,
-        final String text, final Font font, final int fontSize,
-        final Color color) {
+        final String text, final Object font, final int fontSize,
+        final ColorRGB color) {
 
-        super(x, y, z, null);
+        super(x, y, z, (ImageRGB) null);
 
         this.text = text;
+        this.font = font;
+        this.fontName = getFontFamily(font);
         this.fontSize = fontSize;
         this.color = color;
-        this.font = font;
+    }
+
+    // ------------------------------------------------------------------------
+    // Helper methods ---------------------------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * Get the font family name from a Font object via reflection.
+     *
+     * @param font the Font object
+     * @return the font family name, or null if not available
+     */
+    private static String getFontFamily(final Object font) {
+        if (font == null) {
+            return null;
+        }
+        try {
+            Method getFamily = font.getClass().getMethod("getFamily");
+            return (String) getFamily.invoke(font);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -181,39 +220,29 @@ public class Text extends Bitmap {
      * show
      */
     @Override
-    public BufferedImage getImage(final int textWidth, final int textHeight) {
+    public ImageRGB getImage(final int textWidth, final int textHeight) {
         if (dirty) {
-            // Estimate the pixels needed to render the text.
-            int width = 0;
-            int height = 0;
-            String [] rawLines = text.split("\n");
-            for (int i = 0; i < rawLines.length; i++) {
-                int lineWidth = StringUtils.width(rawLines[i]) * textWidth;
-                width = Math.max(width, lineWidth);
+            if (implClass != null) {
+                try {
+                    if (font != null) {
+                        Method renderMethod = implClass.getMethod("renderTextWithFont",
+                            String.class, Object.class, int.class, ColorRGB.class,
+                            int.class);
+                        ImageRGB renderedImage = (ImageRGB) renderMethod.invoke(null,
+                            text, font, fontSize, color, textWidth);
+                        setImage(renderedImage);
+                    } else {
+                        Method renderMethod = implClass.getMethod("renderText",
+                            String.class, String.class, int.class, ColorRGB.class,
+                            int.class);
+                        ImageRGB renderedImage = (ImageRGB) renderMethod.invoke(null,
+                            text, fontName, fontSize, color, textWidth);
+                        setImage(renderedImage);
+                    }
+                } catch (Exception e) {
+                    // If reflection fails, just don't render
+                }
             }
-            width *= (fontSize / 2);
-            height = (rawLines.length + 1) * (int) (fontSize * 1.5);
-
-            BufferedImage newImage = new BufferedImage(width, height,
-                BufferedImage.TYPE_INT_ARGB);
-            Graphics2D gr = newImage.createGraphics();
-            gr.setFont(font);
-            gr.setColor(color);
-
-            // Because this is text, let's enable anti-aliasing.
-            gr.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-
-            FontMetrics fm = gr.getFontMetrics();
-            int maxDescent = fm.getMaxDescent();
-            int maxAscent = fm.getMaxAscent();
-
-            for (int i = 0; i < rawLines.length; i++) {
-                gr.drawString(rawLines[i], 0,
-                    (fontSize * (i + 1)) + maxAscent - maxDescent);
-            }
-            gr.dispose();
-            setImage(newImage);
         }
         return super.getImage(textWidth, textHeight);
     }

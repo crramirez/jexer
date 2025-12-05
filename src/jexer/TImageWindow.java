@@ -28,13 +28,12 @@
  */
 package jexer;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ResourceBundle;
-import javax.imageio.ImageIO;
 
 import jexer.bits.Animation;
+import jexer.bits.ImageRGB;
 import jexer.bits.ImageUtils;
 import jexer.event.TKeypressEvent;
 import jexer.event.TMouseEvent;
@@ -107,14 +106,14 @@ public class TImageWindow extends TScrollableWindow {
         i18n = ResourceBundle.getBundle(TImageWindow.class.getName(),
             getLocale());
 
-        BufferedImage image = null;
+        ImageRGB image = null;
         Animation animation = null;
         if (file.getName().toLowerCase().endsWith(".gif")) {
             animation = ImageUtils.getAnimation(file);
             imageField = addImage(0, 0, getWidth() - 2, getHeight() - 2,
                 animation, 0, 0);
          } else {
-            image = ImageIO.read(file);
+            image = ImageUtils.readImage(file);
             imageField = addImage(0, 0, getWidth() - 2, getHeight() - 2,
                 image, 0, 0);
         }

@@ -31,6 +31,7 @@ package jexer.backend;
 import java.util.List;
 
 import jexer.bits.CellAttributes;
+import jexer.bits.ColorRGB;
 import jexer.event.TInputEvent;
 
 /**
@@ -192,25 +193,25 @@ public class HeadlessBackend extends LogicalScreen implements Backend {
     }
 
     /**
-     * Convert a CellAttributes foreground color to an AWT Color.
+     * Convert a CellAttributes foreground color to a ColorRGB.
      *
      * @param attr the text attributes
-     * @return the AWT Color
+     * @return the ColorRGB
      */
-    public java.awt.Color attrToForegroundColor(final CellAttributes attr) {
-        // Use Swing colors.
-        return SwingTerminal.attrToForegroundColor(attr);
+    public ColorRGB attrToForegroundColor(final CellAttributes attr) {
+        // Use color utility.
+        return ColorUtils.attrToForegroundColor(attr);
     }
 
     /**
-     * Convert a CellAttributes background color to an AWT Color.
+     * Convert a CellAttributes background color to a ColorRGB.
      *
      * @param attr the text attributes
-     * @return the AWT Color
+     * @return the ColorRGB
      */
-    public java.awt.Color attrToBackgroundColor(final CellAttributes attr) {
-        // Use Swing colors.
-        return SwingTerminal.attrToBackgroundColor(attr);
+    public ColorRGB attrToBackgroundColor(final CellAttributes attr) {
+        // Use color utility.
+        return ColorUtils.attrToBackgroundColor(attr);
     }
 
 }
