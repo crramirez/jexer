@@ -232,10 +232,7 @@ public class SwingTerminal extends LogicalScreen
      */
     private long lastSyncTime = 0;
 
-    /**
-     * The backend that is reading from this terminal.
-     */
-    private Backend backend;
+    // Note: backend is inherited from LogicalScreen via setBackend()/getBackend()
 
     /**
      * The Swing component or frame to draw to.
@@ -430,7 +427,7 @@ public class SwingTerminal extends LogicalScreen
     public SwingTerminal(final Backend backend, final int windowWidth,
         final int windowHeight, final int fontSize, final Object listener) {
 
-        this.backend = backend;
+        setBackend(backend);
         this.fontSize = fontSize;
 
         reloadOptions();
@@ -561,7 +558,7 @@ public class SwingTerminal extends LogicalScreen
         final int windowWidth, final int windowHeight, final int fontSize,
         final Object listener) {
 
-        this.backend = backend;
+        setBackend(backend);
         this.fontSize = fontSize;
 
         reloadOptions();
@@ -1519,7 +1516,7 @@ public class SwingTerminal extends LogicalScreen
         Cell cellColor = new Cell(cell);
         if (cell.isPulse()) {
             cellColor.setPulse(false, false, 0);
-            cellColor.setForeColorRGB(cell.getForeColorPulseRGB(backend,
+            cellColor.setForeColorRGB(cell.getForeColorPulseRGB(getBackend(),
                     System.currentTimeMillis()));
         }
 
@@ -2253,7 +2250,7 @@ public class SwingTerminal extends LogicalScreen
 
         // Save it and we are done.
         synchronized (eventQueue) {
-            eventQueue.add(new TKeypressEvent(backend, keypress));
+            eventQueue.add(new TKeypressEvent(getBackend(), keypress));
             resetBlinkTimer();
         }
         if (listener != null) {
@@ -2296,7 +2293,7 @@ public class SwingTerminal extends LogicalScreen
     public void windowClosing(final WindowEvent event) {
         // Drop a cmBackendDisconnect and walk away
         synchronized (eventQueue) {
-            eventQueue.add(new TCommandEvent(backend, cmBackendDisconnect));
+            eventQueue.add(new TCommandEvent(getBackend(), cmBackendDisconnect));
             resetBlinkTimer();
         }
         if (listener != null) {
@@ -2395,7 +2392,7 @@ public class SwingTerminal extends LogicalScreen
         // Drop a new TResizeEvent into the queue
         sessionInfo.queryWindowSize();
         synchronized (eventQueue) {
-            TResizeEvent windowResize = new TResizeEvent(backend,
+            TResizeEvent windowResize = new TResizeEvent(getBackend(),
                 TResizeEvent.Type.SCREEN,
                 sessionInfo.getWindowWidth(), sessionInfo.getWindowHeight());
             eventQueue.add(windowResize);
@@ -2463,7 +2460,7 @@ public class SwingTerminal extends LogicalScreen
         int offsetX = (mouse.getX() - left) % textWidth;
         int offsetY = (mouse.getY() - top) % textHeight;
 
-        TMouseEvent mouseEvent = new TMouseEvent(backend,
+        TMouseEvent mouseEvent = new TMouseEvent(getBackend(),
             TMouseEvent.Type.MOUSE_MOTION, x, y, x, y, offsetX, offsetY,
             mouse1, mouse2, mouse3, false, false,
             eventAlt, eventCtrl, eventShift);
@@ -2511,7 +2508,7 @@ public class SwingTerminal extends LogicalScreen
             eventShift = true;
         }
 
-        TMouseEvent mouseEvent = new TMouseEvent(backend,
+        TMouseEvent mouseEvent = new TMouseEvent(getBackend(),
             TMouseEvent.Type.MOUSE_MOTION, x, y, x, y, offsetX, offsetY,
             mouse1, mouse2, mouse3, false, false,
             eventAlt, eventCtrl, eventShift);
@@ -2599,7 +2596,7 @@ public class SwingTerminal extends LogicalScreen
         int offsetX = (mouse.getX() - left) % textWidth;
         int offsetY = (mouse.getY() - top) % textHeight;
 
-        TMouseEvent mouseEvent = new TMouseEvent(backend,
+        TMouseEvent mouseEvent = new TMouseEvent(getBackend(),
             TMouseEvent.Type.MOUSE_DOWN, x, y, x, y, offsetX, offsetY,
             mouse1, mouse2, mouse3, false, false,
             eventAlt, eventCtrl, eventShift);
@@ -2665,7 +2662,7 @@ public class SwingTerminal extends LogicalScreen
         int offsetX = (mouse.getX() - left) % textWidth;
         int offsetY = (mouse.getY() - top) % textHeight;
 
-        TMouseEvent mouseEvent = new TMouseEvent(backend,
+        TMouseEvent mouseEvent = new TMouseEvent(getBackend(),
             TMouseEvent.Type.MOUSE_UP, x, y, x, y, offsetX, offsetY,
             eventMouse1, eventMouse2, eventMouse3, false, false,
             eventAlt, eventCtrl, eventShift);
@@ -2734,7 +2731,7 @@ public class SwingTerminal extends LogicalScreen
         int offsetX = (mouse.getX() - left) % textWidth;
         int offsetY = (mouse.getY() - top) % textHeight;
 
-        TMouseEvent mouseEvent = new TMouseEvent(backend,
+        TMouseEvent mouseEvent = new TMouseEvent(getBackend(),
             TMouseEvent.Type.MOUSE_DOWN, x, y, x, y, offsetX, offsetY,
             mouse1, mouse2, mouse3, mouseWheelUp, mouseWheelDown,
             eventAlt, eventCtrl, eventShift);
