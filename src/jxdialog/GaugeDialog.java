@@ -87,9 +87,9 @@ public class GaugeDialog extends BaseDialog {
 
         // Start a thread to read from stdin for updates
         Thread readerThread = new Thread(() -> {
+            BufferedReader reader = null;
             try {
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(System.in));
+                reader = new BufferedReader(new InputStreamReader(System.in));
                 String line;
                 while (running && (line = reader.readLine()) != null) {
                     line = line.trim();
@@ -130,6 +130,9 @@ public class GaugeDialog extends BaseDialog {
                 }
             } catch (Exception e) {
                 // Reader closed or error
+            } finally {
+                // Note: We don't close the reader since it wraps System.in
+                // which should not be closed
             }
         });
         readerThread.setDaemon(true);

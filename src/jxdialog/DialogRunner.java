@@ -92,10 +92,10 @@ public class DialogRunner {
             DialogApplication app = new DialogApplication(options, this);
             (new Thread(app)).start();
 
-            // Wait for the application to finish
+            // Wait for the application to finish using proper wait/notify
             synchronized (this) {
                 while (!app.isFinished()) {
-                    wait(100);
+                    wait();
                 }
             }
 

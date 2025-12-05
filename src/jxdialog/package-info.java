@@ -33,7 +33,7 @@
  * <pre>
  * jxdialog --title "Hello" --msgbox "Welcome to JxDialog!" 10 40
  * jxdialog --yesno "Do you want to continue?" 10 40
- * result=$(jxdialog --inputbox "Enter your name:" 10 40 2>&amp;1)
+ * result=$(jxdialog --inputbox "Enter your name:" 10 40 2>&1)
  * </pre>
  *
  * <p>Supported dialog types:</p>

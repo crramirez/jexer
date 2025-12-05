@@ -164,6 +164,8 @@
                 <include>jxdialog/**</include>
                 <!-- Include jexer core classes (terminal only) -->
                 <include>jexer/**</include>
+                <!-- Include GraalVM native-image config -->
+                <include>META-INF/native-image/jxdialog/**</include>
               </includes>
               <excludes>
                 <!-- Exclude all java.desktop dependent classes in jexer.desktop package -->

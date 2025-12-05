@@ -1,0 +1,23 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "pattern": "jexer/.*\\.properties$"
+      },
+      {
+        "pattern": "jxdialog/.*\\.properties$"
+      }
+    ]
+  },
+  "bundles": [
+    {
+      "name": "jexer.TApplication"
+    },
+    {
+      "name": "jexer.TMessageBox"
+    },
+    {
+      "name": "jexer.TFileOpenBox"
+    }
+  ]
+}
