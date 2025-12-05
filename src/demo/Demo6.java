@@ -27,6 +27,7 @@
  * @version 1
  */
 package demo;
+import jexer.desktop.SwingBackend;
 
 import java.util.ResourceBundle;
 

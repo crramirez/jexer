@@ -80,7 +80,7 @@ public class Text extends Bitmap {
      */
     static {
         try {
-            implClass = Class.forName("jexer.backend.TextImpl");
+            implClass = Class.forName("jexer.desktop.TextImpl");
         } catch (ClassNotFoundException e) {
             implClass = null;
         }

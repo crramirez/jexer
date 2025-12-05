@@ -51,7 +51,7 @@ public class TackboardItem implements Comparable<TackboardItem> {
      */
     static {
         try {
-            Class.forName("jexer.backend.TackboardItemImpl");
+            Class.forName("jexer.desktop.TackboardItemImpl");
             implAvailable = true;
         } catch (ClassNotFoundException e) {
             implAvailable = false;

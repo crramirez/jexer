@@ -26,7 +26,14 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.backend;
+package jexer.desktop;
+import jexer.backend.TerminalReader;
+import jexer.backend.ColorUtils;
+import jexer.backend.Screen;
+import jexer.backend.Backend;
+import jexer.backend.SessionInfo;
+
+import jexer.backend.LogicalScreen;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

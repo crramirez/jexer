@@ -26,7 +26,8 @@
  * @author Autumn Lamonte
  * @version 1
  */
-package jexer.backend;
+package jexer.desktop;
+import jexer.backend.Screen;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;

@@ -26,7 +26,11 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.backend;
+package jexer.desktop;
+import jexer.backend.ColorUtils;
+import jexer.backend.Backend;
+import jexer.backend.SessionInfo;
+import jexer.backend.GenericBackend;
 
 import java.awt.Font;
 import javax.swing.JComponent;

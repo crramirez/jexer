@@ -239,7 +239,7 @@ public class ECMA48Terminal extends LogicalScreen
         } else {
             try {
                 Class.forName("java.awt.image.BufferedImage");
-                Class.forName("jexer.backend.HQSixelEncoder");
+                Class.forName("jexer.desktop.HQSixelEncoder");
                 awtAvailable = true;
             } catch (Throwable e) {
                 awtAvailable = false;
@@ -1122,10 +1122,10 @@ public class ECMA48Terminal extends LogicalScreen
                 // Default to HQ quantizer.
                 if (System.getProperty("jexer.ECMA48.sixelEncoder",
                         "hq").equals("legacy")) {
-                    Class<?> legacyClass = Class.forName("jexer.backend.LegacySixelEncoder");
+                    Class<?> legacyClass = Class.forName("jexer.desktop.LegacySixelEncoder");
                     sixelEncoder = legacyClass.getDeclaredConstructor().newInstance();
                 } else {
-                    Class<?> hqClass = Class.forName("jexer.backend.HQSixelEncoder");
+                    Class<?> hqClass = Class.forName("jexer.desktop.HQSixelEncoder");
                     sixelEncoder = hqClass.getDeclaredConstructor().newInstance();
                 }
                 if (System.getProperty("jexer.ECMA48.sixelFastAndDirty",
@@ -1139,7 +1139,7 @@ public class ECMA48Terminal extends LogicalScreen
                 Method reloadMethod = sixelEncoder.getClass().getMethod("reloadOptions");
                 reloadMethod.invoke(sixelEncoder);
 
-                Class<?> unicodeClass = Class.forName("jexer.backend.UnicodeGlyphEncoder");
+                Class<?> unicodeClass = Class.forName("jexer.desktop.UnicodeGlyphEncoder");
                 unicodeGlyphEncoder = unicodeClass.getDeclaredConstructor().newInstance();
                 Method unicodeReloadMethod = unicodeGlyphEncoder.getClass().getMethod("reloadOptions");
                 unicodeReloadMethod.invoke(unicodeGlyphEncoder);
@@ -1414,7 +1414,7 @@ public class ECMA48Terminal extends LogicalScreen
             return null;
         }
         try {
-            Class<?> helperClass = Class.forName("jexer.backend.ECMA48TerminalHelper");
+            Class<?> helperClass = Class.forName("jexer.desktop.ECMA48TerminalHelper");
             Method method = helperClass.getMethod("toBufferedImage", ImageRGB.class);
             return method.invoke(null, imageRGB);
         } catch (Exception e) {
@@ -1434,7 +1434,7 @@ public class ECMA48Terminal extends LogicalScreen
             return null;
         }
         try {
-            Class<?> helperClass = Class.forName("jexer.backend.ECMA48TerminalHelper");
+            Class<?> helperClass = Class.forName("jexer.desktop.ECMA48TerminalHelper");
             Class<?> bufferedImageClass = Class.forName("java.awt.image.BufferedImage");
             Method method = helperClass.getMethod("toImageRGB", bufferedImageClass);
             return (ImageRGB) method.invoke(null, bufferedImage);
@@ -1458,7 +1458,7 @@ public class ECMA48Terminal extends LogicalScreen
             return null;
         }
         try {
-            Class<?> helperClass = Class.forName("jexer.backend.ECMA48TerminalHelper");
+            Class<?> helperClass = Class.forName("jexer.desktop.ECMA48TerminalHelper");
             Method method = helperClass.getMethod("createImage", int.class, int.class);
             return method.invoke(null, width, height);
         } catch (Exception e) {
@@ -1479,7 +1479,7 @@ public class ECMA48Terminal extends LogicalScreen
             return null;
         }
         try {
-            Class<?> helperClass = Class.forName("jexer.backend.ECMA48TerminalHelper");
+            Class<?> helperClass = Class.forName("jexer.desktop.ECMA48TerminalHelper");
             Method method = helperClass.getMethod("createBlankImage", int.class, int.class);
             return (ImageRGB) method.invoke(null, width, height);
         } catch (Exception e) {
@@ -1624,7 +1624,7 @@ public class ECMA48Terminal extends LogicalScreen
         if (sixelEncoder == null) {
             return false;
         }
-        return sixelEncoder.getClass().getName().equals("jexer.backend.HQSixelEncoder");
+        return sixelEncoder.getClass().getName().equals("jexer.desktop.HQSixelEncoder");
     }
 
     /**
@@ -1636,7 +1636,7 @@ public class ECMA48Terminal extends LogicalScreen
         if (sixelEncoder == null) {
             return false;
         }
-        return sixelEncoder.getClass().getName().equals("jexer.backend.LegacySixelEncoder");
+        return sixelEncoder.getClass().getName().equals("jexer.desktop.LegacySixelEncoder");
     }
 
     // ------------------------------------------------------------------------
@@ -4078,7 +4078,7 @@ public class ECMA48Terminal extends LogicalScreen
             return "";
         }
         try {
-            Class<?> helperClass = Class.forName("jexer.backend.ECMA48TerminalHelper");
+            Class<?> helperClass = Class.forName("jexer.desktop.ECMA48TerminalHelper");
             Method cellsToImageMethod = helperClass.getMethod("cellsToImage", List.class, int.class, int.class);
             Object cellsImage = cellsToImageMethod.invoke(null, cells, getTextWidth(), getTextHeight());
             if (cellsImage == null) {
@@ -4124,7 +4124,7 @@ public class ECMA48Terminal extends LogicalScreen
             return null;
         }
         try {
-            Class<?> helperClass = Class.forName("jexer.backend.ECMA48TerminalHelper");
+            Class<?> helperClass = Class.forName("jexer.desktop.ECMA48TerminalHelper");
             Method method = helperClass.getMethod("cellsToImage", List.class, int.class, int.class);
             return method.invoke(null, cells, getTextWidth(), getTextHeight());
         } catch (Exception e) {
@@ -4207,7 +4207,7 @@ public class ECMA48Terminal extends LogicalScreen
 
         // Get image dimensions and encode to PNG using reflection
         try {
-            Class<?> helperClass = Class.forName("jexer.backend.ECMA48TerminalHelper");
+            Class<?> helperClass = Class.forName("jexer.desktop.ECMA48TerminalHelper");
 
             // Get image dimensions
             Method getDimsMethod = helperClass.getMethod("getImageDimensions", Object.class);
@@ -4318,7 +4318,7 @@ public class ECMA48Terminal extends LogicalScreen
         }
 
         try {
-            Class<?> helperClass = Class.forName("jexer.backend.ECMA48TerminalHelper");
+            Class<?> helperClass = Class.forName("jexer.desktop.ECMA48TerminalHelper");
 
             // Get image dimensions
             Method getDimsMethod = helperClass.getMethod("getImageDimensions", Object.class);
@@ -4444,7 +4444,7 @@ public class ECMA48Terminal extends LogicalScreen
                     sb.append(' ');
                     continue;
                 }
-                Class<?> helperClass = Class.forName("jexer.backend.ECMA48TerminalHelper");
+                Class<?> helperClass = Class.forName("jexer.desktop.ECMA48TerminalHelper");
                 Method getDimsMethod = helperClass.getMethod("getImageDimensions", Object.class);
                 int[] dims = (int[]) getDimsMethod.invoke(null, image);
                 if (dims == null) {

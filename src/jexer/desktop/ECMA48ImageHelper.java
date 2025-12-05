@@ -26,7 +26,8 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.backend;
+package jexer.desktop;
+import jexer.backend.Backend;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;

@@ -26,7 +26,7 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.backend;
+package jexer.desktop;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;

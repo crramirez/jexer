@@ -26,7 +26,7 @@
  * @author Autumn Lamonte ♀ Trans Rights
  * @version 1
  */
-package jexer.backend;
+package jexer.desktop;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;

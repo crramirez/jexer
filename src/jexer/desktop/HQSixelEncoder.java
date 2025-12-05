@@ -32,7 +32,7 @@
  * implementations of principal component analysis color mapping, and sixel
  * row encoding.
  */
-package jexer.backend;
+package jexer.desktop;
 
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
@@ -2083,7 +2083,7 @@ public class HQSixelEncoder implements SixelEncoder {
             || ((args.length == 1) && args[0].equals("-vv"))
             || ((args.length == 1) && args[0].equals("-t"))
         ) {
-            System.err.println("USAGE: java jexer.backend.HQSixelEncoder [ -p | -t | -v | -vv ] { file1 [ file2 ... ] }");
+            System.err.println("USAGE: java jexer.desktop.HQSixelEncoder [ -p | -t | -v | -vv ] { file1 [ file2 ... ] }");
             System.exit(-1);
         }
 

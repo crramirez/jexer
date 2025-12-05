@@ -88,7 +88,7 @@ public class Clipboard {
         if (!triedImpl) {
             triedImpl = true;
             try {
-                Class.forName("jexer.backend.ClipboardImpl");
+                Class.forName("jexer.desktop.ClipboardImpl");
                 implAvailable = true;
             } catch (ClassNotFoundException e) {
                 implAvailable = false;
@@ -97,7 +97,7 @@ public class Clipboard {
 
         if (implAvailable) {
             try {
-                return (Clipboard) Class.forName("jexer.backend.ClipboardImpl")
+                return (Clipboard) Class.forName("jexer.desktop.ClipboardImpl")
                     .getDeclaredConstructor()
                     .newInstance();
             } catch (Exception e) {

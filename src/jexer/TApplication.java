@@ -739,7 +739,7 @@ public class TApplication implements Runnable {
         final int windowWidth, final int windowHeight, final int fontSize) {
 
         try {
-            Class<?> swingBackendClass = Class.forName("jexer.backend.SwingBackend");
+            Class<?> swingBackendClass = Class.forName("jexer.desktop.SwingBackend");
             if (windowWidth > 0 && windowHeight > 0 && fontSize > 0) {
                 // Use constructor with dimensions
                 return (Backend) swingBackendClass
@@ -768,7 +768,7 @@ public class TApplication implements Runnable {
      */
     private static boolean isSwingBackend(final Backend backend) {
         try {
-            Class<?> swingBackendClass = Class.forName("jexer.backend.SwingBackend");
+            Class<?> swingBackendClass = Class.forName("jexer.desktop.SwingBackend");
             return swingBackendClass.isInstance(backend);
         } catch (ClassNotFoundException e) {
             return false;
@@ -799,7 +799,7 @@ public class TApplication implements Runnable {
      */
     protected static boolean isSwingTerminal(final Screen screen) {
         try {
-            Class<?> swingTerminalClass = Class.forName("jexer.backend.SwingTerminal");
+            Class<?> swingTerminalClass = Class.forName("jexer.desktop.SwingTerminal");
             return swingTerminalClass.isInstance(screen);
         } catch (ClassNotFoundException e) {
             return false;

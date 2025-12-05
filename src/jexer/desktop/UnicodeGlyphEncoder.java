@@ -26,7 +26,7 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.backend;
+package jexer.desktop;
 
 import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
@@ -297,7 +297,7 @@ public class UnicodeGlyphEncoder {
      */
     public static void main(final String [] args) {
         if (args.length < 3) {
-            System.err.println("USAGE: java jexer.backend.UnicodeGlyphEncoder { cell width } { cell height } { file1 [ file2 ... ] }");
+            System.err.println("USAGE: java jexer.desktop.UnicodeGlyphEncoder { cell width } { cell height } { file1 [ file2 ... ] }");
             System.exit(-1);
         }
 

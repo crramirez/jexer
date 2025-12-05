@@ -508,7 +508,7 @@ public class TButton extends TWidget {
         if (!triedDrawHelper) {
             triedDrawHelper = true;
             try {
-                Class<?> helperClass = Class.forName("jexer.backend.TButtonDrawHelper");
+                Class<?> helperClass = Class.forName("jexer.desktop.TButtonDrawHelper");
                 drawEndsMethod = helperClass.getMethod("drawEnds",
                     Style.class,
                     int.class,

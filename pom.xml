@@ -114,66 +114,8 @@
             <configuration>
               <classifier>core</classifier>
               <excludes>
-                <!-- Exclude java.desktop helper classes -->
-                <exclude>**/backend/BitmapImpl$*.class</exclude>
-                <exclude>**/backend/BitmapImpl.class</exclude>
-                <exclude>**/backend/ClipboardImpl$*.class</exclude>
-                <exclude>**/backend/ClipboardImpl.class</exclude>
-                <exclude>**/backend/ColorEmojiGlyphMakerImpl$*.class</exclude>
-                <exclude>**/backend/ColorEmojiGlyphMakerImpl.class</exclude>
-                <exclude>**/backend/ECMA48ImageHelper$*.class</exclude>
-                <exclude>**/backend/ECMA48ImageHelper.class</exclude>
-                <exclude>**/backend/ECMA48TerminalHelper$*.class</exclude>
-                <exclude>**/backend/ECMA48TerminalHelper.class</exclude>
-                <exclude>**/backend/FontHelper$*.class</exclude>
-                <exclude>**/backend/FontHelper.class</exclude>
-                <exclude>**/backend/GlyphMakerFontImpl$*.class</exclude>
-                <exclude>**/backend/GlyphMakerFontImpl.class</exclude>
-                <exclude>**/backend/GlyphMakerImpl$*.class</exclude>
-                <exclude>**/backend/GlyphMakerImpl.class</exclude>
-                <exclude>**/backend/HQSixelEncoder$*.class</exclude>
-                <exclude>**/backend/HQSixelEncoder.class</exclude>
-                <exclude>**/backend/ImageRGBUtils$*.class</exclude>
-                <exclude>**/backend/ImageRGBUtils.class</exclude>
-                <exclude>**/backend/ImageUtilsImpl$*.class</exclude>
-                <exclude>**/backend/ImageUtilsImpl.class</exclude>
-                <exclude>**/backend/LegacySixelEncoder$*.class</exclude>
-                <exclude>**/backend/LegacySixelEncoder.class</exclude>
-                <exclude>**/backend/LogicalScreenHelper$*.class</exclude>
-                <exclude>**/backend/LogicalScreenHelper.class</exclude>
-                <exclude>**/backend/SixelDecoderImpl$*.class</exclude>
-                <exclude>**/backend/SixelDecoderImpl.class</exclude>
-                <exclude>**/backend/SixelEncoder$*.class</exclude>
-                <exclude>**/backend/SixelEncoder.class</exclude>
-                <exclude>**/backend/TackboardHelper$*.class</exclude>
-                <exclude>**/backend/TackboardHelper.class</exclude>
-                <exclude>**/backend/TackboardImpl$*.class</exclude>
-                <exclude>**/backend/TackboardImpl.class</exclude>
-                <exclude>**/backend/TackboardItemImpl$*.class</exclude>
-                <exclude>**/backend/TackboardItemImpl.class</exclude>
-                <exclude>**/backend/TButtonDrawHelper$*.class</exclude>
-                <exclude>**/backend/TButtonDrawHelper.class</exclude>
-                <exclude>**/backend/TextImpl$*.class</exclude>
-                <exclude>**/backend/TextImpl.class</exclude>
-                <exclude>**/backend/TImageHelper$*.class</exclude>
-                <exclude>**/backend/TImageHelper.class</exclude>
-                <exclude>**/backend/TImageImpl$*.class</exclude>
-                <exclude>**/backend/TImageImpl.class</exclude>
-                <exclude>**/backend/TTerminalHelper$*.class</exclude>
-                <exclude>**/backend/TTerminalHelper.class</exclude>
-                <exclude>**/backend/TTextPictureImpl$*.class</exclude>
-                <exclude>**/backend/TTextPictureImpl.class</exclude>
-                <exclude>**/backend/UnicodeGlyphEncoder$*.class</exclude>
-                <exclude>**/backend/UnicodeGlyphEncoder.class</exclude>
-                <!-- Exclude Swing backend classes -->
-                <exclude>**/backend/SwingBackend$*.class</exclude>
-                <exclude>**/backend/SwingBackend.class</exclude>
-                <exclude>**/backend/SwingComponent$*.class</exclude>
-                <exclude>**/backend/SwingComponent.class</exclude>
-                <exclude>**/backend/SwingSessionInfo$*.class</exclude>
-                <exclude>**/backend/SwingSessionInfo.class</exclude>
-                <exclude>**/backend/SwingTerminal$*.class</exclude>
-                <exclude>**/backend/SwingTerminal.class</exclude>
+                <!-- Exclude all java.desktop dependent classes in jexer.desktop package -->
+                <exclude>jexer/desktop/**</exclude>
                 <!-- Exclude demo classes that require java.desktop -->
                 <exclude>demo/Demo1.class</exclude>
                 <exclude>demo/Demo2.class</exclude>

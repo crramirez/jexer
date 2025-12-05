@@ -98,7 +98,7 @@ public class TImage extends TWidget implements EditMenuUser {
      */
     static {
         try {
-            implClass = Class.forName("jexer.backend.TImageImpl");
+            implClass = Class.forName("jexer.desktop.TImageImpl");
             implAvailable = true;
         } catch (ClassNotFoundException e) {
             implAvailable = false;

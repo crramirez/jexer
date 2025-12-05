@@ -851,7 +851,7 @@ public class TTerminal extends TScrollable
         }
         helperClassLoaded = true;
         try {
-            terminalHelperClass = Class.forName("jexer.backend.TTerminalHelper");
+            terminalHelperClass = Class.forName("jexer.desktop.TTerminalHelper");
             splitDoubleWidthImageMethod = terminalHelperClass.getMethod(
                 "splitDoubleWidthImage", ImageRGB.class, int.class, int.class, int.class);
             getImageHashCodeMethod = terminalHelperClass.getMethod(

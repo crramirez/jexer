@@ -3210,7 +3210,7 @@ public abstract class TWidget implements Comparable<TWidget> {
 
     static {
         try {
-            imageHelperClass = Class.forName("jexer.backend.TImageHelper");
+            imageHelperClass = Class.forName("jexer.desktop.TImageHelper");
         } catch (ClassNotFoundException e) {
             imageHelperAvailable = false;
         }

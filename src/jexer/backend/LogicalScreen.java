@@ -64,7 +64,7 @@ public class LogicalScreen implements Screen {
             awtAvailable = false;
         } else {
             try {
-                Class<?> helperClass = Class.forName("jexer.backend.LogicalScreenHelper");
+                Class<?> helperClass = Class.forName("jexer.desktop.LogicalScreenHelper");
                 blendScreenColorsMethod = helperClass.getMethod("blendScreenColors",
                         int[].class, int[].class, int[].class, int[].class, int[].class,
                         int.class, int.class, int.class);

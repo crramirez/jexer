@@ -90,7 +90,7 @@ public class GlyphMaker {
                 if (!triedImpl) {
                     triedImpl = true;
                     try {
-                        Class.forName("jexer.backend.GlyphMakerImpl");
+                        Class.forName("jexer.desktop.GlyphMakerImpl");
                         implAvailable = true;
                     } catch (ClassNotFoundException e) {
                         implAvailable = false;
@@ -99,7 +99,7 @@ public class GlyphMaker {
 
                 if (implAvailable) {
                     try {
-                        maker = (GlyphMaker) Class.forName("jexer.backend.GlyphMakerImpl")
+                        maker = (GlyphMaker) Class.forName("jexer.desktop.GlyphMakerImpl")
                             .getMethod("getInstance", int.class)
                             .invoke(null, fontSize);
                     } catch (Exception e) {

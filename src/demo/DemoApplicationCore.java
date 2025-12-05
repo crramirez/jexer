@@ -31,7 +31,7 @@ package demo;
 import jexer.*;
 import jexer.backend.Backend;
 import jexer.backend.ECMA48Terminal;
-import jexer.backend.SwingTerminal;
+import jexer.desktop.SwingTerminal;
 import jexer.event.TMenuEvent;
 import jexer.menu.TMenu;
 import jexer.menu.TMenuItem;

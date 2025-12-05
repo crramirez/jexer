@@ -99,7 +99,7 @@ public class ImageUtils {
     private static boolean isImplAvailable() {
         if (implAvailable == null) {
             try {
-                implClass = Class.forName("jexer.backend.ImageUtilsImpl");
+                implClass = Class.forName("jexer.desktop.ImageUtilsImpl");
                 implAvailable = true;
             } catch (ClassNotFoundException e) {
                 implAvailable = false;
@@ -175,7 +175,7 @@ public class ImageUtils {
         }
         try {
             // Get the Scale enum from the impl class
-            Class<?> scaleEnumClass = Class.forName("jexer.backend.ImageUtilsImpl$Scale");
+            Class<?> scaleEnumClass = Class.forName("jexer.desktop.ImageUtilsImpl$Scale");
             Object implScale = Enum.valueOf((Class<Enum>) scaleEnumClass,
                 scale.name());
 

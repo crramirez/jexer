@@ -26,7 +26,7 @@
  * @author Autumn Lamonte ♥
  * @version 1
  */
-package jexer.backend;
+package jexer.desktop;
 
 import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
@@ -1062,7 +1062,7 @@ public class LegacySixelEncoder implements SixelEncoder {
      */
     public static void main(final String [] args) {
         if (args.length == 0) {
-            System.err.println("USAGE: java jexer.backend.LegacySixelEncoder [ -v | -vv | -t | -p ] { file1 [ file2 ... ] }");
+            System.err.println("USAGE: java jexer.desktop.LegacySixelEncoder [ -v | -vv | -t | -p ] { file1 [ file2 ... ] }");
             System.exit(-1);
         }
 

@@ -52,7 +52,7 @@ import jexer.menu.TMenu;
 import jexer.menu.TMenuItem;
 import jexer.menu.TSubMenu;
 import jexer.backend.Backend;
-import jexer.backend.SwingTerminal;
+import jexer.desktop.SwingTerminal;
 
 /**
  * The demo application itself.

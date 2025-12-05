@@ -54,7 +54,7 @@ public class ColorEmojiGlyphMaker {
 
     static {
         try {
-            implClass = Class.forName("jexer.backend.ColorEmojiGlyphMakerImpl");
+            implClass = Class.forName("jexer.desktop.ColorEmojiGlyphMakerImpl");
         } catch (ClassNotFoundException e) {
             implAvailable = false;
         }

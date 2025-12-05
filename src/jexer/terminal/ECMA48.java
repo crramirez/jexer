@@ -800,7 +800,7 @@ public class ECMA48 implements Runnable {
      */
     private void loadImageHelper() {
         try {
-            Class<?> helperClass = Class.forName("jexer.backend.ECMA48ImageHelper");
+            Class<?> helperClass = Class.forName("jexer.desktop.ECMA48ImageHelper");
             Constructor<?> constructor = helperClass.getConstructor(
                 int.class, int.class, Backend.class);
             imageHelper = constructor.newInstance(textWidth, textHeight, backend);

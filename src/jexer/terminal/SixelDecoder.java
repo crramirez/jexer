@@ -66,7 +66,7 @@ public class SixelDecoder {
 
     static {
         try {
-            implClass = Class.forName("jexer.backend.SixelDecoderImpl");
+            implClass = Class.forName("jexer.desktop.SixelDecoderImpl");
         } catch (ClassNotFoundException e) {
             implAvailable = false;
         }

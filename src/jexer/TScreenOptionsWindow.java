@@ -1396,7 +1396,7 @@ public class TScreenOptionsWindow extends TWindow {
 
     static {
         try {
-            fontHelperClass = Class.forName("jexer.backend.FontHelper");
+            fontHelperClass = Class.forName("jexer.desktop.FontHelper");
         } catch (ClassNotFoundException e) {
             fontHelperAvailable = false;
         }
