@@ -39,7 +39,7 @@ import java.util.Arrays;
  * <p>
  * For actual rendering operations that require AWT Graphics, use the
  * toBufferedImage() method to convert to a BufferedImage, which is
- * available in the jexer-java-desktop.jar addon.
+ * available in the desktop package.
  * </p>
  */
 public class ImageRGB {

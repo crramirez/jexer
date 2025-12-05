@@ -43,7 +43,7 @@ module jexer {
     // When java.desktop is not available, image/font features gracefully degrade.
     requires static java.desktop;
     // java.xml is needed for help file parsing
-    requires static java.xml;
+    requires transitive java.xml;
 
     exports jexer;
     exports jexer.backend;
