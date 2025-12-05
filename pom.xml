@@ -84,7 +84,7 @@
         <artifactId>maven-jar-plugin</artifactId>
         <version>3.4.2</version>
         <executions>
-          <!-- Default JAR (jexer.jar) - terminal-only, excludes Swing backend, java.desktop classes -->
+          <!-- Default JAR (jexer.jar) - full version with everything including Swing backend, java.desktop classes, emoji, and terminus -->
           <execution>
             <id>default-jar</id>
             <phase>package</phase>
@@ -92,7 +92,29 @@
               <goal>jar</goal>
             </goals>
             <configuration>
+              <archive>
+                <manifest>
+                  <mainClass>
+                    demo.Demo1
+                  </mainClass>
+                </manifest>
+                <manifestEntries>
+                  <Implementation-Version>${project.version}</Implementation-Version>
+                </manifestEntries>
+              </archive>
+            </configuration>
+          </execution>
+          <!-- Core JAR (jexer-core.jar) - terminal-only, excludes Swing backend, java.desktop classes, emoji, and terminus -->
+          <execution>
+            <id>core-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <classifier>core</classifier>
               <excludes>
+                <!-- Exclude java.desktop helper classes -->
                 <exclude>**/backend/BitmapImpl$*.class</exclude>
                 <exclude>**/backend/BitmapImpl.class</exclude>
                 <exclude>**/backend/ClipboardImpl$*.class</exclude>
@@ -123,14 +145,6 @@
                 <exclude>**/backend/SixelDecoderImpl.class</exclude>
                 <exclude>**/backend/SixelEncoder$*.class</exclude>
                 <exclude>**/backend/SixelEncoder.class</exclude>
-                <exclude>**/backend/SwingBackend$*.class</exclude>
-                <exclude>**/backend/SwingBackend.class</exclude>
-                <exclude>**/backend/SwingComponent$*.class</exclude>
-                <exclude>**/backend/SwingComponent.class</exclude>
-                <exclude>**/backend/SwingSessionInfo$*.class</exclude>
-                <exclude>**/backend/SwingSessionInfo.class</exclude>
-                <exclude>**/backend/SwingTerminal$*.class</exclude>
-                <exclude>**/backend/SwingTerminal.class</exclude>
                 <exclude>**/backend/TackboardHelper$*.class</exclude>
                 <exclude>**/backend/TackboardHelper.class</exclude>
                 <exclude>**/backend/TackboardImpl$*.class</exclude>
@@ -151,6 +165,16 @@
                 <exclude>**/backend/TTextPictureImpl.class</exclude>
                 <exclude>**/backend/UnicodeGlyphEncoder$*.class</exclude>
                 <exclude>**/backend/UnicodeGlyphEncoder.class</exclude>
+                <!-- Exclude Swing backend classes -->
+                <exclude>**/backend/SwingBackend$*.class</exclude>
+                <exclude>**/backend/SwingBackend.class</exclude>
+                <exclude>**/backend/SwingComponent$*.class</exclude>
+                <exclude>**/backend/SwingComponent.class</exclude>
+                <exclude>**/backend/SwingSessionInfo$*.class</exclude>
+                <exclude>**/backend/SwingSessionInfo.class</exclude>
+                <exclude>**/backend/SwingTerminal$*.class</exclude>
+                <exclude>**/backend/SwingTerminal.class</exclude>
+                <!-- Exclude demo classes that require java.desktop -->
                 <exclude>demo/Demo1.class</exclude>
                 <exclude>demo/Demo2.class</exclude>
                 <exclude>demo/Demo3.class</exclude>
@@ -167,118 +191,16 @@
                 <exclude>demo/DesktopDemoApplication.class</exclude>
                 <exclude>demo/DesktopDemoApplication$*.class</exclude>
                 <exclude>demo/DesktopDemo.class</exclude>
+                <!-- Exclude emoji resources -->
+                <exclude>emoji/**</exclude>
+                <!-- Exclude terminus fonts -->
+                <exclude>terminus-ttf-4.49.1/**</exclude>
               </excludes>
               <archive>
                 <manifest>
                   <mainClass>
                     demo.DemoCore
                   </mainClass>
-                </manifest>
-                <manifestEntries>
-                  <Implementation-Version>${project.version}</Implementation-Version>
-                </manifestEntries>
-              </archive>
-            </configuration>
-          </execution>
-          <!-- Java Desktop addon JAR (jexer-java-desktop.jar) - contains AWT-based classes -->
-          <execution>
-            <id>java-desktop-jar</id>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <classifier>java-desktop</classifier>
-              <includes>
-                <include>**/backend/GlyphMakerImpl.class</include>
-                <include>**/backend/GlyphMakerImpl$*.class</include>
-                <include>**/backend/GlyphMakerFontImpl.class</include>
-                <include>**/backend/GlyphMakerFontImpl$*.class</include>
-                <include>**/backend/ClipboardImpl.class</include>
-                <include>**/backend/ClipboardImpl$*.class</include>
-                <include>**/backend/TButtonDrawHelper.class</include>
-                <include>**/backend/TButtonDrawHelper$*.class</include>
-                <include>**/backend/ImageRGBUtils.class</include>
-                <include>**/backend/ImageRGBUtils$*.class</include>
-                <include>**/backend/ECMA48ImageHelper.class</include>
-                <include>**/backend/ECMA48ImageHelper$*.class</include>
-                <include>**/backend/ImageUtilsImpl.class</include>
-                <include>**/backend/ImageUtilsImpl$*.class</include>
-                <include>**/backend/SixelDecoderImpl.class</include>
-                <include>**/backend/SixelDecoderImpl$*.class</include>
-                <include>**/backend/ColorEmojiGlyphMakerImpl.class</include>
-                <include>**/backend/ColorEmojiGlyphMakerImpl$*.class</include>
-                <include>**/backend/FontHelper.class</include>
-                <include>**/backend/FontHelper$*.class</include>
-                <include>**/backend/TImageHelper.class</include>
-                <include>**/backend/TImageHelper$*.class</include>
-                <include>**/backend/TackboardHelper.class</include>
-                <include>**/backend/TackboardHelper$*.class</include>
-                <include>**/backend/TTerminalHelper.class</include>
-                <include>**/backend/TTerminalHelper$*.class</include>
-                <include>**/backend/TImageImpl.class</include>
-                <include>**/backend/TImageImpl$*.class</include>
-                <include>**/backend/TTextPictureImpl.class</include>
-                <include>**/backend/TTextPictureImpl$*.class</include>
-                <include>**/backend/TackboardItemImpl.class</include>
-                <include>**/backend/TackboardItemImpl$*.class</include>
-                <include>**/backend/TackboardImpl.class</include>
-                <include>**/backend/TackboardImpl$*.class</include>
-                <include>**/backend/TextImpl.class</include>
-                <include>**/backend/TextImpl$*.class</include>
-                <include>**/backend/BitmapImpl.class</include>
-                <include>**/backend/BitmapImpl$*.class</include>
-                <include>**/backend/ECMA48TerminalHelper.class</include>
-                <include>**/backend/ECMA48TerminalHelper$*.class</include>
-                <include>**/backend/LogicalScreenHelper.class</include>
-                <include>**/backend/LogicalScreenHelper$*.class</include>
-                <include>**/backend/SixelEncoder.class</include>
-                <include>**/backend/SixelEncoder$*.class</include>
-                <include>**/backend/HQSixelEncoder.class</include>
-                <include>**/backend/HQSixelEncoder$*.class</include>
-                <include>**/backend/LegacySixelEncoder.class</include>
-                <include>**/backend/LegacySixelEncoder$*.class</include>
-                <include>**/backend/UnicodeGlyphEncoder.class</include>
-                <include>**/backend/UnicodeGlyphEncoder$*.class</include>
-                <include>demo/Demo5.class</include>
-                <include>demo/DemoPixelsWindow.class</include>
-              </includes>
-              <archive>
-                <manifest>
-                    <mainClass>
-                        demo.Demo1
-                    </mainClass>
-                </manifest>
-                <manifestEntries>
-                  <Implementation-Version>${project.version}</Implementation-Version>
-                </manifestEntries>
-              </archive>
-            </configuration>
-          </execution>
-          <!-- Swing addon JAR (jexer-swing.jar) - contains Swing backend classes only -->
-          <execution>
-            <id>swing-jar</id>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <classifier>swing</classifier>
-              <includes>
-                <include>**/backend/SwingBackend.class</include>
-                <include>**/backend/SwingBackend$*.class</include>
-                <include>**/backend/SwingTerminal.class</include>
-                <include>**/backend/SwingTerminal$*.class</include>
-                <include>**/backend/SwingComponent.class</include>
-                <include>**/backend/SwingComponent$*.class</include>
-                <include>**/backend/SwingSessionInfo.class</include>
-                <include>**/backend/SwingSessionInfo$*.class</include>
-              </includes>
-              <archive>
-                <manifest>
-                    <mainClass>
-                        demo.Demo1
-                    </mainClass>
                 </manifest>
                 <manifestEntries>
                   <Implementation-Version>${project.version}</Implementation-Version>
