@@ -150,6 +150,43 @@
               </archive>
             </configuration>
           </execution>
+          <!-- JxDialog JAR (jxdialog.jar) - dialog command clone with jexer-core bundled -->
+          <execution>
+            <id>jxdialog-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <classifier>jxdialog</classifier>
+              <includes>
+                <!-- Include jxdialog classes -->
+                <include>jxdialog/**</include>
+                <!-- Include jexer core classes (terminal only) -->
+                <include>jexer/**</include>
+              </includes>
+              <excludes>
+                <!-- Exclude all java.desktop dependent classes in jexer.desktop package -->
+                <exclude>jexer/desktop/**</exclude>
+                <!-- Exclude demo classes -->
+                <exclude>demo/**</exclude>
+                <!-- Exclude emoji resources -->
+                <exclude>emoji/**</exclude>
+                <!-- Exclude terminus fonts -->
+                <exclude>terminus-ttf-4.49.1/**</exclude>
+              </excludes>
+              <archive>
+                <manifest>
+                  <mainClass>
+                    jxdialog.JxDialog
+                  </mainClass>
+                </manifest>
+                <manifestEntries>
+                  <Implementation-Version>${project.version}</Implementation-Version>
+                </manifestEntries>
+              </archive>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 
