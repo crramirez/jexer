@@ -164,6 +164,8 @@ public class DialogApplication extends TApplication {
         synchronized (runner) {
             runner.notifyAll();
         }
+
+        restoreConsole();
     }
 
     /**

@@ -99,6 +99,8 @@ public class DialogRunner {
                 }
             }
 
+            app.restoreConsole();
+
             // Output the result to the configured output stream
             if (!result.isEmpty()) {
                 options.getOutput().print(result);
